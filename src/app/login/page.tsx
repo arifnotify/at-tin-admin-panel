@@ -9,7 +9,7 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await api.post("/admin/login", {
+      const res = await api.post("api/admin/login", {
         email,
         password,
       });
