@@ -3,25 +3,29 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(
-  req: NextRequest,
+  req: NextRequest
 ) {
   const token =
     req.cookies.get("token");
 
-  const isLoginPage =
-    req.nextUrl.pathname === "/login";
+  const isLogin =
+    req.nextUrl.pathname ===
+    "/login";
 
-  // redirect to login
-  if (!token && !isLoginPage) {
+  // NOT LOGGED IN
+  if (!token && !isLogin) {
     return NextResponse.redirect(
-      new URL("/login", req.url),
+      new URL("/login", req.url)
     );
   }
 
-  // already logged in
-  if (token && isLoginPage) {
+  // ALREADY LOGGED IN
+  if (token && isLogin) {
     return NextResponse.redirect(
-      new URL("/dashboard", req.url),
+      new URL(
+        "/dashboard",
+        req.url
+      )
     );
   }
 
@@ -32,11 +36,8 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/products/:path*",
-    "/categories/:path*",
     "/orders/:path*",
     "/users/:path*",
-    "/banners/:path*",
-    "/locations/:path*",
     "/login",
   ],
 };

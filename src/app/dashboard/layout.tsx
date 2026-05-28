@@ -1,6 +1,5 @@
 import Navbar from "@/src/components/layout/Navbar";
-import { Sidebar } from "lucide-react";
-
+import Sidebar from "@/src/components/layout/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -14,7 +13,7 @@ export default function DashboardLayout({
       <Sidebar />
 
       {/* MAIN */}
-      <div className="flex-1 md:ml-[260px]">
+      <div className="ml-[250px] w-full">
 
         {/* NAVBAR */}
         <Navbar />

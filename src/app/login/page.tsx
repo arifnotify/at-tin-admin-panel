@@ -1,7 +1,9 @@
 "use client";
 
-import api from "@/src/services/api";
 import { useState } from "react";
+
+import Cookies from "js-cookie";
+import api from "@/src/services/api";
 
 export default function LoginPage() {
   const [email, setEmail] =
@@ -10,45 +12,57 @@ export default function LoginPage() {
   const [password, setPassword] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
   const handleLogin = async () => {
     try {
+      setLoading(true);
+
       const res = await api.post(
         "/admin/login",
         {
           email,
           password,
-        },
+        }
       );
 
       console.log(res.data);
 
-      localStorage.setItem(
+      // SAVE TOKEN
+      Cookies.set(
         "token",
         res.data.access_token,
+        {
+          expires: 7,
+        }
       );
 
+      // REDIRECT
       window.location.href =
         "/dashboard";
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
 
       alert("Login Failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
 
-      <div className="w-[400px] bg-white p-6 rounded-xl shadow">
+      <div className="w-[400px] bg-white p-6 rounded-2xl shadow">
 
-        <h1 className="text-2xl font-bold mb-5">
+        <h1 className="text-3xl font-bold mb-6">
           Admin Login
         </h1>
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full border p-3 mb-4 rounded"
+          className="w-full border p-3 rounded-xl mb-4"
           onChange={(e) =>
             setEmail(e.target.value)
           }
@@ -57,17 +71,22 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Password"
-          className="w-full border p-3 mb-4 rounded"
+          className="w-full border p-3 rounded-xl mb-4"
           onChange={(e) =>
-            setPassword(e.target.value)
+            setPassword(
+              e.target.value
+            )
           }
         />
 
         <button
           onClick={handleLogin}
-          className="w-full bg-black text-white p-3 rounded"
+          disabled={loading}
+          className="w-full bg-black text-white p-3 rounded-xl"
         >
-          Login
+          {loading
+            ? "Loading..."
+            : "Login"}
         </button>
 
       </div>
