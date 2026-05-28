@@ -14,7 +14,7 @@ export function middleware(
 
   if (!token && !isLoginPage) {
     return NextResponse.redirect(
-      new URL("/login", request.url)
+      new URL("/api/login", request.url)
     );
   }
 
