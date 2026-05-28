@@ -8,18 +8,18 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex">
+    <div className="flex bg-gray-100 min-h-screen">
 
       {/* SIDEBAR */}
       <Sidebar />
 
-      {/* MAIN CONTENT */}
-      <div className="ml-[250px] w-full bg-gray-100 min-h-screen">
+      {/* MAIN */}
+      <div className="flex-1 md:ml-[260px]">
 
         {/* NAVBAR */}
         <Navbar />
 
-        {/* PAGE CONTENT */}
+        {/* CONTENT */}
         <div className="p-6">
           {children}
         </div>
