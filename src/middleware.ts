@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
 
   if (!token && !isLoginPage) {
     return NextResponse.redirect(
-      new URL("/api/login", req.url)
+      new URL("/login", req.url)
     );
   }
 
