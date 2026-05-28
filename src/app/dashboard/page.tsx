@@ -1,31 +1,52 @@
-"use client";
+const cards = [
+  {
+    title: "Total Users",
+    value: 1200,
+  },
 
-import { useEffect } from "react";
+  {
+    title: "Total Orders",
+    value: 530,
+  },
 
-import { useRouter } from "next/navigation";
+  {
+    title: "Total Products",
+    value: 340,
+  },
+
+  {
+    title: "Revenue",
+    value: "$12,000",
+  },
+];
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token =
-      localStorage.getItem("token");
-
-    // IF NO TOKEN
-    if (!token) {
-      router.push("/login");
-    }
-  }, []);
-
   return (
-    <div className="p-10">
-      <h1 className="text-4xl font-bold">
+    <div>
+
+      <h1 className="text-3xl font-bold mb-6">
         Dashboard
       </h1>
 
-      <p className="mt-4">
-        Admin Panel Started 🚀
-      </p>
+      <div className="grid grid-cols-4 gap-5">
+
+        {cards.map((card) => (
+          <div
+            key={card.title}
+            className="bg-white p-5 rounded-2xl shadow"
+          >
+            <h2 className="text-gray-500">
+              {card.title}
+            </h2>
+
+            <h1 className="text-3xl font-bold mt-2">
+              {card.value}
+            </h1>
+          </div>
+        ))}
+
+      </div>
+
     </div>
   );
 }
