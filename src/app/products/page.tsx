@@ -166,7 +166,8 @@ export default function ProductsPage() {
 
                     <img
                       src={
-                        product.images?.[0]
+                            product.images?.[0] ||
+    "https://via.placeholder.com/60"
                       }
                       alt={product.name}
                       className="w-[60px] h-[60px] object-cover rounded-lg"
