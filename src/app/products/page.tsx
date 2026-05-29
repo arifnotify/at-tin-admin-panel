@@ -7,6 +7,7 @@ import {
 
 import {deleteProduct,getProducts, } from "@/src/services/product.service";
 import { Product } from "@/src/types/product";
+import Link from "next/link";
 
 export default function ProductsPage() {
   const [products, setProducts] =
@@ -96,6 +97,13 @@ export default function ProductsPage() {
         <h1 className="text-3xl font-bold">
           Products
         </h1>
+
+          <Link
+    href="/products/create"
+    className="bg-black text-white px-5 py-3 rounded-xl"
+  >
+    Create Product
+  </Link>
 
       </div>
 
