@@ -1,577 +1,318 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import * as React from "react";
 
 import {
-  getMainCategories,
-  getSubCategories,
-} from "@/src/services/category.service";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
-import { Category } from "@/src/types/category";
+import { Button } from "@/components/ui/button";
 
-import { uploadImages } from "@/src/services/upload.service";
+import { Input } from "@/components/ui/input";
 
-import { createProduct } from "@/src/services/product.service";
+import { Label } from "@/components/ui/label";
+
+import { Textarea } from "@/components/ui/textarea";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { Switch } from "@/components/ui/switch";
+
+import { Badge } from "@/components/ui/badge";
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+
+import {
+  Upload,
+  ImagePlus,
+  Package,
+  Tag,
+  Layers3,
+  DollarSign,
+  Boxes,
+  Search,
+  Globe,
+  Calendar,
+  Star,
+  Eye,
+  Save,
+  Send,
+} from "lucide-react";
 
 export default function CreateProductPage() {
-  // =========================
-  // STATES
-  // =========================
+  const [featured, setFeatured] =
+    React.useState(false);
 
-  const [title, setTitle] =
-    useState("");
-
-  const [
-    description,
-    setDescription,
-  ] = useState("");
-
-  const [price, setPrice] =
-    useState("");
-
-  const [
-    discountPrice,
-    setDiscountPrice,
-  ] = useState("");
-
-  const [stock, setStock] =
-    useState("");
-
-  const [brand, setBrand] =
-    useState("");
-
-  const [location, setLocation] =
-    useState("");
-
-  const [
-    mainCategory,
-    setMainCategory,
-  ] = useState("");
-
-  const [category, setCategory] =
-    useState("");
+  const [status, setStatus] =
+    React.useState("draft");
 
   const [images, setImages] =
-    useState<string[]>([]);
+    React.useState<string[]>([]);
 
-  const [
-    categories,
-    setCategories,
-  ] = useState<Category[]>([]);
+  const handleImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files =
+      e.target.files;
 
-  const [
-    subCategories,
-    setSubCategories,
-  ] = useState<Category[]>([]);
+    if (!files) return;
 
-  const [loading, setLoading] =
-    useState(false);
+    const previews =
+      Array.from(files).map((file) =>
+        URL.createObjectURL(file),
+      );
 
-  // =========================
-  // FETCH MAIN CATEGORIES
-  // =========================
-
-  useEffect(() => {
-    fetchMainCategories();
-  }, []);
-
-  const fetchMainCategories =
-    async () => {
-      try {
-        const data =
-          await getMainCategories();
-
-        setCategories(data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-  // =========================
-  // FETCH SUBCATEGORIES
-  // =========================
-
-  const fetchSubCategories =
-    async (
-      parentId: string,
-    ) => {
-      try {
-        const data =
-          await getSubCategories(
-            parentId,
-          );
-
-        setSubCategories(data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-  // =========================
-  // HANDLE MAIN CATEGORY
-  // =========================
-
-  const handleMainCategory =
-    async (
-      e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-      const value =
-        e.target.value;
-
-      setMainCategory(value);
-
-      setCategory("");
-
-      setSubCategories([]);
-
-      if (value) {
-        await fetchSubCategories(
-          value,
-        );
-      }
-    };
-
-  // =========================
-  // HANDLE IMAGE UPLOAD
-  // =========================
-
-  const handleUpload =
-    async (
-      e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-      const files =
-        e.target.files;
-
-      if (!files) return;
-
-      try {
-        setLoading(true);
-
-        const res =
-          await uploadImages(
-            files,
-          );
-
-        const imageUrls =
-          res.map(
-            (item: any) =>
-              item.url,
-          );
-
-        setImages(imageUrls);
-      } catch (err) {
-        console.log(err);
-
-        alert(
-          "Upload Failed",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  // =========================
-  // CREATE PRODUCT
-  // =========================
-
-  const handleCreate =
-    async () => {
-      try {
-        setLoading(true);
-
-        await createProduct({
-          title,
-          description,
-
-          price:
-            Number(price),
-
-          discountPrice:
-            Number(
-              discountPrice,
-            ),
-
-          stock:
-            Number(stock),
-
-          brand,
-          location,
-          category,
-          images,
-        });
-
-        alert(
-          "Product Created Successfully",
-        );
-
-        window.location.href =
-          "/products";
-      } catch (err) {
-        console.log(err);
-
-        alert(
-          "Create Failed",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    setImages(previews);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-sky-100 to-violet-100 py-10 px-4">
+    <div className="min-h-screen bg-[#f6f8fb]">
 
-      <div className="max-w-7xl mx-auto">
+      {/* TOP ACTION BAR */}
+      <div className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-xl">
 
-        {/* HEADER */}
-        <div className="mb-10 text-center">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 
-          <div className="inline-block bg-white/70 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-white/40 mb-5">
+          <div>
 
-            <span className="text-pink-600 font-bold tracking-wide">
-              ✨ BEAUTIFUL PRODUCT PANEL
-            </span>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Create Product
+            </h1>
+
+            <p className="text-sm text-slate-500">
+              Manage your ecommerce product information
+            </p>
 
           </div>
 
-          <h1 className="text-6xl font-black bg-gradient-to-r from-pink-600 via-violet-600 to-sky-600 bg-clip-text text-transparent">
+          <div className="flex items-center gap-3">
 
-            Create Product
+            <Button
+              variant="outline"
+              className="rounded-xl"
+            >
+              <Save className="mr-2 h-4 w-4" />
 
-          </h1>
+              Save Draft
+            </Button>
 
-          <p className="text-gray-600 mt-4 text-lg">
-            Add your amazing product with modern colorful UI
-          </p>
+            <Button
+              variant="outline"
+              className="rounded-xl"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+
+              Preview
+            </Button>
+
+            <Button className="rounded-xl bg-slate-900 hover:bg-slate-800">
+
+              <Send className="mr-2 h-4 w-4" />
+
+              Publish Product
+
+            </Button>
+
+          </div>
 
         </div>
 
-        {/* MAIN CONTAINER */}
-        <div className="grid lg:grid-cols-3 gap-8">
+      </div>
 
-          {/* LEFT SIDE */}
-          <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
+      {/* PAGE */}
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-6 py-8 lg:grid-cols-3">
 
-            {/* TITLE */}
-            <div className="mb-6">
+        {/* LEFT */}
+        <div className="space-y-8 lg:col-span-2">
 
-              <label className="block text-sm font-bold text-pink-600 mb-3">
-                Product Title
-              </label>
+          {/* PRODUCT INFO */}
+          <Card className="rounded-3xl border-0 shadow-sm">
 
-              <input
-                type="text"
-                placeholder="Enter product title"
-                className="w-full h-16 rounded-3xl bg-white border-2 border-pink-100 px-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-200 transition"
-                value={title}
-                onChange={(e) =>
-                  setTitle(
-                    e.target.value,
-                  )
-                }
-              />
+            <CardHeader>
 
-            </div>
+              <CardTitle className="flex items-center gap-2 text-xl">
 
-            {/* DESCRIPTION */}
-            <div className="mb-6">
+                <Package className="h-5 w-5 text-slate-500" />
 
-              <label className="block text-sm font-bold text-violet-600 mb-3">
-                Description
-              </label>
+                Product Information
 
-              <textarea
-                placeholder="Write beautiful product description..."
-                className="w-full h-[180px] rounded-3xl bg-white border-2 border-violet-100 p-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-200 transition resize-none"
-                value={description}
-                onChange={(e) =>
-                  setDescription(
-                    e.target.value,
-                  )
-                }
-              />
+              </CardTitle>
 
-            </div>
+              <CardDescription>
+                Basic information about your product
+              </CardDescription>
 
-            {/* CATEGORY */}
-            <div className="grid md:grid-cols-2 gap-5 mb-6">
+            </CardHeader>
 
-              <div>
+            <CardContent className="space-y-6">
 
-                <label className="block text-sm font-bold text-sky-600 mb-3">
-                  Main Category
-                </label>
+              <div className="space-y-2">
 
-                <select
-                  value={mainCategory}
-                  onChange={
-                    handleMainCategory
-                  }
-                  className="w-full h-16 rounded-3xl bg-white border-2 border-sky-100 px-6 text-gray-700 focus:outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-200"
-                >
-                  <option value="">
-                    Select Category
-                  </option>
+                <Label>
+                  Product Name
+                </Label>
 
-                  {categories.map(
-                    (item) => (
-                      <option
-                        key={
-                          item._id
-                        }
-                        value={
-                          item._id
-                        }
-                      >
-                        {item.name}
-                      </option>
-                    ),
-                  )}
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="block text-sm font-bold text-orange-500 mb-3">
-                  SubCategory
-                </label>
-
-                <select
-                  value={category}
-                  onChange={(e) =>
-                    setCategory(
-                      e.target.value,
-                    )
-                  }
-                  className="w-full h-16 rounded-3xl bg-white border-2 border-orange-100 px-6 text-gray-700 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-200"
-                >
-                  <option value="">
-                    Select SubCategory
-                  </option>
-
-                  {subCategories.map(
-                    (item) => (
-                      <option
-                        key={
-                          item._id
-                        }
-                        value={
-                          item.name
-                        }
-                      >
-                        {item.name}
-                      </option>
-                    ),
-                  )}
-
-                </select>
-
-              </div>
-
-            </div>
-
-            {/* PRICE */}
-            <div className="grid md:grid-cols-2 gap-5 mb-6">
-
-              <div>
-
-                <label className="block text-sm font-bold text-emerald-600 mb-3">
-                  Price
-                </label>
-
-                <input
-                  type="number"
-                  placeholder="$0.00"
-                  className="w-full h-16 rounded-3xl bg-white border-2 border-emerald-100 px-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-200"
-                  value={price}
-                  onChange={(e) =>
-                    setPrice(
-                      e.target.value,
-                    )
-                  }
+                <Input
+                  placeholder="Premium Headphone"
+                  className="h-12 rounded-xl"
                 />
 
               </div>
 
-              <div>
+              <div className="space-y-2">
 
-                <label className="block text-sm font-bold text-rose-500 mb-3">
-                  Discount Price
-                </label>
+                <Label>
+                  Slug
+                </Label>
 
-                <input
-                  type="number"
-                  placeholder="$0.00"
-                  className="w-full h-16 rounded-3xl bg-white border-2 border-rose-100 px-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-200"
-                  value={
-                    discountPrice
-                  }
-                  onChange={(e) =>
-                    setDiscountPrice(
-                      e.target.value,
-                    )
-                  }
+                <Input
+                  placeholder="premium-headphone"
+                  className="h-12 rounded-xl"
                 />
 
               </div>
 
-            </div>
+              <div className="space-y-2">
 
-            {/* STOCK & BRAND */}
-            <div className="grid md:grid-cols-2 gap-5 mb-6">
+                <Label>
+                  Short Description
+                </Label>
 
-              <div>
-
-                <label className="block text-sm font-bold text-indigo-600 mb-3">
-                  Stock
-                </label>
-
-                <input
-                  type="number"
-                  placeholder="Stock quantity"
-                  className="w-full h-16 rounded-3xl bg-white border-2 border-indigo-100 px-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-200"
-                  value={stock}
-                  onChange={(e) =>
-                    setStock(
-                      e.target.value,
-                    )
-                  }
+                <Textarea
+                  placeholder="Short product summary..."
+                  className="min-h-[100px] rounded-2xl"
                 />
 
               </div>
 
-              <div>
+              <div className="space-y-2">
 
-                <label className="block text-sm font-bold text-fuchsia-600 mb-3">
-                  Brand
-                </label>
+                <Label>
+                  Full Description
+                </Label>
 
-                <input
-                  type="text"
-                  placeholder="Brand name"
-                  className="w-full h-16 rounded-3xl bg-white border-2 border-fuchsia-100 px-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-200"
-                  value={brand}
-                  onChange={(e) =>
-                    setBrand(
-                      e.target.value,
-                    )
-                  }
+                <Textarea
+                  placeholder="Write full product details..."
+                  className="min-h-[220px] rounded-2xl"
                 />
 
               </div>
 
-            </div>
+            </CardContent>
 
-            {/* LOCATION */}
-            <div className="mb-8">
+          </Card>
 
-              <label className="block text-sm font-bold text-cyan-600 mb-3">
-                Location
-              </label>
+          {/* PRODUCT MEDIA */}
+          <Card className="rounded-3xl border-0 shadow-sm">
 
-              <input
-                type="text"
-                placeholder="Product location"
-                className="w-full h-16 rounded-3xl bg-white border-2 border-cyan-100 px-6 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-200"
-                value={location}
-                onChange={(e) =>
-                  setLocation(
-                    e.target.value,
-                  )
-                }
-              />
+            <CardHeader>
 
-            </div>
+              <CardTitle className="flex items-center gap-2 text-xl">
 
-            {/* BUTTON */}
-            <button
-              onClick={
-                handleCreate
-              }
-              disabled={loading}
-              className="w-full h-16 rounded-3xl bg-gradient-to-r from-pink-500 via-violet-500 to-sky-500 text-white text-xl font-black shadow-[0_15px_50px_rgba(168,85,247,0.35)] hover:scale-[1.02] transition-all duration-300"
-            >
-              {loading
-                ? "Creating Product..."
-                : "🚀 Create Product"}
-            </button>
+                <ImagePlus className="h-5 w-5 text-slate-500" />
 
-          </div>
+                Product Media
 
-          {/* RIGHT SIDE */}
-          <div className="space-y-8">
+              </CardTitle>
 
-            {/* IMAGE UPLOAD */}
-            <div className="bg-white/60 backdrop-blur-xl border border-white/40 rounded-[40px] p-7 shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
+              <CardDescription>
+                Upload thumbnail and product gallery images
+              </CardDescription>
 
-              <h2 className="text-3xl font-black bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent mb-2">
+            </CardHeader>
 
-                Upload Images
+            <CardContent className="space-y-6">
 
-              </h2>
+              {/* THUMBNAIL */}
+              <div>
 
-              <p className="text-gray-500 mb-6">
-                Add beautiful product images
-              </p>
+                <Label className="mb-3 block">
+                  Thumbnail Upload
+                </Label>
 
-              <label className="flex flex-col items-center justify-center rounded-[35px] border-2 border-dashed border-pink-300 bg-gradient-to-br from-pink-50 via-violet-50 to-sky-50 h-[280px] cursor-pointer hover:scale-[1.02] transition overflow-hidden">
+                <label className="flex h-52 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:bg-slate-100">
 
-                <div className="w-24 h-24 rounded-full bg-gradient-to-r from-pink-500 to-violet-600 flex items-center justify-center text-white text-5xl shadow-2xl mb-5">
+                  <Upload className="mb-4 h-10 w-10 text-slate-400" />
 
-                  +
+                  <p className="font-medium text-slate-700">
+                    Upload Thumbnail
+                  </p>
 
-                </div>
+                  <span className="mt-1 text-sm text-slate-500">
+                    PNG, JPG, WEBP
+                  </span>
 
-                <h3 className="text-2xl font-bold text-gray-700">
-                  Upload Files
-                </h3>
+                  <input
+                    type="file"
+                    className="hidden"
+                  />
 
-                <p className="text-gray-500 mt-2">
-                  PNG, JPG, WEBP
-                </p>
+                </label>
 
-                <input
-                  type="file"
-                  multiple
-                  onChange={
-                    handleUpload
-                  }
-                  className="hidden"
-                />
+              </div>
 
-              </label>
+              {/* MULTIPLE IMAGES */}
+              <div>
 
-            </div>
+                <Label className="mb-3 block">
+                  Product Gallery
+                </Label>
 
-            {/* PREVIEW */}
-            <div className="bg-white/60 backdrop-blur-xl border border-white/40 rounded-[40px] p-7 shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
+                <label className="flex h-40 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 transition hover:bg-slate-100">
 
-              <h2 className="text-3xl font-black bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent mb-5">
+                  <ImagePlus className="mb-3 h-8 w-8 text-slate-400" />
 
-                Preview
+                  <p className="font-medium text-slate-700">
+                    Upload Multiple Images
+                  </p>
 
-              </h2>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={
+                      handleImageUpload
+                    }
+                    className="hidden"
+                  />
 
-              {images.length ===
-              0 ? (
-                <div className="h-[250px] rounded-[30px] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-gray-500 font-medium">
-                  No Images Uploaded
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
+                </label>
+
+              </div>
+
+              {/* IMAGE PREVIEW */}
+              {images.length >
+                0 && (
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 
                   {images.map(
-                    (image) => (
+                    (
+                      image,
+                      index,
+                    ) => (
                       <div
-                        key={image}
-                        className="overflow-hidden rounded-[25px] bg-white border border-white shadow-lg"
+                        key={index}
+                        className="overflow-hidden rounded-2xl border bg-white"
                       >
 
                         <img
                           src={image}
-                          alt="product"
-                          className="w-full h-[160px] object-cover hover:scale-110 transition duration-500"
+                          alt="preview"
+                          className="h-32 w-full object-cover"
                         />
 
                       </div>
@@ -581,9 +322,451 @@ export default function CreateProductPage() {
                 </div>
               )}
 
-            </div>
+            </CardContent>
 
-          </div>
+          </Card>
+
+          {/* PRICING */}
+          <Card className="rounded-3xl border-0 shadow-sm">
+
+            <CardHeader>
+
+              <CardTitle className="flex items-center gap-2 text-xl">
+
+                <DollarSign className="h-5 w-5 text-slate-500" />
+
+                Pricing
+
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="grid gap-6 md:grid-cols-3">
+
+              <div className="space-y-2">
+
+                <Label>
+                  Regular Price
+                </Label>
+
+                <Input
+                  type="number"
+                  placeholder="$199"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Sale Price
+                </Label>
+
+                <Input
+                  type="number"
+                  placeholder="$149"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Discount %
+                </Label>
+
+                <Input
+                  type="number"
+                  placeholder="25%"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* INVENTORY */}
+          <Card className="rounded-3xl border-0 shadow-sm">
+
+            <CardHeader>
+
+              <CardTitle className="flex items-center gap-2 text-xl">
+
+                <Boxes className="h-5 w-5 text-slate-500" />
+
+                Inventory
+
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="grid gap-6 md:grid-cols-2">
+
+              <div className="space-y-2">
+
+                <Label>
+                  SKU
+                </Label>
+
+                <Input
+                  placeholder="SKU-001"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Stock Quantity
+                </Label>
+
+                <Input
+                  type="number"
+                  placeholder="120"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Stock Status
+                </Label>
+
+                <Select>
+
+                  <SelectTrigger className="h-12 rounded-xl">
+
+                    <SelectValue placeholder="Select status" />
+
+                  </SelectTrigger>
+
+                  <SelectContent>
+
+                    <SelectItem value="in-stock">
+                      In Stock
+                    </SelectItem>
+
+                    <SelectItem value="out-stock">
+                      Out Of Stock
+                    </SelectItem>
+
+                    <SelectItem value="pre-order">
+                      Pre Order
+                    </SelectItem>
+
+                  </SelectContent>
+
+                </Select>
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Low Stock Warning
+                </Label>
+
+                <Input
+                  type="number"
+                  placeholder="5"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* ORGANIZATION */}
+          <Card className="rounded-3xl border-0 shadow-sm">
+
+            <CardHeader>
+
+              <CardTitle className="flex items-center gap-2 text-xl">
+
+                <Layers3 className="h-5 w-5 text-slate-500" />
+
+                Product Organization
+
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="grid gap-6 md:grid-cols-2">
+
+              <div className="space-y-2">
+
+                <Label>
+                  Category
+                </Label>
+
+                <Select>
+
+                  <SelectTrigger className="h-12 rounded-xl">
+
+                    <SelectValue placeholder="Select category" />
+
+                  </SelectTrigger>
+
+                </Select>
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Subcategory
+                </Label>
+
+                <Select>
+
+                  <SelectTrigger className="h-12 rounded-xl">
+
+                    <SelectValue placeholder="Select subcategory" />
+
+                  </SelectTrigger>
+
+                </Select>
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Brand
+                </Label>
+
+                <Select>
+
+                  <SelectTrigger className="h-12 rounded-xl">
+
+                    <SelectValue placeholder="Select brand" />
+
+                  </SelectTrigger>
+
+                </Select>
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Tags
+                </Label>
+
+                <Input
+                  placeholder="electronics, audio..."
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          {/* SEO */}
+          <Card className="rounded-3xl border-0 shadow-sm">
+
+            <CardHeader>
+
+              <CardTitle className="flex items-center gap-2 text-xl">
+
+                <Globe className="h-5 w-5 text-slate-500" />
+
+                SEO Settings
+
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+
+              <div className="space-y-2">
+
+                <Label>
+                  SEO Title
+                </Label>
+
+                <Input
+                  placeholder="SEO title"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Meta Description
+                </Label>
+
+                <Textarea
+                  placeholder="Meta description..."
+                  className="rounded-2xl"
+                />
+
+              </div>
+
+              <div className="space-y-2">
+
+                <Label>
+                  Meta Keywords
+                </Label>
+
+                <Input
+                  placeholder="keyword1, keyword2"
+                  className="h-12 rounded-xl"
+                />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+        </div>
+
+        {/* RIGHT SIDEBAR */}
+        <div className="space-y-6">
+
+          {/* PUBLISH */}
+          <Card className="sticky top-28 rounded-3xl border-0 shadow-sm">
+
+            <CardHeader>
+
+              <CardTitle className="text-xl">
+                Publish Settings
+              </CardTitle>
+
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+
+              {/* STATUS */}
+              <div className="space-y-3">
+
+                <Label>
+                  Product Status
+                </Label>
+
+                <Tabs
+                  defaultValue="draft"
+                  className="w-full"
+                >
+
+                  <TabsList className="grid w-full grid-cols-2 rounded-xl">
+
+                    <TabsTrigger value="draft">
+                      Draft
+                    </TabsTrigger>
+
+                    <TabsTrigger value="published">
+                      Published
+                    </TabsTrigger>
+
+                  </TabsList>
+
+                </Tabs>
+
+              </div>
+
+              {/* FEATURED */}
+              <div className="flex items-center justify-between rounded-2xl border p-4">
+
+                <div>
+
+                  <p className="font-medium">
+                    Featured Product
+                  </p>
+
+                  <p className="text-sm text-slate-500">
+                    Highlight product on homepage
+                  </p>
+
+                </div>
+
+                <Switch
+                  checked={featured}
+                  onCheckedChange={
+                    setFeatured
+                  }
+                />
+
+              </div>
+
+              {/* SCHEDULE */}
+              <div className="space-y-3">
+
+                <Label>
+                  Schedule Publish
+                </Label>
+
+                <div className="relative">
+
+                  <Calendar className="absolute left-4 top-3.5 h-4 w-4 text-slate-400" />
+
+                  <Input
+                    type="datetime-local"
+                    className="h-12 rounded-xl pl-10"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* PRODUCT VISIBILITY */}
+              <div className="rounded-2xl bg-slate-50 p-5">
+
+                <div className="mb-4 flex items-center gap-2">
+
+                  <Star className="h-4 w-4 text-amber-500" />
+
+                  <span className="font-semibold">
+                    Product Visibility
+                  </span>
+
+                </div>
+
+                <div className="space-y-3 text-sm text-slate-600">
+
+                  <div className="flex items-center justify-between">
+
+                    <span>Status</span>
+
+                    <Badge variant="secondary">
+                      Draft
+                    </Badge>
+
+                  </div>
+
+                  <div className="flex items-center justify-between">
+
+                    <span>SEO Score</span>
+
+                    <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+
+                      Good
+
+                    </Badge>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </CardContent>
+
+          </Card>
 
         </div>
 
