@@ -11,7 +11,7 @@ export function middleware(
   const isLoginPage =
     req.nextUrl.pathname === "/login";
 
-  // redirect to login
+  // no token
   if (!token && !isLoginPage) {
     return NextResponse.redirect(
       new URL("/login", req.url),

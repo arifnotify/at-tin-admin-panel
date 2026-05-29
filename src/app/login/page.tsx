@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import Cookies from "js-cookie";
-import api from "@/src/services/api";
+import { loginAdmin } from "@/src/services/auth.service";
 
 export default function LoginPage() {
   const [email, setEmail] =
@@ -19,26 +19,19 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      const res = await api.post(
-        "/admin/login",
-        {
+      const data =
+        await loginAdmin(
           email,
           password,
-        }
-      );
-
-      console.log(res.data);
+        );
 
       // SAVE TOKEN
       Cookies.set(
         "token",
-        res.data.access_token,
-        {
-          expires: 7,
-        }
+        data.access_token,
       );
 
-      // REDIRECT
+      // redirect
       window.location.href =
         "/dashboard";
     } catch (err) {
@@ -53,7 +46,7 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
 
-      <div className="w-[400px] bg-white p-6 rounded-2xl shadow">
+      <div className="w-[400px] p-6 bg-white rounded-2xl shadow">
 
         <h1 className="text-3xl font-bold mb-6">
           Admin Login
@@ -62,7 +55,7 @@ export default function LoginPage() {
         <input
           type="email"
           placeholder="Email"
-          className="w-full border p-3 rounded-xl mb-4"
+          className="w-full border p-3 rounded-lg mb-4"
           onChange={(e) =>
             setEmail(e.target.value)
           }
@@ -71,18 +64,16 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Password"
-          className="w-full border p-3 rounded-xl mb-4"
+          className="w-full border p-3 rounded-lg mb-4"
           onChange={(e) =>
-            setPassword(
-              e.target.value
-            )
+            setPassword(e.target.value)
           }
         />
 
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-black text-white p-3 rounded-xl"
+          className="w-full bg-black text-white p-3 rounded-lg"
         >
           {loading
             ? "Loading..."
