@@ -192,9 +192,9 @@ export default function ProductsPage() {
                   {/* CATEGORY */}
                   <td className="p-4">
 
-                    
-                      {product.category?.name}
-                    
+                    {
+                      product.category
+                    }
 
                   </td>
 
