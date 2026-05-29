@@ -13,17 +13,6 @@ import { uploadImages } from "@/src/services/upload.service";
 
 import { createProduct } from "@/src/services/product.service";
 
-import {
-  ImagePlus,
-  PackageCheck,
-  Tag,
-  Layers3,
-  Boxes,
-  MapPin,
-  DollarSign,
-  Sparkles,
-} from "lucide-react";
-
 export default function CreateProductPage() {
   // =========================
   // STATES
@@ -229,83 +218,40 @@ export default function CreateProductPage() {
     };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#111827] to-[#1e293b] p-6">
+    <div className="min-h-screen bg-[#07111f] py-10 px-4">
 
       <div className="max-w-7xl mx-auto">
 
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-5">
+        {/* TOP */}
+        <div className="mb-10">
 
-          <div>
+          <h1 className="text-5xl font-black text-white">
+            Create Product
+          </h1>
 
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 px-4 py-2 rounded-full text-sm mb-4">
-
-              <Sparkles size={16} />
-
-              Premium Product Panel
-
-            </div>
-
-            <h1 className="text-5xl font-black text-white leading-tight">
-              Create New Product
-            </h1>
-
-            <p className="text-slate-400 mt-3 text-lg">
-              Add your products with beautiful details & images
-            </p>
-
-          </div>
-
-          <div className="hidden lg:flex items-center justify-center w-28 h-28 rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-2xl shadow-cyan-500/30">
-
-            <PackageCheck
-              size={50}
-              className="text-white"
-            />
-
-          </div>
+          <p className="text-gray-400 mt-3 text-lg">
+            Add your product details with premium dashboard UI
+          </p>
 
         </div>
 
-        {/* MAIN CARD */}
-        <div className="relative overflow-hidden rounded-[35px] border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
+        {/* MAIN WRAPPER */}
+        <div className="grid lg:grid-cols-3 gap-8">
 
-          {/* Glow */}
-          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-cyan-500/20 blur-[120px]" />
-
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-violet-500/20 blur-[120px]" />
-
-          {/* HEADER */}
-          <div className="relative border-b border-white/10 p-8">
-
-            <h2 className="text-3xl font-bold text-white">
-              Product Information
-            </h2>
-
-            <p className="text-slate-400 mt-2">
-              Fill all product details carefully
-            </p>
-
-          </div>
-
-          {/* FORM */}
-          <div className="relative p-8 md:p-10">
+          {/* LEFT SIDE */}
+          <div className="lg:col-span-2 bg-[#0d1728] border border-white/10 rounded-[35px] p-8 shadow-2xl">
 
             {/* TITLE */}
-            <div className="mb-7">
+            <div className="mb-6">
 
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
-
-                <Tag size={18} />
-
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Product Title
-
               </label>
 
               <input
                 type="text"
-                placeholder="Enter product title..."
-                className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 transition-all"
+                placeholder="Enter product title"
+                className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 transition"
                 value={title}
                 onChange={(e) =>
                   setTitle(
@@ -317,15 +263,15 @@ export default function CreateProductPage() {
             </div>
 
             {/* DESCRIPTION */}
-            <div className="mb-7">
+            <div className="mb-6">
 
-              <label className="text-sm font-semibold text-slate-300 mb-3 block">
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Description
               </label>
 
               <textarea
-                placeholder="Write amazing product description..."
-                className="w-full h-[160px] rounded-2xl bg-white/5 border border-white/10 p-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 transition-all resize-none"
+                placeholder="Write product description..."
+                className="w-full h-[160px] rounded-2xl bg-[#111c31] border border-white/10 p-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400 transition resize-none"
                 value={description}
                 onChange={(e) =>
                   setDescription(
@@ -337,17 +283,12 @@ export default function CreateProductPage() {
             </div>
 
             {/* CATEGORY */}
-            <div className="grid md:grid-cols-2 gap-6 mb-7">
+            <div className="grid md:grid-cols-2 gap-5 mb-6">
 
-              {/* MAIN CATEGORY */}
               <div>
 
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
-
-                  <Layers3 size={18} />
-
+                <label className="block text-sm font-semibold text-gray-300 mb-3">
                   Main Category
-
                 </label>
 
                 <select
@@ -355,7 +296,7 @@ export default function CreateProductPage() {
                   onChange={
                     handleMainCategory
                   }
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                  className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white focus:outline-none focus:border-cyan-400"
                 >
                   <option className="text-black" value="">
                     Select Category
@@ -381,11 +322,10 @@ export default function CreateProductPage() {
 
               </div>
 
-              {/* SUBCATEGORY */}
               <div>
 
-                <label className="text-sm font-semibold text-slate-300 mb-3 block">
-                  Sub Category
+                <label className="block text-sm font-semibold text-gray-300 mb-3">
+                  SubCategory
                 </label>
 
                 <select
@@ -395,7 +335,7 @@ export default function CreateProductPage() {
                       e.target.value,
                     )
                   }
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                  className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white focus:outline-none focus:border-cyan-400"
                 >
                   <option className="text-black" value="">
                     Select SubCategory
@@ -424,24 +364,18 @@ export default function CreateProductPage() {
             </div>
 
             {/* PRICE */}
-            <div className="grid md:grid-cols-2 gap-6 mb-7">
+            <div className="grid md:grid-cols-2 gap-5 mb-6">
 
               <div>
 
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
-
-                  <DollarSign
-                    size={18}
-                  />
-
+                <label className="block text-sm font-semibold text-gray-300 mb-3">
                   Price
-
                 </label>
 
                 <input
                   type="number"
-                  placeholder="0.00"
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                  placeholder="$0.00"
+                  className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400"
                   value={price}
                   onChange={(e) =>
                     setPrice(
@@ -454,14 +388,14 @@ export default function CreateProductPage() {
 
               <div>
 
-                <label className="text-sm font-semibold text-slate-300 mb-3 block">
+                <label className="block text-sm font-semibold text-gray-300 mb-3">
                   Discount Price
                 </label>
 
                 <input
                   type="number"
-                  placeholder="0.00"
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                  placeholder="$0.00"
+                  className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400"
                   value={
                     discountPrice
                   }
@@ -477,22 +411,18 @@ export default function CreateProductPage() {
             </div>
 
             {/* STOCK & BRAND */}
-            <div className="grid md:grid-cols-2 gap-6 mb-7">
+            <div className="grid md:grid-cols-2 gap-5 mb-6">
 
               <div>
 
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
-
-                  <Boxes size={18} />
-
+                <label className="block text-sm font-semibold text-gray-300 mb-3">
                   Stock
-
                 </label>
 
                 <input
                   type="number"
-                  placeholder="Stock amount"
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                  placeholder="Stock quantity"
+                  className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400"
                   value={stock}
                   onChange={(e) =>
                     setStock(
@@ -505,14 +435,14 @@ export default function CreateProductPage() {
 
               <div>
 
-                <label className="text-sm font-semibold text-slate-300 mb-3 block">
+                <label className="block text-sm font-semibold text-gray-300 mb-3">
                   Brand
                 </label>
 
                 <input
                   type="text"
                   placeholder="Brand name"
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                  className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400"
                   value={brand}
                   onChange={(e) =>
                     setBrand(
@@ -526,20 +456,16 @@ export default function CreateProductPage() {
             </div>
 
             {/* LOCATION */}
-            <div className="mb-7">
+            <div className="mb-6">
 
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
-
-                <MapPin size={18} />
-
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Location
-
               </label>
 
               <input
                 type="text"
                 placeholder="Product location"
-                className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-5 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20"
+                className="w-full h-14 rounded-2xl bg-[#111c31] border border-white/10 px-5 text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-400"
                 value={location}
                 onChange={(e) =>
                   setLocation(
@@ -550,38 +476,47 @@ export default function CreateProductPage() {
 
             </div>
 
-            {/* IMAGE UPLOAD */}
-            <div className="mb-8">
+            {/* BUTTON */}
+            <button
+              onClick={
+                handleCreate
+              }
+              disabled={loading}
+              className="w-full h-16 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white font-bold text-lg hover:scale-[1.01] transition-all duration-300 shadow-[0_10px_40px_rgba(6,182,212,0.35)]"
+            >
+              {loading
+                ? "Creating..."
+                : "Create Product"}
+            </button>
 
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-4">
+          </div>
 
-                <ImagePlus
-                  size={18}
-                />
+          {/* RIGHT SIDE */}
+          <div className="space-y-8">
 
-                Upload Images
+            {/* IMAGE UPLOAD CARD */}
+            <div className="bg-[#0d1728] border border-white/10 rounded-[35px] p-6 shadow-2xl">
 
-              </label>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Product Images
+              </h2>
 
-              <label className="group relative flex flex-col items-center justify-center border-2 border-dashed border-cyan-400/30 rounded-[30px] p-12 cursor-pointer bg-gradient-to-br from-cyan-500/5 to-blue-500/5 hover:from-cyan-500/10 hover:to-blue-500/10 transition-all overflow-hidden">
+              <p className="text-gray-400 mb-6">
+                Upload high quality product images
+              </p>
 
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-cyan-500/5" />
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-cyan-500/30 rounded-[30px] h-[250px] cursor-pointer bg-[#111c31] hover:border-cyan-400 transition overflow-hidden">
 
-                <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-xl shadow-cyan-500/30 mb-5">
-
-                  <ImagePlus
-                    size={38}
-                    className="text-white"
-                  />
-
+                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-4xl text-white shadow-xl mb-5">
+                  +
                 </div>
 
-                <h3 className="text-white font-bold text-xl">
-                  Click to Upload
+                <h3 className="text-white font-bold text-lg">
+                  Upload Images
                 </h3>
 
-                <p className="text-slate-400 mt-2 text-center">
-                  PNG, JPG, WEBP supported
+                <p className="text-gray-400 mt-2 text-sm">
+                  PNG, JPG, WEBP Supported
                 </p>
 
                 <input
@@ -597,53 +532,42 @@ export default function CreateProductPage() {
 
             </div>
 
-            {/* IMAGE PREVIEW */}
-            {images.length >
-              0 && (
-              <div className="mb-10">
+            {/* PREVIEW */}
+            <div className="bg-[#0d1728] border border-white/10 rounded-[35px] p-6 shadow-2xl">
 
-                <h3 className="text-white font-bold text-xl mb-5">
-                  Uploaded Images
-                </h3>
+              <h2 className="text-2xl font-bold text-white mb-5">
+                Preview Images
+              </h2>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
+              {images.length ===
+              0 ? (
+                <div className="h-[250px] rounded-3xl bg-[#111c31] flex items-center justify-center text-gray-500">
+                  No Images Uploaded
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
 
                   {images.map(
                     (image) => (
                       <div
                         key={image}
-                        className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5"
+                        className="overflow-hidden rounded-2xl border border-white/10 bg-[#111c31]"
                       >
 
                         <img
                           src={image}
                           alt="product"
-                          className="w-full h-[180px] object-cover group-hover:scale-110 transition duration-500"
+                          className="w-full h-[150px] object-cover hover:scale-110 transition duration-500"
                         />
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition" />
 
                       </div>
                     ),
                   )}
 
                 </div>
+              )}
 
-              </div>
-            )}
-
-            {/* BUTTON */}
-            <button
-              onClick={
-                handleCreate
-              }
-              disabled={loading}
-              className="w-full h-16 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white text-lg font-bold shadow-[0_15px_40px_rgba(6,182,212,0.4)] hover:scale-[1.01] hover:shadow-[0_20px_50px_rgba(6,182,212,0.6)] transition-all duration-300 disabled:opacity-50"
-            >
-              {loading
-                ? "Processing..."
-                : "🚀 Create Product"}
-            </button>
+            </div>
 
           </div>
 
