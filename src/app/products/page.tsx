@@ -7,7 +7,6 @@ import {
 
 import {deleteProduct,getProducts, } from "@/src/services/product.service";
 import { Product } from "@/src/types/product";
-import Image from "next/image";
 
 export default function ProductsPage() {
   const [products, setProducts] =
@@ -165,16 +164,13 @@ export default function ProductsPage() {
                   {/* IMAGE */}
                   <td className="p-4">
 
-<Image
-  src={
-    product.images?.[0] ||
-    "https://via.placeholder.com/60"
-  }
-  alt={product.title}
-  width={60}
-  height={60}
-  className="object-cover rounded-lg"
-/>
+                    <img
+                      src={
+                        product.images?.[0]
+                      }
+                      alt={product.name}
+                      className="w-[60px] h-[60px] object-cover rounded-lg"
+                    />
 
                   </td>
 
