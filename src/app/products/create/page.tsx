@@ -1,19 +1,19 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 
 import {   getMainCategories,
   getSubCategories, } from "@/src/services/category.service";
 import { Category } from "@/src/types/category";
-import { uploadImage } from "@/src/services/upload.service";
+import { uploadImages } from "@/src/services/upload.service";
 import { createProduct } from "@/src/services/product.service";
 
 export default function CreateProductPage() {
+  // =========================
   // STATES
+  // =========================
+
   const [title, setTitle] =
     useState("");
 
@@ -63,7 +63,10 @@ export default function CreateProductPage() {
   const [loading, setLoading] =
     useState(false);
 
+  // =========================
   // FETCH MAIN CATEGORIES
+  // =========================
+
   useEffect(() => {
     fetchMainCategories();
   }, []);
@@ -80,7 +83,10 @@ export default function CreateProductPage() {
       }
     };
 
+  // =========================
   // FETCH SUBCATEGORIES
+  // =========================
+
   const fetchSubCategories =
     async (
       parentId: string,
@@ -97,7 +103,10 @@ export default function CreateProductPage() {
       }
     };
 
+  // =========================
   // HANDLE MAIN CATEGORY
+  // =========================
+
   const handleMainCategory =
     async (
       e: React.ChangeEvent<HTMLSelectElement>,
@@ -119,7 +128,10 @@ export default function CreateProductPage() {
       }
     };
 
-  // IMAGE UPLOAD
+  // =========================
+  // HANDLE IMAGE UPLOAD
+  // =========================
+
   const handleUpload =
     async (
       e: React.ChangeEvent<HTMLInputElement>,
@@ -132,27 +144,19 @@ export default function CreateProductPage() {
       try {
         setLoading(true);
 
-        const uploadedImages: string[] =
-          [];
-
-        for (
-          let i = 0;
-          i < files.length;
-          i++
-        ) {
-          const res =
-            await uploadImage(
-              files[i],
-            );
-
-          uploadedImages.push(
-            res.url,
+        const res =
+          await uploadImages(
+            files,
           );
-        }
 
-        setImages(
-          uploadedImages,
-        );
+        const imageUrls =
+          res.map(
+            (item: any) =>
+              item.url,
+          );
+
+        setImages(imageUrls);
+
       } catch (err) {
         console.log(err);
 
@@ -164,7 +168,10 @@ export default function CreateProductPage() {
       }
     };
 
+  // =========================
   // CREATE PRODUCT
+  // =========================
+
   const handleCreate =
     async () => {
       try {
@@ -201,6 +208,7 @@ export default function CreateProductPage() {
 
         window.location.href =
           "/products";
+
       } catch (err) {
         console.log(err);
 
@@ -213,8 +221,9 @@ export default function CreateProductPage() {
     };
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-6xl">
 
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
 
         <h1 className="text-3xl font-bold">
@@ -223,6 +232,7 @@ export default function CreateProductPage() {
 
       </div>
 
+      {/* FORM */}
       <div className="bg-white p-6 rounded-2xl shadow">
 
         {/* TITLE */}
@@ -236,6 +246,7 @@ export default function CreateProductPage() {
             type="text"
             placeholder="Product title"
             className="w-full border p-3 rounded-xl"
+            value={title}
             onChange={(e) =>
               setTitle(
                 e.target.value,
@@ -255,6 +266,7 @@ export default function CreateProductPage() {
           <textarea
             placeholder="Description"
             className="w-full border p-3 rounded-xl h-[120px]"
+            value={description}
             onChange={(e) =>
               setDescription(
                 e.target.value,
@@ -358,6 +370,7 @@ export default function CreateProductPage() {
               type="number"
               placeholder="Price"
               className="w-full border p-3 rounded-xl"
+              value={price}
               onChange={(e) =>
                 setPrice(
                   e.target.value,
@@ -377,6 +390,7 @@ export default function CreateProductPage() {
               type="number"
               placeholder="Discount Price"
               className="w-full border p-3 rounded-xl"
+              value={discountPrice}
               onChange={(e) =>
                 setDiscountPrice(
                   e.target.value,
@@ -401,6 +415,7 @@ export default function CreateProductPage() {
               type="number"
               placeholder="Stock"
               className="w-full border p-3 rounded-xl"
+              value={stock}
               onChange={(e) =>
                 setStock(
                   e.target.value,
@@ -420,6 +435,7 @@ export default function CreateProductPage() {
               type="text"
               placeholder="Brand"
               className="w-full border p-3 rounded-xl"
+              value={brand}
               onChange={(e) =>
                 setBrand(
                   e.target.value,
@@ -442,6 +458,7 @@ export default function CreateProductPage() {
             type="text"
             placeholder="Location"
             className="w-full border p-3 rounded-xl"
+            value={location}
             onChange={(e) =>
               setLocation(
                 e.target.value,
@@ -451,7 +468,7 @@ export default function CreateProductPage() {
 
         </div>
 
-        {/* IMAGE */}
+        {/* IMAGE UPLOAD */}
         <div className="mb-5">
 
           <label className="block mb-2 font-medium">
@@ -477,7 +494,7 @@ export default function CreateProductPage() {
                 key={image}
                 src={image}
                 alt="product"
-                className="w-[100px] h-[100px] object-cover rounded-xl"
+                className="w-[100px] h-[100px] object-cover rounded-xl border"
               />
             ),
           )}

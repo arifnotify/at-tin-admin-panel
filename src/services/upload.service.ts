@@ -1,20 +1,34 @@
 import api from "./api";
 
-export const uploadImage =
-  async (file: File) => {
-    const formData =
-      new FormData();
+export const uploadImages = async (
+  files: FileList,
+) => {
+  const formData =
+    new FormData();
 
+  // MULTIPLE FILES
+  for (
+    let i = 0;
+    i < files.length;
+    i++
+  ) {
     formData.append(
-      "file",
-      file,
+      "files",
+      files[i],
+    );
+  }
+
+  const response =
+    await api.post(
+      "/upload/multiple",
+      formData,
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      },
     );
 
-    const response =
-      await api.post(
-        "/upload/multiple",
-        formData,
-      );
-
-    return response.data;
-  };
+  return response.data;
+};
