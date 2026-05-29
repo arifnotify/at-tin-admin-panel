@@ -1,6 +1,6 @@
 import api from "./api";
 
-// MAIN CATEGORIES
+// GET MAIN CATEGORIES
 export const getMainCategories =
   async () => {
     const response =
@@ -11,7 +11,7 @@ export const getMainCategories =
     return response.data;
   };
 
-// SUBCATEGORIES
+// GET SUBCATEGORIES
 export const getSubCategories =
   async (
     parentId: string,

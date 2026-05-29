@@ -1,5 +1,5 @@
 export interface Product {
-  _id: string;
+  _id?: string;
 
   title: string;
 
@@ -15,11 +15,11 @@ export interface Product {
 
   images: string[];
 
-  category: any;
+  category: string;
 
   brand: string;
 
   location: string;
 
-  isFlashSale: boolean;
+  isFlashSale?: boolean;
 }

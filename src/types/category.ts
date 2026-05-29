@@ -6,4 +6,6 @@ export interface Category {
   image?: string;
 
   parentCategory?: string | null;
+
+  isActive?: boolean;
 }
