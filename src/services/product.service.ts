@@ -1,5 +1,14 @@
 import api from "./api";
 
+// GET PRODUCTS
+export const getProducts =
+  async () => {
+    const response =
+      await api.get("/products");
+
+    return response.data;
+  };
+
 // CREATE PRODUCT
 export const createProduct =
   async (data: any) => {
@@ -7,17 +16,6 @@ export const createProduct =
       await api.post(
         "/products",
         data,
-      );
-
-    return response.data;
-  };
-
-// GET PRODUCTS
-export const getProducts =
-  async () => {
-    const response =
-      await api.get(
-        "/products",
       );
 
     return response.data;

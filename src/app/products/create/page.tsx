@@ -40,14 +40,12 @@ export default function CreateProductPage() {
     useState("");
 
   const [
-    category,
-    setCategory,
-  ] = useState("");
-
-  const [
     mainCategory,
     setMainCategory,
   ] = useState("");
+
+  const [category, setCategory] =
+    useState("");
 
   const [images, setImages] =
     useState<string[]>([]);
@@ -99,7 +97,7 @@ export default function CreateProductPage() {
       }
     };
 
-  // CATEGORY CHANGE
+  // HANDLE CATEGORY
   const handleMainCategory =
     async (
       e: React.ChangeEvent<HTMLSelectElement>,
@@ -191,7 +189,7 @@ export default function CreateProductPage() {
         });
 
         alert(
-          "Product Created",
+          "Product Created Successfully",
         );
 
         window.location.href =
@@ -377,7 +375,7 @@ export default function CreateProductPage() {
 
         </div>
 
-        {/* STOCK */}
+        {/* STOCK & BRAND */}
         <div className="grid grid-cols-2 gap-5 mb-5">
 
           <div>
@@ -466,7 +464,7 @@ export default function CreateProductPage() {
                 key={image}
                 src={image}
                 alt="product"
-                className="w-[100px] h-[100px] object-cover rounded-xl"
+                className="w-[100px] h-[100px] rounded-xl object-cover"
               />
             ),
           )}
