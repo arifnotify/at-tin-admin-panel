@@ -1,13 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  getMainCategories,
+  getSubCategories,
+} from "@/src/services/category.service";
 
-
-import {   getMainCategories,
-  getSubCategories, } from "@/src/services/category.service";
 import { Category } from "@/src/types/category";
+
 import { uploadImages } from "@/src/services/upload.service";
+
 import { createProduct } from "@/src/services/product.service";
+
+import {
+  ImagePlus,
+  Package2,
+  Tag,
+  Boxes,
+  MapPin,
+  BadgeDollarSign,
+} from "lucide-react";
 
 export default function CreateProductPage() {
   // =========================
@@ -116,7 +128,6 @@ export default function CreateProductPage() {
 
       setMainCategory(value);
 
-      // RESET
       setCategory("");
 
       setSubCategories([]);
@@ -156,7 +167,6 @@ export default function CreateProductPage() {
           );
 
         setImages(imageUrls);
-
       } catch (err) {
         console.log(err);
 
@@ -179,7 +189,6 @@ export default function CreateProductPage() {
 
         await createProduct({
           title,
-
           description,
 
           price:
@@ -194,11 +203,8 @@ export default function CreateProductPage() {
             Number(stock),
 
           brand,
-
           location,
-
           category,
-
           images,
         });
 
@@ -208,7 +214,6 @@ export default function CreateProductPage() {
 
         window.location.href =
           "/products";
-
       } catch (err) {
         console.log(err);
 
@@ -221,292 +226,408 @@ export default function CreateProductPage() {
     };
 
   return (
-    <div className="max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 p-6">
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="max-w-7xl mx-auto">
 
-        <h1 className="text-3xl font-bold">
-          Create Product
-        </h1>
+        {/* HEADER */}
+        <div className="mb-8 flex items-center justify-between">
 
-      </div>
-
-      {/* FORM */}
-      <div className="bg-white p-6 rounded-2xl shadow">
-
-        {/* TITLE */}
-        <div className="mb-5">
-
-          <label className="block mb-2 font-medium">
-            Product Title
-          </label>
-
-          <input
-            type="text"
-            placeholder="Product title"
-            className="w-full border p-3 rounded-xl"
-            value={title}
-            onChange={(e) =>
-              setTitle(
-                e.target.value,
-              )
-            }
-          />
-
-        </div>
-
-        {/* DESCRIPTION */}
-        <div className="mb-5">
-
-          <label className="block mb-2 font-medium">
-            Description
-          </label>
-
-          <textarea
-            placeholder="Description"
-            className="w-full border p-3 rounded-xl h-[120px]"
-            value={description}
-            onChange={(e) =>
-              setDescription(
-                e.target.value,
-              )
-            }
-          />
-
-        </div>
-
-        {/* CATEGORY */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
-
-          {/* MAIN CATEGORY */}
           <div>
 
-            <label className="block mb-2 font-medium">
-              Main Category
-            </label>
+            <h1 className="text-4xl font-bold text-slate-800">
+              Create Product
+            </h1>
 
-            <select
-              value={mainCategory}
-              onChange={
-                handleMainCategory
-              }
-              className="w-full border p-3 rounded-xl"
-            >
-              <option value="">
-                Select Category
-              </option>
-
-              {categories.map(
-                (item) => (
-                  <option
-                    key={
-                      item._id
-                    }
-                    value={
-                      item._id
-                    }
-                  >
-                    {item.name}
-                  </option>
-                ),
-              )}
-
-            </select>
+            <p className="text-slate-500 mt-2">
+              Add your new product with details
+            </p>
 
           </div>
 
-          {/* SUBCATEGORY */}
-          <div>
+          <div className="hidden md:flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border">
 
-            <label className="block mb-2 font-medium">
-              SubCategory
-            </label>
-
-            <select
-              value={category}
-              onChange={(e) =>
-                setCategory(
-                  e.target.value,
-                )
-              }
-              className="w-full border p-3 rounded-xl"
-            >
-              <option value="">
-                Select SubCategory
-              </option>
-
-             {subCategories.map(
-  (item) => (
-    <option
-      key={item._id}
-      value={item.name}
-    >
-      {item.name}
-    </option>
-  ),
-)}
-
-            </select>
-
-          </div>
-
-        </div>
-
-        {/* PRICE */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
-
-          <div>
-
-            <label className="block mb-2 font-medium">
-              Price
-            </label>
-
-            <input
-              type="number"
-              placeholder="Price"
-              className="w-full border p-3 rounded-xl"
-              value={price}
-              onChange={(e) =>
-                setPrice(
-                  e.target.value,
-                )
-              }
+            <Package2
+              size={24}
+              className="text-indigo-600"
             />
 
-          </div>
-
-          <div>
-
-            <label className="block mb-2 font-medium">
-              Discount Price
-            </label>
-
-            <input
-              type="number"
-              placeholder="Discount Price"
-              className="w-full border p-3 rounded-xl"
-              value={discountPrice}
-              onChange={(e) =>
-                setDiscountPrice(
-                  e.target.value,
-                )
-              }
-            />
+            <span className="font-semibold text-slate-700">
+              Product Panel
+            </span>
 
           </div>
 
         </div>
 
-        {/* STOCK & BRAND */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
+        {/* MAIN CARD */}
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
 
-          <div>
+          {/* TOP BAR */}
+          <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 p-6">
 
-            <label className="block mb-2 font-medium">
-              Stock
-            </label>
+            <h2 className="text-2xl font-bold text-white">
+              Product Information
+            </h2>
 
-            <input
-              type="number"
-              placeholder="Stock"
-              className="w-full border p-3 rounded-xl"
-              value={stock}
-              onChange={(e) =>
-                setStock(
-                  e.target.value,
-                )
-              }
-            />
+            <p className="text-indigo-100 mt-1">
+              Fill all required fields carefully
+            </p>
 
           </div>
 
-          <div>
+          {/* FORM */}
+          <div className="p-8">
 
-            <label className="block mb-2 font-medium">
-              Brand
-            </label>
+            {/* TITLE */}
+            <div className="mb-6">
 
-            <input
-              type="text"
-              placeholder="Brand"
-              className="w-full border p-3 rounded-xl"
-              value={brand}
-              onChange={(e) =>
-                setBrand(
-                  e.target.value,
-                )
-              }
-            />
+              <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700">
 
-          </div>
+                <Tag
+                  size={18}
+                />
 
-        </div>
+                Product Title
 
-        {/* LOCATION */}
-        <div className="mb-5">
+              </label>
 
-          <label className="block mb-2 font-medium">
-            Location
-          </label>
-
-          <input
-            type="text"
-            placeholder="Location"
-            className="w-full border p-3 rounded-xl"
-            value={location}
-            onChange={(e) =>
-              setLocation(
-                e.target.value,
-              )
-            }
-          />
-
-        </div>
-
-        {/* IMAGE UPLOAD */}
-        <div className="mb-5">
-
-          <label className="block mb-2 font-medium">
-            Upload Images
-          </label>
-
-          <input
-            type="file"
-            multiple
-            onChange={
-              handleUpload
-            }
-          />
-
-        </div>
-
-        {/* IMAGE PREVIEW */}
-        <div className="flex gap-3 flex-wrap mb-6">
-
-          {images.map(
-            (image) => (
-              <img
-                key={image}
-                src={image}
-                alt="product"
-                className="w-[100px] h-[100px] object-cover rounded-xl border"
+              <input
+                type="text"
+                placeholder="Enter product title"
+                className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition"
+                value={title}
+                onChange={(e) =>
+                  setTitle(
+                    e.target.value,
+                  )
+                }
               />
-            ),
-          )}
+
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="mb-6">
+
+              <label className="block mb-3 text-sm font-semibold text-slate-700">
+                Description
+              </label>
+
+              <textarea
+                placeholder="Write product description..."
+                className="w-full p-5 rounded-2xl border border-slate-300 h-[150px] focus:outline-none focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition"
+                value={description}
+                onChange={(e) =>
+                  setDescription(
+                    e.target.value,
+                  )
+                }
+              />
+
+            </div>
+
+            {/* CATEGORY */}
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+
+              {/* MAIN CATEGORY */}
+              <div>
+
+                <label className="block mb-3 text-sm font-semibold text-slate-700">
+                  Main Category
+                </label>
+
+                <select
+                  value={mainCategory}
+                  onChange={
+                    handleMainCategory
+                  }
+                  className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                >
+                  <option value="">
+                    Select Category
+                  </option>
+
+                  {categories.map(
+                    (item) => (
+                      <option
+                        key={
+                          item._id
+                        }
+                        value={
+                          item._id
+                        }
+                      >
+                        {item.name}
+                      </option>
+                    ),
+                  )}
+
+                </select>
+
+              </div>
+
+              {/* SUBCATEGORY */}
+              <div>
+
+                <label className="block mb-3 text-sm font-semibold text-slate-700">
+                  Sub Category
+                </label>
+
+                <select
+                  value={category}
+                  onChange={(e) =>
+                    setCategory(
+                      e.target.value,
+                    )
+                  }
+                  className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                >
+                  <option value="">
+                    Select SubCategory
+                  </option>
+
+                  {subCategories.map(
+                    (item) => (
+                      <option
+                        key={
+                          item._id
+                        }
+                        value={
+                          item.name
+                        }
+                      >
+                        {item.name}
+                      </option>
+                    ),
+                  )}
+
+                </select>
+
+              </div>
+
+            </div>
+
+            {/* PRICE */}
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+
+              <div>
+
+                <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700">
+
+                  <BadgeDollarSign
+                    size={18}
+                  />
+
+                  Price
+
+                </label>
+
+                <input
+                  type="number"
+                  placeholder="Enter price"
+                  className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                  value={price}
+                  onChange={(e) =>
+                    setPrice(
+                      e.target.value,
+                    )
+                  }
+                />
+
+              </div>
+
+              <div>
+
+                <label className="block mb-3 text-sm font-semibold text-slate-700">
+                  Discount Price
+                </label>
+
+                <input
+                  type="number"
+                  placeholder="Enter discount price"
+                  className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                  value={
+                    discountPrice
+                  }
+                  onChange={(e) =>
+                    setDiscountPrice(
+                      e.target.value,
+                    )
+                  }
+                />
+
+              </div>
+
+            </div>
+
+            {/* STOCK & BRAND */}
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+
+              <div>
+
+                <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700">
+
+                  <Boxes
+                    size={18}
+                  />
+
+                  Stock
+
+                </label>
+
+                <input
+                  type="number"
+                  placeholder="Stock quantity"
+                  className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                  value={stock}
+                  onChange={(e) =>
+                    setStock(
+                      e.target.value,
+                    )
+                  }
+                />
+
+              </div>
+
+              <div>
+
+                <label className="block mb-3 text-sm font-semibold text-slate-700">
+                  Brand
+                </label>
+
+                <input
+                  type="text"
+                  placeholder="Brand name"
+                  className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                  value={brand}
+                  onChange={(e) =>
+                    setBrand(
+                      e.target.value,
+                    )
+                  }
+                />
+
+              </div>
+
+            </div>
+
+            {/* LOCATION */}
+            <div className="mb-6">
+
+              <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-700">
+
+                <MapPin
+                  size={18}
+                />
+
+                Location
+
+              </label>
+
+              <input
+                type="text"
+                placeholder="Product location"
+                className="w-full h-14 px-5 rounded-2xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200"
+                value={location}
+                onChange={(e) =>
+                  setLocation(
+                    e.target.value,
+                  )
+                }
+              />
+
+            </div>
+
+            {/* IMAGE UPLOAD */}
+            <div className="mb-8">
+
+              <label className="flex items-center gap-2 mb-4 text-sm font-semibold text-slate-700">
+
+                <ImagePlus
+                  size={18}
+                />
+
+                Upload Product Images
+
+              </label>
+
+              <label className="border-2 border-dashed border-indigo-300 rounded-3xl p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-indigo-50 transition">
+
+                <ImagePlus
+                  size={50}
+                  className="text-indigo-500 mb-4"
+                />
+
+                <p className="font-semibold text-slate-700">
+                  Click to Upload Images
+                </p>
+
+                <p className="text-sm text-slate-500 mt-1">
+                  PNG, JPG, WEBP Supported
+                </p>
+
+                <input
+                  type="file"
+                  multiple
+                  onChange={
+                    handleUpload
+                  }
+                  className="hidden"
+                />
+
+              </label>
+
+            </div>
+
+            {/* IMAGE PREVIEW */}
+            {images.length >
+              0 && (
+              <div className="mb-8">
+
+                <h3 className="font-semibold text-slate-700 mb-4">
+                  Uploaded Images
+                </h3>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+
+                  {images.map(
+                    (image) => (
+                      <div
+                        key={image}
+                        className="relative group overflow-hidden rounded-2xl border bg-slate-100"
+                      >
+
+                        <img
+                          src={image}
+                          alt="product"
+                          className="w-full h-[140px] object-cover group-hover:scale-105 transition duration-300"
+                        />
+
+                      </div>
+                    ),
+                  )}
+
+                </div>
+
+              </div>
+            )}
+
+            {/* BUTTON */}
+            <button
+              onClick={
+                handleCreate
+              }
+              disabled={loading}
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-lg shadow-lg hover:opacity-90 transition disabled:opacity-50"
+            >
+              {loading
+                ? "Processing..."
+                : "Create Product"}
+            </button>
+
+          </div>
 
         </div>
-
-        {/* BUTTON */}
-        <button
-          onClick={handleCreate}
-          disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded-xl"
-        >
-          {loading
-            ? "Loading..."
-            : "Create Product"}
-        </button>
 
       </div>
 
