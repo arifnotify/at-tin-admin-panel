@@ -2,19 +2,17 @@
 
 import Link from "next/link";
 
-import { usePathname } from "next/navigation";
-
 import {
   LayoutDashboard,
   Package,
   ShoppingCart,
   Users,
-  LogOut,
+  Image,
+  MapPin,
+  Layers,
 } from "lucide-react";
 
-import Cookies from "js-cookie";
-
-const menus = [
+const menuItems = [
   {
     title: "Dashboard",
     href: "/dashboard",
@@ -28,6 +26,12 @@ const menus = [
   },
 
   {
+    title: "Categories",
+    href: "/categories",
+    icon: Layers,
+  },
+
+  {
     title: "Orders",
     href: "/orders",
     icon: ShoppingCart,
@@ -38,65 +42,43 @@ const menus = [
     href: "/users",
     icon: Users,
   },
+
+  {
+    title: "Banners",
+    href: "/banners",
+    icon: Image,
+  },
+
+  {
+    title: "Locations",
+    href: "/locations",
+    icon: MapPin,
+  },
 ];
 
 export default function Sidebar() {
-  const pathname = usePathname();
-
-  const logout = () => {
-    Cookies.remove("token");
-
-    window.location.href =
-      "/login";
-  };
-
   return (
-    <div className="w-[250px] h-screen bg-black text-white fixed left-0 top-0 p-5 flex flex-col justify-between">
+    <div className="w-[250px] h-screen bg-black text-white fixed left-0 top-0 p-5">
 
-      <div>
+      <h1 className="text-2xl font-bold mb-10">
+        Admin Panel
+      </h1>
 
-        <h1 className="text-3xl font-bold mb-10">
-          Admin Panel
-        </h1>
+      <div className="flex flex-col gap-3">
 
-        <div className="flex flex-col gap-3">
+        {menuItems.map((item) => (
+          <Link
+            key={item.title}
+            href={item.href}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition"
+          >
+            <item.icon size={20} />
 
-          {menus.map((menu) => {
-            const active =
-              pathname === menu.href;
-
-            return (
-              <Link
-                key={menu.title}
-                href={menu.href}
-                className={`flex items-center gap-3 p-3 rounded-xl transition ${
-                  active
-                    ? "bg-white text-black"
-                    : "hover:bg-gray-800"
-                }`}
-              >
-                <menu.icon size={20} />
-
-                <span>
-                  {menu.title}
-                </span>
-              </Link>
-            );
-          })}
-
-        </div>
+            <span>{item.title}</span>
+          </Link>
+        ))}
 
       </div>
-
-      <button
-        onClick={logout}
-        className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-500"
-      >
-        <LogOut size={20} />
-
-        Logout
-      </button>
-
     </div>
   );
 }
