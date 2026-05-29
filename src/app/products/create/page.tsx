@@ -97,7 +97,7 @@ export default function CreateProductPage() {
       }
     };
 
-  // HANDLE CATEGORY
+  // HANDLE MAIN CATEGORY
   const handleMainCategory =
     async (
       e: React.ChangeEvent<HTMLSelectElement>,
@@ -107,9 +107,16 @@ export default function CreateProductPage() {
 
       setMainCategory(value);
 
-      await fetchSubCategories(
-        value,
-      );
+      // RESET
+      setCategory("");
+
+      setSubCategories([]);
+
+      if (value) {
+        await fetchSubCategories(
+          value,
+        );
+      }
     };
 
   // IMAGE UPLOAD
@@ -208,9 +215,13 @@ export default function CreateProductPage() {
   return (
     <div className="max-w-5xl">
 
-      <h1 className="text-3xl font-bold mb-6">
-        Create Product
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+
+        <h1 className="text-3xl font-bold">
+          Create Product
+        </h1>
+
+      </div>
 
       <div className="bg-white p-6 rounded-2xl shadow">
 
@@ -264,10 +275,11 @@ export default function CreateProductPage() {
             </label>
 
             <select
-              className="w-full border p-3 rounded-xl"
+              value={mainCategory}
               onChange={
                 handleMainCategory
               }
+              className="w-full border p-3 rounded-xl"
             >
               <option value="">
                 Select Category
@@ -300,12 +312,13 @@ export default function CreateProductPage() {
             </label>
 
             <select
-              className="w-full border p-3 rounded-xl"
+              value={category}
               onChange={(e) =>
                 setCategory(
                   e.target.value,
                 )
               }
+              className="w-full border p-3 rounded-xl"
             >
               <option value="">
                 Select SubCategory
@@ -464,7 +477,7 @@ export default function CreateProductPage() {
                 key={image}
                 src={image}
                 alt="product"
-                className="w-[100px] h-[100px] rounded-xl object-cover"
+                className="w-[100px] h-[100px] object-cover rounded-xl"
               />
             ),
           )}

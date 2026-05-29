@@ -5,493 +5,245 @@ import {
   useState,
 } from "react";
 
-import { getMainCategories, getSubCategories } from "@/src/services/category.service";
-import { uploadImage } from "@/src/services/upload.service";
-import { createProduct } from "@/src/services/product.service";
-import { Category } from "@/src/types/category";
+import {deleteProduct,getProducts, } from "@/src/services/product.service";
+import { Product } from "@/src/types/product";
+import Link from "next/link";
 
-export default function CreateProductPage() {
-  // STATES
-  const [title, setTitle] =
-    useState("");
-
-  const [
-    description,
-    setDescription,
-  ] = useState("");
-
-  const [price, setPrice] =
-    useState("");
-
-  const [
-    discountPrice,
-    setDiscountPrice,
-  ] = useState("");
-
-  const [stock, setStock] =
-    useState("");
-
-  const [brand, setBrand] =
-    useState("");
-
-  const [location, setLocation] =
-    useState("");
-
-  const [
-    mainCategory,
-    setMainCategory,
-  ] = useState("");
-
-  const [category, setCategory] =
-    useState("");
-
-  const [images, setImages] =
-    useState<string[]>([]);
-
-  const [
-    categories,
-    setCategories,
-  ] = useState<Category[]>([]);
-
-  const [
-    subCategories,
-    setSubCategories,
-  ] = useState<Category[]>([]);
+export default function ProductsPage() {
+  const [products, setProducts] =
+    useState<Product[]>([]);
 
   const [loading, setLoading] =
-    useState(false);
+    useState(true);
 
-  // FETCH MAIN CATEGORIES
+  const [search, setSearch] =
+    useState("");
+
   useEffect(() => {
-    fetchMainCategories();
+    fetchProducts();
   }, []);
 
-  const fetchMainCategories =
+  const fetchProducts =
     async () => {
       try {
         const data =
-          await getMainCategories();
+          await getProducts();
 
-        setCategories(data);
+        setProducts(data);
       } catch (err) {
         console.log(err);
-      }
-    };
-
-  // FETCH SUBCATEGORIES
-  const fetchSubCategories =
-    async (
-      parentId: string,
-    ) => {
-      try {
-        const data =
-          await getSubCategories(
-            parentId,
-          );
-
-        setSubCategories(data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-  // HANDLE MAIN CATEGORY
-  const handleMainCategory =
-    async (
-      e: React.ChangeEvent<HTMLSelectElement>,
-    ) => {
-      const value =
-        e.target.value;
-
-      setMainCategory(value);
-
-      // RESET
-      setCategory("");
-
-      setSubCategories([]);
-
-      if (value) {
-        await fetchSubCategories(
-          value,
-        );
-      }
-    };
-
-  // IMAGE UPLOAD
-  const handleUpload =
-    async (
-      e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-      const files =
-        e.target.files;
-
-      if (!files) return;
-
-      try {
-        setLoading(true);
-
-        const uploadedImages: string[] =
-          [];
-
-        for (
-          let i = 0;
-          i < files.length;
-          i++
-        ) {
-          const res =
-            await uploadImage(
-              files[i],
-            );
-
-          uploadedImages.push(
-            res.url,
-          );
-        }
-
-        setImages(
-          uploadedImages,
-        );
-      } catch (err) {
-        console.log(err);
-
-        alert(
-          "Upload Failed",
-        );
       } finally {
         setLoading(false);
       }
     };
 
-  // CREATE PRODUCT
-  const handleCreate =
-    async () => {
-      try {
-        setLoading(true);
-
-        await createProduct({
-          title,
-
-          description,
-
-          price:
-            Number(price),
-
-          discountPrice:
-            Number(
-              discountPrice,
-            ),
-
-          stock:
-            Number(stock),
-
-          brand,
-
-          location,
-
-          category,
-
-          images,
-        });
-
-        alert(
-          "Product Created Successfully",
+  // DELETE PRODUCT
+  const handleDelete =
+    async (id: string) => {
+      const confirmDelete =
+        confirm(
+          "Delete this product?",
         );
 
-        window.location.href =
-          "/products";
+      if (!confirmDelete) return;
+
+      try {
+        await deleteProduct(id);
+
+        setProducts((prev) =>
+          prev.filter(
+            (product) =>
+              product._id !== id,
+          ),
+        );
+
+        alert(
+          "Product deleted",
+        );
       } catch (err) {
         console.log(err);
 
         alert(
-          "Create Failed",
+          "Delete failed",
         );
-      } finally {
-        setLoading(false);
       }
     };
+
+  // SEARCH FILTER
+  const filteredProducts =
+    products.filter((product) =>
+      product.title
+        .toLowerCase()
+        .includes(
+          search.toLowerCase(),
+        ),
+    );
+
+  // LOADING
+  if (loading) {
+    return (
+      <div>
+        Loading products...
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-5xl">
+    <div>
 
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
 
         <h1 className="text-3xl font-bold">
-          Create Product
+          Products
         </h1>
+
+          <Link
+    href="/products/create"
+    className="bg-black text-white px-5 py-3 rounded-xl"
+  >
+    Create Product
+  </Link>
 
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow">
+      {/* SEARCH */}
+      <div className="mb-5">
 
-        {/* TITLE */}
-        <div className="mb-5">
+        <input
+          type="text"
+          placeholder="Search product..."
+          className="w-full p-3 border rounded-xl"
+          onChange={(e) =>
+            setSearch(
+              e.target.value,
+            )
+          }
+        />
 
-          <label className="block mb-2 font-medium">
-            Product Title
-          </label>
+      </div>
 
-          <input
-            type="text"
-            placeholder="Product title"
-            className="w-full border p-3 rounded-xl"
-            onChange={(e) =>
-              setTitle(
-                e.target.value,
-              )
-            }
-          />
+      {/* TABLE */}
+      <div className="bg-white rounded-2xl shadow overflow-hidden">
 
-        </div>
+        <table className="w-full">
 
-        {/* DESCRIPTION */}
-        <div className="mb-5">
+          <thead className="bg-gray-100">
 
-          <label className="block mb-2 font-medium">
-            Description
-          </label>
+            <tr>
 
-          <textarea
-            placeholder="Description"
-            className="w-full border p-3 rounded-xl h-[120px]"
-            onChange={(e) =>
-              setDescription(
-                e.target.value,
-              )
-            }
-          />
+              <th className="p-4 text-left">
+                Image
+              </th>
 
-        </div>
+              <th className="p-4 text-left">
+                Name
+              </th>
 
-        {/* CATEGORY */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
+              <th className="p-4 text-left">
+                Category
+              </th>
 
-          {/* MAIN CATEGORY */}
-          <div>
+              <th className="p-4 text-left">
+                Price
+              </th>
 
-            <label className="block mb-2 font-medium">
-              Main Category
-            </label>
+              <th className="p-4 text-left">
+                Stock
+              </th>
 
-            <select
-              value={mainCategory}
-              onChange={
-                handleMainCategory
-              }
-              className="w-full border p-3 rounded-xl"
-            >
-              <option value="">
-                Select Category
-              </option>
+              <th className="p-4 text-left">
+                Actions
+              </th>
 
-              {categories.map(
-                (item) => (
-                  <option
-                    key={
-                      item._id
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {filteredProducts.map(
+              (product) => (
+                <tr
+                  key={product._id}
+                  className="border-t"
+                >
+
+                  {/* IMAGE */}
+                  <td className="p-4">
+
+                    <img
+                      src={
+                        product.images?.[0]
+                      }
+                      alt={product.title}
+                      className="w-[60px] h-[60px] object-cover rounded-lg"
+                    />
+
+                  </td>
+
+                  {/* NAME */}
+                  <td className="p-4 font-medium">
+
+                    {product.title}
+
+                  </td>
+
+                  {/* CATEGORY */}
+                  <td className="p-4">
+
+                    {
+                      product.category
                     }
-                    value={
-                      item._id
-                    }
-                  >
-                    {item.name}
-                  </option>
-                ),
-              )}
 
-            </select>
+                  </td>
 
-          </div>
+                  {/* PRICE */}
+                  <td className="p-4">
 
-          {/* SUBCATEGORY */}
-          <div>
+                    $
+                    {product.price}
 
-            <label className="block mb-2 font-medium">
-              SubCategory
-            </label>
+                  </td>
 
-            <select
-              value={category}
-              onChange={(e) =>
-                setCategory(
-                  e.target.value,
-                )
-              }
-              className="w-full border p-3 rounded-xl"
-            >
-              <option value="">
-                Select SubCategory
-              </option>
+                  {/* STOCK */}
+                  <td className="p-4">
 
-              {subCategories.map(
-                (item) => (
-                  <option
-                    key={
-                      item._id
-                    }
-                    value={
-                      item._id
-                    }
-                  >
-                    {item.name}
-                  </option>
-                ),
-              )}
+                    {product.stock}
 
-            </select>
+                  </td>
 
-          </div>
+                  {/* ACTIONS */}
+                  <td className="p-4">
 
-        </div>
+                    <div className="flex gap-3">
 
-        {/* PRICE */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                        Edit
+                      </button>
 
-          <div>
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            product._id,
+                          )
+                        }
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                      >
+                        Delete
+                      </button>
 
-            <label className="block mb-2 font-medium">
-              Price
-            </label>
+                    </div>
 
-            <input
-              type="number"
-              placeholder="Price"
-              className="w-full border p-3 rounded-xl"
-              onChange={(e) =>
-                setPrice(
-                  e.target.value,
-                )
-              }
-            />
+                  </td>
 
-          </div>
+                </tr>
+              ),
+            )}
 
-          <div>
+          </tbody>
 
-            <label className="block mb-2 font-medium">
-              Discount Price
-            </label>
-
-            <input
-              type="number"
-              placeholder="Discount Price"
-              className="w-full border p-3 rounded-xl"
-              onChange={(e) =>
-                setDiscountPrice(
-                  e.target.value,
-                )
-              }
-            />
-
-          </div>
-
-        </div>
-
-        {/* STOCK & BRAND */}
-        <div className="grid grid-cols-2 gap-5 mb-5">
-
-          <div>
-
-            <label className="block mb-2 font-medium">
-              Stock
-            </label>
-
-            <input
-              type="number"
-              placeholder="Stock"
-              className="w-full border p-3 rounded-xl"
-              onChange={(e) =>
-                setStock(
-                  e.target.value,
-                )
-              }
-            />
-
-          </div>
-
-          <div>
-
-            <label className="block mb-2 font-medium">
-              Brand
-            </label>
-
-            <input
-              type="text"
-              placeholder="Brand"
-              className="w-full border p-3 rounded-xl"
-              onChange={(e) =>
-                setBrand(
-                  e.target.value,
-                )
-              }
-            />
-
-          </div>
-
-        </div>
-
-        {/* LOCATION */}
-        <div className="mb-5">
-
-          <label className="block mb-2 font-medium">
-            Location
-          </label>
-
-          <input
-            type="text"
-            placeholder="Location"
-            className="w-full border p-3 rounded-xl"
-            onChange={(e) =>
-              setLocation(
-                e.target.value,
-              )
-            }
-          />
-
-        </div>
-
-        {/* IMAGE */}
-        <div className="mb-5">
-
-          <label className="block mb-2 font-medium">
-            Upload Images
-          </label>
-
-          <input
-            type="file"
-            multiple
-            onChange={
-              handleUpload
-            }
-          />
-
-        </div>
-
-        {/* IMAGE PREVIEW */}
-        <div className="flex gap-3 flex-wrap mb-6">
-
-          {images.map(
-            (image) => (
-              <img
-                key={image}
-                src={image}
-                alt="product"
-                className="w-[100px] h-[100px] object-cover rounded-xl"
-              />
-            ),
-          )}
-
-        </div>
-
-        {/* BUTTON */}
-        <button
-          onClick={handleCreate}
-          disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded-xl"
-        >
-          {loading
-            ? "Loading..."
-            : "Create Product"}
-        </button>
+        </table>
 
       </div>
 
