@@ -9,7 +9,6 @@ export interface Product {
 
   images: string[];
 
-  category: {
-    name: string;
-  };
+  category:  string;
+
 }

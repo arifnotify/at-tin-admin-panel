@@ -186,7 +186,6 @@ export default function ProductsPage() {
 
                     {
                       product.category
-                        ?.name
                     }
 
                   </td>
