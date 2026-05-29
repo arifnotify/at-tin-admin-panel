@@ -12,7 +12,7 @@ export const uploadImage =
 
     const response =
       await api.post(
-        "/upload",
+        "/upload/multiple",
         formData,
       );
 
