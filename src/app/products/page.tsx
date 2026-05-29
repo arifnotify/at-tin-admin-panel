@@ -168,7 +168,7 @@ export default function ProductsPage() {
                       src={
                         product.images?.[0]
                       }
-                      alt={product.name}
+                      alt={product.title}
                       className="w-[60px] h-[60px] object-cover rounded-lg"
                     />
 
