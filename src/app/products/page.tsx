@@ -1,13 +1,26 @@
 "use client";
 
+import {   deleteProduct,
+  getProducts,} from "@/src/services/product.service";
+import Image from "next/image";
+
 import {
   useEffect,
   useState,
 } from "react";
 
-import {deleteProduct,getProducts, } from "@/src/services/product.service";
-import { Product } from "@/src/types/product";
-import Image from "next/image";
+
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  stock: number;
+  images: string[];
+  category?: {
+    name: string;
+  };
+}
 
 export default function ProductsPage() {
   const [products, setProducts] =
@@ -19,17 +32,16 @@ export default function ProductsPage() {
   const [search, setSearch] =
     useState("");
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
+  // FETCH PRODUCTS
   const fetchProducts =
     async () => {
       try {
         const data =
           await getProducts();
 
-        setProducts(data);
+        console.log(data);
+
+        setProducts(data || []);
       } catch (err) {
         console.log(err);
       } finally {
@@ -37,16 +49,13 @@ export default function ProductsPage() {
       }
     };
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   // DELETE PRODUCT
   const handleDelete =
     async (id: string) => {
-      const confirmDelete =
-        confirm(
-          "Delete this product?",
-        );
-
-      if (!confirmDelete) return;
-
       try {
         await deleteProduct(id);
 
@@ -56,24 +65,16 @@ export default function ProductsPage() {
               product._id !== id,
           ),
         );
-
-        alert(
-          "Product deleted",
-        );
       } catch (err) {
         console.log(err);
-
-        alert(
-          "Delete failed",
-        );
       }
     };
 
-  // SEARCH FILTER
+  // FILTER
   const filteredProducts =
     products.filter((product) =>
       product.name
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(
           search.toLowerCase(),
         ),
@@ -83,7 +84,7 @@ export default function ProductsPage() {
   if (loading) {
     return (
       <div>
-        Loading products...
+        Loading Products...
       </div>
     );
   }
@@ -92,7 +93,7 @@ export default function ProductsPage() {
     <div>
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
 
         <h1 className="text-3xl font-bold">
           Products
@@ -101,23 +102,19 @@ export default function ProductsPage() {
       </div>
 
       {/* SEARCH */}
-      <div className="mb-5">
-
-        <input
-          type="text"
-          placeholder="Search product..."
-          className="w-full p-3 border rounded-xl"
-          onChange={(e) =>
-            setSearch(
-              e.target.value,
-            )
-          }
-        />
-
-      </div>
+      <input
+        type="text"
+        placeholder="Search Product..."
+        className="w-full border p-3 rounded-xl mb-5"
+        onChange={(e) =>
+          setSearch(
+            e.target.value,
+          )
+        }
+      />
 
       {/* TABLE */}
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
+      <div className="bg-white rounded-2xl shadow overflow-x-auto">
 
         <table className="w-full">
 
@@ -146,7 +143,7 @@ export default function ProductsPage() {
               </th>
 
               <th className="p-4 text-left">
-                Actions
+                Action
               </th>
 
             </tr>
@@ -165,21 +162,24 @@ export default function ProductsPage() {
                   {/* IMAGE */}
                   <td className="p-4">
 
-<Image
-  src={
-    product.images?.[0] ||
-    "https://via.placeholder.com/60"
-  }
-  alt={product.name}
-  width={60}
-  height={60}
-  className="object-cover rounded-lg"
-/>
+                    <Image
+                      src={
+                        product
+                          .images?.[0] ||
+                        "https://via.placeholder.com/60"
+                      }
+                      alt={
+                        product.name
+                      }
+                      width={60}
+                      height={60}
+                      className="rounded-lg object-cover"
+                    />
 
                   </td>
 
                   {/* NAME */}
-                  <td className="p-4 font-medium">
+                  <td className="p-4">
 
                     {product.name}
 
@@ -188,18 +188,16 @@ export default function ProductsPage() {
                   {/* CATEGORY */}
                   <td className="p-4">
 
-                    {
-                      product.category
-                        ?.name
-                    }
+                    {product.category
+                      ?.name ||
+                      "No Category"}
 
                   </td>
 
                   {/* PRICE */}
                   <td className="p-4">
 
-                    $
-                    {product.price}
+                    ${product.price}
 
                   </td>
 
@@ -210,27 +208,19 @@ export default function ProductsPage() {
 
                   </td>
 
-                  {/* ACTIONS */}
+                  {/* DELETE */}
                   <td className="p-4">
 
-                    <div className="flex gap-3">
-
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            product._id,
-                          )
-                        }
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                      >
-                        Delete
-                      </button>
-
-                    </div>
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          product._id,
+                        )
+                      }
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Delete
+                    </button>
 
                   </td>
 
