@@ -97,202 +97,166 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="bg-white">
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-3xl shadow p-8">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="text-3xl">📦</div>
+        <div className="flex items-center gap-4 mb-10">
+          <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">
+            📦
+          </div>
           <div>
             <h1 className="text-3xl font-bold">Create Product</h1>
-            <p className="text-gray-600 mt-1 text-[15px]">
+            <p className="text-gray-500 mt-1">
               Fill in the details below to add a new product to your inventory.
             </p>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Product Title */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">🏷️</span>
-              <label className="font-medium">Product Title <span className="text-red-500">*</span></label>
+        <div className="space-y-8">
+          {/* Each Field with Icon */}
+          {[
+            { icon: "🏷️", label: "Product Title", required: true, type: "text", state: title, setState: setTitle, placeholder: "Enter product title" },
+            { icon: "📝", label: "Description", required: true, type: "textarea", state: description, setState: setDescription, placeholder: "Enter product description" },
+          ].map((field, i) => (
+            <div key={i} className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">
+                {field.icon}
+              </div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">
+                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                </label>
+                {field.type === "textarea" ? (
+                  <textarea
+                    placeholder={field.placeholder}
+                    className="w-full border border-gray-200 rounded-2xl px-5 py-4 h-32 focus:border-blue-500 outline-none"
+                    value={field.state as string}
+                    onChange={(e) => (field.setState as any)(e.target.value)}
+                  />
+                ) : (
+                  <input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none"
+                    value={field.state as string}
+                    onChange={(e) => (field.setState as any)(e.target.value)}
+                  />
+                )}
+              </div>
             </div>
-            <input
-              type="text"
-              placeholder="Enter product title"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+          ))}
 
-          {/* Description */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">📝</span>
-              <label className="font-medium">Description <span className="text-red-500">*</span></label>
+          {/* Categories */}
+          <div className="grid grid-cols-2 gap-8">
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">📋</div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">Main Category <span className="text-red-500">*</span></label>
+                <select value={mainCategory} onChange={handleMainCategory} className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none">
+                  <option value="">Select Category</option>
+                  {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+                </select>
+              </div>
             </div>
-            <textarea
-              placeholder="Enter product description"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 h-28 focus:outline-none focus:border-blue-500"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
 
-          {/* Main Category */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">📋</span>
-              <label className="font-medium">Main Category <span className="text-red-500">*</span></label>
-            </div>
-            <select
-              value={mainCategory}
-              onChange={handleMainCategory}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-            >
-              <option value="">Select Category</option>
-              {categories.map((item) => (
-                <option key={item._id} value={item._id}>{item.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* SubCategory */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">📚</span>
-              <label className="font-medium">SubCategory <span className="text-red-500">*</span></label>
-            </div>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-            >
-              <option value="">Select SubCategory</option>
-              {subCategories.map((item) => (
-                <option key={item._id} value={item.name}>{item.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Price */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">💰</span>
-              <label className="font-medium">Price <span className="text-red-500">*</span></label>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Enter price"
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-              <span className="bg-gray-100 border border-gray-300 rounded-lg px-6 py-3 flex items-center">USD</span>
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">📚</div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">SubCategory <span className="text-red-500">*</span></label>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none">
+                  <option value="">Select SubCategory</option>
+                  {subCategories.map((c) => <option key={c._id} value={c.name}>{c.name}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Discount Price */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">🏷️</span>
-              <label className="font-medium">Discount Price</label>
+          {/* Price & Discount */}
+          <div className="grid grid-cols-2 gap-8">
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">💰</div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">Price <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <input type="number" placeholder="Enter price" className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none" value={price} onChange={(e) => setPrice(e.target.value)} />
+                  <span className="absolute right-5 top-4 text-gray-500">USD</span>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Enter discount price"
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-                value={discountPrice}
-                onChange={(e) => setDiscountPrice(e.target.value)}
-              />
-              <span className="bg-gray-100 border border-gray-300 rounded-lg px-6 py-3 flex items-center">USD</span>
+
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">🏷️</div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">Discount Price</label>
+                <div className="relative">
+                  <input type="number" placeholder="Enter discount price" className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} />
+                  <span className="absolute right-5 top-4 text-gray-500">USD</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Stock */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">📦</span>
-              <label className="font-medium">Stock</label>
+          {/* Stock, Brand, Location */}
+          <div className="grid grid-cols-2 gap-8">
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">📦</div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">Stock</label>
+                <input type="number" placeholder="Enter stock quantity" className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none" value={stock} onChange={(e) => setStock(e.target.value)} />
+              </div>
             </div>
-            <input
-              type="number"
-              placeholder="Enter stock quantity"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-            />
+
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">🏷️</div>
+              <div className="flex-1">
+                <label className="block font-medium mb-2">Brand</label>
+                <input type="text" placeholder="Enter brand" className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none" value={brand} onChange={(e) => setBrand(e.target.value)} />
+              </div>
+            </div>
           </div>
 
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">🏷️</span>
-              <label className="font-medium">Brand</label>
+          <div className="flex gap-5 items-start">
+            <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">📍</div>
+            <div className="flex-1">
+              <label className="block font-medium mb-2">Location</label>
+              <input type="text" placeholder="Enter location" className="w-full border border-gray-200 rounded-2xl px-5 py-4 focus:border-blue-500 outline-none" value={location} onChange={(e) => setLocation(e.target.value)} />
             </div>
-            <input
-              type="text"
-              placeholder="Enter brand"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-            />
-          </div>
-
-          {/* Location */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">📍</span>
-              <label className="font-medium">Location</label>
-            </div>
-            <input
-              type="text"
-              placeholder="Enter location"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
           </div>
 
           {/* Upload Images */}
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">🖼️</span>
-              <label className="font-medium">Upload Images</label>
-            </div>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-              <div className="text-4xl mb-3">☁️</div>
-              <p className="text-gray-600">Drag & drop images here</p>
-              <p className="text-gray-400 my-2">or</p>
-              <label className="cursor-pointer inline-block bg-blue-50 text-blue-600 px-5 py-2.5 rounded-lg font-medium">
-                Choose Files
-                <input type="file" multiple className="hidden" onChange={handleUpload} />
-              </label>
-              <p className="text-xs text-gray-400 mt-4">JPG, PNG up to 5MB each</p>
-            </div>
-
-            {images.length > 0 && (
-              <div className="flex gap-3 mt-4 flex-wrap">
-                {images.map((img, i) => (
-                  <img key={i} src={img} className="w-20 h-20 object-cover rounded-lg" />
-                ))}
+          <div className="flex gap-5 items-start">
+            <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 mt-1">🖼️</div>
+            <div className="flex-1">
+              <label className="block font-medium mb-3">Upload Images</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-3xl p-10 text-center hover:border-blue-400">
+                <div className="mx-auto w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 text-4xl">☁️</div>
+                <p>Drag & drop images here</p>
+                <p className="text-gray-400 my-2">or</p>
+                <label className="cursor-pointer bg-white border px-6 py-3 rounded-2xl hover:bg-gray-50">
+                  Choose Files
+                  <input type="file" multiple className="hidden" onChange={handleUpload} />
+                </label>
+                <p className="text-xs text-gray-400 mt-4">JPG, PNG up to 5MB each</p>
               </div>
-            )}
+
+              {images.length > 0 && (
+                <div className="flex gap-4 mt-6 flex-wrap">
+                  {images.map((img, i) => (
+                    <img key={i} src={img} className="w-28 h-28 object-cover rounded-2xl border" />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 mt-10">
-          <button className="flex-1 py-3.5 border border-gray-300 rounded-xl text-gray-700 font-medium">
-            Cancel
-          </button>
+        <div className="flex justify-end gap-4 mt-12">
+          <button className="px-8 py-3 border border-gray-300 rounded-2xl text-gray-700">✕ Cancel</button>
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="flex-1 py-3.5 bg-blue-600 text-white rounded-xl font-medium"
+            className="px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 disabled:opacity-70"
           >
             {loading ? "Creating..." : "Create Product"}
           </button>
