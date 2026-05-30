@@ -1,42 +1,24 @@
 import api from "./api";
 
-/* =========================
-   GET MAIN CATEGORIES
-========================= */
-export const getMainCategories = async () => {
-  const res = await api.get("/categories/main");
-  return res.data;
-};
-
-/* =========================
-   GET SUBCATEGORIES
-========================= */
-export const getSubCategories = async (parentId: string) => {
-  const res = await api.get(
-    `/categories/subcategories/${parentId}`
-  );
-  return res.data;
-};
-
-/* =========================
-   GET ALL CATEGORIES
-========================= */
+// GET ALL
 export const getCategories = async () => {
   const res = await api.get("/categories");
   return res.data;
 };
 
-/* =========================
-   CREATE CATEGORY
-========================= */
+// GET ONE
+export const getCategory = async (id: string) => {
+  const res = await api.get(`/categories/${id}`);
+  return res.data;
+};
+
+// CREATE
 export const createCategory = async (data: any) => {
   const res = await api.post("/categories", data);
   return res.data;
 };
 
-/* =========================
-   UPDATE CATEGORY
-========================= */
+// UPDATE
 export const updateCategory = async (
   id: string,
   data: any
@@ -45,13 +27,41 @@ export const updateCategory = async (
     `/categories/${id}`,
     data
   );
+
   return res.data;
 };
 
-/* =========================
-   DELETE CATEGORY
-========================= */
-export const deleteCategory = async (id: string) => {
-  const res = await api.delete(`/categories/${id}`);
+// DELETE
+export const deleteCategory = async (
+  id: string
+) => {
+  const res = await api.delete(
+    `/categories/${id}`
+  );
+
   return res.data;
 };
+
+// MAIN CATEGORY
+export const getMainCategories =
+  async () => {
+    const res =
+      await api.get(
+        "/categories/main"
+      );
+
+    return res.data;
+  };
+
+// SUB CATEGORY
+export const getSubCategories =
+  async (
+    parentId: string
+  ) => {
+    const res =
+      await api.get(
+        `/categories/subcategories/${parentId}`
+      );
+
+    return res.data;
+  };

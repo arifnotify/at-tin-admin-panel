@@ -1,101 +1,222 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  getCategories,
-  deleteCategory,
-} from "@/src/services/category.service";
-
 import Link from "next/link";
+import {
+  deleteCategory,
+  getCategories,
+} from "@/src/services/category.service";
+import { useEffect, useState } from "react";
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] =
+    useState<any[]>([]);
 
   useEffect(() => {
     loadCategories();
   }, []);
 
-  const loadCategories = async () => {
-    const data = await getCategories();
-    setCategories(data);
-    setLoading(false);
-  };
+  const loadCategories =
+    async () => {
+      const data =
+        await getCategories();
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this category?")) return;
+      setCategories(data);
+    };
 
-    await deleteCategory(id);
-    loadCategories();
-  };
+  const handleDelete =
+    async (id: string) => {
+      const confirmDelete =
+        confirm(
+          "Delete Category?"
+        );
 
-  if (loading) return <p className="p-6">Loading...</p>;
+      if (!confirmDelete) return;
+
+      await deleteCategory(id);
+
+      loadCategories();
+    };
+
+  const mainCategories =
+    categories.filter(
+      (item) =>
+        !item.parentId
+    );
+
+  const subCategories =
+    categories.filter(
+      (item) =>
+        item.parentId
+    );
 
   return (
     <div className="p-6">
 
-      {/* HEADER */}
-      <div className="flex justify-between mb-6">
-        <h1 className="text-2xl font-bold">
+      <div className="flex justify-between mb-8">
+
+        <h1 className="text-3xl font-bold">
           Categories
         </h1>
 
-        <Link
-          href="/categories/create"
-          className="bg-black text-white px-4 py-2 rounded-xl"
-        >
-          + Create Category
-        </Link>
+        <div className="flex gap-3">
+
+          <Link
+            href="/categories/main/create"
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Main Category
+          </Link>
+
+          <Link
+            href="/categories/sub/create"
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Sub Category
+          </Link>
+
+        </div>
+
       </div>
 
-      {/* TABLE */}
-      <table className="w-full border">
+      {/* MAIN */}
 
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="p-3 text-left">Name</th>
-            <th className="p-3 text-left">Type</th>
-            <th className="p-3 text-left">Action</th>
-          </tr>
-        </thead>
+      <div className="bg-white rounded-xl shadow p-5 mb-10">
 
-        <tbody>
-          {categories.map((cat) => (
-            <tr key={cat._id} className="border-t">
+        <h2 className="text-xl font-bold mb-4">
+          Main Categories
+        </h2>
 
-              <td className="p-3">
-                {cat.name}
-              </td>
+        <table className="w-full">
 
-              <td className="p-3">
-                {cat.parentId
-                  ? "Sub Category"
-                  : "Main Category"}
-              </td>
+          <thead>
 
-              <td className="p-3 flex gap-2">
+            <tr>
 
-                <Link
-                  href={`/categories/edit/${cat._id}`}
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
-                >
-                  Edit
-                </Link>
+              <th>Name</th>
 
-                <button
-                  onClick={() => handleDelete(cat._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
-
-              </td>
+              <th>Action</th>
 
             </tr>
-          ))}
-        </tbody>
 
-      </table>
+          </thead>
+
+          <tbody>
+
+            {mainCategories.map(
+              (item) => (
+                <tr
+                  key={
+                    item._id
+                  }
+                >
+                  <td>
+                    {
+                      item.name
+                    }
+                  </td>
+
+                  <td className="flex gap-3">
+
+                    <Link
+                      href={`/categories/main/edit/${item._id}`}
+                    >
+                      Edit
+                    </Link>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          item._id
+                        )
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </td>
+                </tr>
+              )
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {/* SUB */}
+
+      <div className="bg-white rounded-xl shadow p-5">
+
+        <h2 className="text-xl font-bold mb-4">
+          Sub Categories
+        </h2>
+
+        <table className="w-full">
+
+          <thead>
+
+            <tr>
+
+              <th>Name</th>
+
+              <th>Parent</th>
+
+              <th>Action</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {subCategories.map(
+              (item) => (
+                <tr
+                  key={
+                    item._id
+                  }
+                >
+                  <td>
+                    {
+                      item.name
+                    }
+                  </td>
+
+                  <td>
+                    {
+                      item.parentId
+                    }
+                  </td>
+
+                  <td className="flex gap-3">
+
+                    <Link
+                      href={`/categories/sub/edit/${item._id}`}
+                    >
+                      Edit
+                    </Link>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          item._id
+                        )
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </td>
+                </tr>
+              )
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
   );
