@@ -1,348 +1,252 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
-  getMainCategories,
-  getSubCategories,
-} from "@/src/services/category.service";
-import { Category } from "@/src/types/category";
-import { uploadImages } from "@/src/services/upload.service";
-import { createProduct } from "@/src/services/product.service";
+  useEffect,
+  useState,
+} from "react";
 
-export default function CreateProductPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [discountPrice, setDiscountPrice] = useState("");
-  const [stock, setStock] = useState("");
-  const [brand, setBrand] = useState("");
-  const [location, setLocation] = useState("");
+import {deleteProduct,getProducts, } from "@/src/services/product.service";
+import { Product } from "@/src/types/product";
+import Link from "next/link";
 
-  const [mainCategory, setMainCategory] = useState("");
-  const [category, setCategory] = useState("");
+export default function ProductsPage() {
+  const [products, setProducts] =
+    useState<Product[]>([]);
 
-  const [images, setImages] = useState<string[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [subCategories, setSubCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [search, setSearch] =
+    useState("");
 
   useEffect(() => {
-    const fetchMainCategories = async () => {
-      try {
-        const data = await getMainCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchMainCategories();
+    fetchProducts();
   }, []);
 
-  const fetchSubCategories = async (parentId: string) => {
-    try {
-      const data = await getSubCategories(parentId);
-      setSubCategories(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const fetchProducts =
+    async () => {
+      try {
+        const data =
+          await getProducts();
 
-  const handleMainCategory = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setMainCategory(value);
-    setCategory("");
-    setSubCategories([]);
-    if (value) await fetchSubCategories(value);
-  };
+        setProducts(data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  // DELETE PRODUCT
+  const handleDelete =
+    async (id: string) => {
+      const confirmDelete =
+        confirm(
+          "Delete this product?",
+        );
 
-    try {
-      setLoading(true);
-      const res = await uploadImages(files);
-      const imageUrls = res.map((item: any) => item.url);
-      setImages(imageUrls);
-    } catch (err) {
-      console.error(err);
-      alert("Upload Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!confirmDelete) return;
 
-  const handleCreate = async () => {
-    try {
-      setLoading(true);
-      await createProduct({
-        title,
-        description,
-        price: Number(price),
-        discountPrice: discountPrice ? Number(discountPrice) : undefined,
-        stock: Number(stock),
-        brand,
-        location,
-        category,
-        images,
-      });
-      alert("Product Created Successfully");
-      window.location.href = "/products";
-    } catch (err) {
-      console.error(err);
-      alert("Create Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        await deleteProduct(id);
+
+        setProducts((prev) =>
+          prev.filter(
+            (product) =>
+              product._id !== id,
+          ),
+        );
+
+        alert(
+          "Product deleted",
+        );
+      } catch (err) {
+        console.log(err);
+
+        alert(
+          "Delete failed",
+        );
+      }
+    };
+
+  // SEARCH FILTER
+  const filteredProducts =
+    products.filter((product) =>
+      product.title
+        .toLowerCase()
+        .includes(
+          search.toLowerCase(),
+        ),
+    );
+
+  // LOADING
+  if (loading) {
+    return (
+      <div>
+        Loading products...
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-3xl shadow-sm p-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
-            📦
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Product</h1>
-            <p className="text-gray-500 mt-1">
-              Fill in the details below to add a new product to your inventory.
-            </p>
-          </div>
-        </div>
+    <div>
 
-        <div className="space-y-8">
-          {/* Product Title */}
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-              🏷️
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter product title"
-                className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-          </div>
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-6">
 
-          {/* Description */}
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-              📝
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                placeholder="Enter product description"
-                className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32 focus:outline-none focus:border-blue-500"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-          </div>
+        <h1 className="text-3xl font-bold">
+          Products
+        </h1>
 
-          {/* Main & Sub Category */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-                📋
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Main Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={mainCategory}
-                  onChange={handleMainCategory}
-                  className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((item) => (
-                    <option key={item._id} value={item._id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+          <Link
+    href="/products/create"
+    className="bg-black text-white px-5 py-3 rounded-xl"
+  >
+    Create Product
+  </Link>
 
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-                📚
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  SubCategory <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select SubCategory</option>
-                  {subCategories.map((item) => (
-                    <option key={item._id} value={item.name}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Price & Discount */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-                💰
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="Enter price"
-                    className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                  />
-                  <span className="absolute right-5 top-4 text-gray-500 font-medium">USD</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-                🏷️
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Discount Price</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="Enter discount price"
-                    className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                    value={discountPrice}
-                    onChange={(e) => setDiscountPrice(e.target.value)}
-                  />
-                  <span className="absolute right-5 top-4 text-gray-500 font-medium">USD</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stock & Brand */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-                📦
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Stock</label>
-                <input
-                  type="number"
-                  placeholder="Enter stock quantity"
-                  className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                  value={stock}
-                  onChange={(e) => setStock(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-                🏷️
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-                <input
-                  type="text"
-                  placeholder="Enter brand"
-                  className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Location */}
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-              📍
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-              <input
-                type="text"
-                placeholder="Enter location"
-                className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Upload Images */}
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
-              🖼️
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-3">Upload Images</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-3xl p-12 text-center">
-                <div className="mx-auto w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 text-4xl">
-                  ☁️
-                </div>
-                <p className="text-gray-600">Drag & drop images here</p>
-                <p className="text-gray-400 my-2">or</p>
-                <label className="cursor-pointer border border-gray-300 bg-white px-6 py-3 rounded-2xl hover:bg-gray-50">
-                  Choose Files
-                  <input type="file" multiple className="hidden" onChange={handleUpload} />
-                </label>
-                <p className="text-xs text-gray-400 mt-4">JPG, PNG up to 5MB each</p>
-              </div>
-
-              {images.length > 0 && (
-                <div className="flex gap-4 mt-6 flex-wrap">
-                  {images.map((img, i) => (
-                    <img
-                      key={i}
-                      src={img}
-                      className="w-24 h-24 object-cover rounded-2xl border"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-4 mt-12 pt-8 border-t border-gray-100">
-          <button className="px-8 py-3 border border-gray-300 rounded-2xl text-gray-700 font-medium">
-            ✕ Cancel
-          </button>
-          <button
-            onClick={handleCreate}
-            disabled={loading}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl flex items-center gap-2"
-          >
-            {loading ? "Creating..." : "Create Product"}
-          </button>
-        </div>
       </div>
+
+      {/* SEARCH */}
+      <div className="mb-5">
+
+        <input
+          type="text"
+          placeholder="Search product..."
+          className="w-full p-3 border rounded-xl"
+          onChange={(e) =>
+            setSearch(
+              e.target.value,
+            )
+          }
+        />
+
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white rounded-2xl shadow overflow-hidden">
+
+        <table className="w-full">
+
+          <thead className="bg-gray-100">
+
+            <tr>
+
+              <th className="p-4 text-left">
+                Image
+              </th>
+
+              <th className="p-4 text-left">
+                Name
+              </th>
+
+              <th className="p-4 text-left">
+                Category
+              </th>
+
+              <th className="p-4 text-left">
+                Price
+              </th>
+
+              <th className="p-4 text-left">
+                Stock
+              </th>
+
+              <th className="p-4 text-left">
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {filteredProducts.map(
+              (product) => (
+                <tr
+                  key={product._id}
+                  className="border-t"
+                >
+
+                  {/* IMAGE */}
+                  <td className="p-4">
+
+                    <img
+                      src={
+                        product.images?.[0]
+                      }
+                      alt={product.title}
+                      className="w-[60px] h-[60px] object-cover rounded-lg"
+                    />
+
+                  </td>
+
+                  {/* NAME */}
+                  <td className="p-4 font-medium">
+
+                    {product.title}
+
+                  </td>
+
+                  {/* CATEGORY */}
+                  <td className="p-4">
+
+                    {
+                      product.category
+                    }
+
+                  </td>
+
+                  {/* PRICE */}
+                  <td className="p-4">
+
+                    $
+                    {product.price}
+
+                  </td>
+
+                  {/* STOCK */}
+                  <td className="p-4">
+
+                    {product.stock}
+
+                  </td>
+
+                  {/* ACTIONS */}
+                  <td className="p-4">
+
+                    <div className="flex gap-3">
+
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            product._id,
+                          )
+                        }
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+              ),
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
     </div>
   );
 }
