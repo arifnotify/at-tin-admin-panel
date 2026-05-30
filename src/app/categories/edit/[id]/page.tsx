@@ -13,31 +13,40 @@ export default function EditCategoryPage() {
   const { id } = useParams();
 
   const [name, setName] = useState("");
+  const [type, setType] = useState<"main" | "sub">("main");
   const [parentId, setParentId] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchData();
+    load();
   }, []);
 
-  const fetchData = async () => {
+  const load = async () => {
     const [cats, res] = await Promise.all([
       getCategories(),
       api.get(`/categories/${id}`),
     ]);
 
     setCategories(cats);
+
     setName(res.data.name);
-    setParentId(res.data.parentId || "");
+
+    if (res.data.parentId) {
+      setType("sub");
+      setParentId(res.data.parentId);
+    } else {
+      setType("main");
+    }
   };
 
   const handleUpdate = async () => {
     await updateCategory(id as string, {
       name,
-      parentId: parentId || null,
+      parentId: type === "main" ? null : parentId,
     });
 
-    alert("Updated Successfully");
+    alert("Updated");
+
     window.location.href = "/categories";
   };
 
@@ -48,36 +57,44 @@ export default function EditCategoryPage() {
         Edit Category
       </h1>
 
-      {/* NAME */}
       <input
-        className="w-full border p-3 mb-4 rounded"
+        className="w-full border p-3 mb-3"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
 
-      {/* PARENT */}
       <select
-        className="w-full border p-3 mb-4 rounded"
-        value={parentId}
-        onChange={(e) => setParentId(e.target.value)}
+        className="w-full border p-3 mb-3"
+        value={type}
+        onChange={(e) => setType(e.target.value as any)}
       >
-        <option value="">Main Category</option>
-
-        {categories
-          .filter((c) => !c.parentId)
-          .map((c) => (
-            <option key={c._id} value={c._id}>
-              {c.name}
-            </option>
-          ))}
+        <option value="main">Main Category</option>
+        <option value="sub">Sub Category</option>
       </select>
 
-      {/* BUTTON */}
+      {type === "sub" && (
+        <select
+          className="w-full border p-3 mb-3"
+          value={parentId}
+          onChange={(e) => setParentId(e.target.value)}
+        >
+          <option value="">Select Main</option>
+
+          {categories
+            .filter((c) => !c.parentId)
+            .map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+        </select>
+      )}
+
       <button
         onClick={handleUpdate}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="bg-blue-600 text-white px-4 py-2"
       >
-        Update Category
+        Update
       </button>
 
     </div>
