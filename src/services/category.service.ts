@@ -1,25 +1,57 @@
 import api from "./api";
 
-// GET MAIN CATEGORIES
-export const getMainCategories =
-  async () => {
-    const response =
-      await api.get(
-        "/categories/main",
-      );
+/* =========================
+   GET MAIN CATEGORIES
+========================= */
+export const getMainCategories = async () => {
+  const res = await api.get("/categories/main");
+  return res.data;
+};
 
-    return response.data;
-  };
+/* =========================
+   GET SUBCATEGORIES
+========================= */
+export const getSubCategories = async (parentId: string) => {
+  const res = await api.get(
+    `/categories/subcategories/${parentId}`
+  );
+  return res.data;
+};
 
-// GET SUBCATEGORIES
-export const getSubCategories =
-  async (
-    parentId: string,
-  ) => {
-    const response =
-      await api.get(
-        `/categories/subcategories/${parentId}`,
-      );
+/* =========================
+   GET ALL CATEGORIES
+========================= */
+export const getCategories = async () => {
+  const res = await api.get("/categories");
+  return res.data;
+};
 
-    return response.data;
-  };
+/* =========================
+   CREATE CATEGORY
+========================= */
+export const createCategory = async (data: any) => {
+  const res = await api.post("/categories", data);
+  return res.data;
+};
+
+/* =========================
+   UPDATE CATEGORY
+========================= */
+export const updateCategory = async (
+  id: string,
+  data: any
+) => {
+  const res = await api.patch(
+    `/categories/${id}`,
+    data
+  );
+  return res.data;
+};
+
+/* =========================
+   DELETE CATEGORY
+========================= */
+export const deleteCategory = async (id: string) => {
+  const res = await api.delete(`/categories/${id}`);
+  return res.data;
+};
