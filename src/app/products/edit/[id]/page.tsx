@@ -20,7 +20,7 @@ import { Category } from "@/src/types/category";
 export default function EditProductPage() {
   const { id } = useParams();
 
-  // SAME STATES AS CREATE
+  // SAME AS CREATE PAGE STATES
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -39,7 +39,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
-  // LOAD PRODUCT + CATEGORIES
+  // FETCH PRODUCT + MAIN CATEGORIES
   useEffect(() => {
     fetchData();
   }, []);
@@ -53,7 +53,7 @@ export default function EditProductPage() {
 
       setCategories(mains);
 
-      // PREFILL (IMPORTANT)
+      // PREFILL DATA
       setTitle(product.title);
       setDescription(product.description);
       setPrice(product.price);
@@ -65,6 +65,7 @@ export default function EditProductPage() {
 
       setCategory(product.category?._id);
 
+      // LOAD SUBCATEGORIES IF EXISTS
       if (product.category?.parentId) {
         setMainCategory(product.category.parentId);
 
@@ -86,6 +87,7 @@ export default function EditProductPage() {
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const value = e.target.value;
+
     setMainCategory(value);
     setCategory("");
     setSubCategories([]);
@@ -96,7 +98,7 @@ export default function EditProductPage() {
     }
   };
 
-  // IMAGE UPLOAD (same as create)
+  // MULTIPLE IMAGE UPLOAD (APPEND MODE)
   const handleUpload = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -107,9 +109,10 @@ export default function EditProductPage() {
       setLoading(true);
 
       const res = await uploadImages(files);
+
       const imageUrls = res.map((item: any) => item.url);
 
-      setImages([...images, ...imageUrls]);
+      setImages((prev) => [...prev, ...imageUrls]);
     } catch (err) {
       console.error(err);
       alert("Upload Failed");
@@ -118,7 +121,12 @@ export default function EditProductPage() {
     }
   };
 
-  // UPDATE PRODUCT (ONLY DIFFERENCE FROM CREATE)
+  // REMOVE IMAGE
+  const removeImage = (img: string) => {
+    setImages(images.filter((i) => i !== img));
+  };
+
+  // UPDATE PRODUCT
   const handleUpdate = async () => {
     try {
       setLoading(true);
@@ -154,53 +162,64 @@ export default function EditProductPage() {
       <div className="bg-white rounded-3xl shadow p-8">
 
         {/* HEADER */}
-        <h1 className="text-3xl font-bold mb-8">
-          Edit Product
-        </h1>
+        <div className="flex items-center gap-4 mb-10">
+          <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+            ✏️
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Edit Product</h1>
+            <p className="text-gray-500 mt-1">
+              Update product details and save changes.
+            </p>
+          </div>
+        </div>
 
         <div className="space-y-7">
 
           {/* TITLE */}
           <input
+            type="text"
+            className="w-full border border-gray-200 rounded-2xl px-5 py-3.5"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full border p-3 rounded-2xl"
-            placeholder="Product Title"
           />
 
           {/* DESCRIPTION */}
           <textarea
+            className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border p-3 rounded-2xl h-32"
-            placeholder="Description"
           />
 
           {/* CATEGORY */}
           <div className="grid grid-cols-2 gap-6">
 
+            {/* MAIN CATEGORY */}
             <select
               value={mainCategory}
               onChange={handleMainCategory}
-              className="w-full border p-3 rounded-2xl"
+              className="w-full border rounded-2xl px-5 py-3.5"
             >
               <option value="">Main Category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
+
+              {categories.map((item) => (
+                <option key={item._id} value={item._id}>
+                  {item.name}
                 </option>
               ))}
             </select>
 
+            {/* SUB CATEGORY */}
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border p-3 rounded-2xl"
+              className="w-full border rounded-2xl px-5 py-3.5"
             >
               <option value="">Sub Category</option>
-              {subCategories.map((c) => (
-                <option key={c._id} value={c.name}>
-                  {c.name}
+
+              {subCategories.map((item) => (
+                <option key={item._id} value={item.name}>
+                  {item.name}
                 </option>
               ))}
             </select>
@@ -212,8 +231,7 @@ export default function EditProductPage() {
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full border p-3 rounded-2xl"
-            placeholder="Price"
+            className="w-full border rounded-2xl px-5 py-3.5"
           />
 
           {/* DISCOUNT */}
@@ -221,8 +239,7 @@ export default function EditProductPage() {
             type="number"
             value={discountPrice}
             onChange={(e) => setDiscountPrice(e.target.value)}
-            className="w-full border p-3 rounded-2xl"
-            placeholder="Discount Price"
+            className="w-full border rounded-2xl px-5 py-3.5"
           />
 
           {/* STOCK */}
@@ -230,51 +247,63 @@ export default function EditProductPage() {
             type="number"
             value={stock}
             onChange={(e) => setStock(e.target.value)}
-            className="w-full border p-3 rounded-2xl"
-            placeholder="Stock"
+            className="w-full border rounded-2xl px-5 py-3.5"
           />
 
           {/* BRAND */}
           <input
+            type="text"
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
-            className="w-full border p-3 rounded-2xl"
-            placeholder="Brand"
+            className="w-full border rounded-2xl px-5 py-3.5"
           />
 
           {/* LOCATION */}
           <input
+            type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="w-full border p-3 rounded-2xl"
-            placeholder="Location"
+            className="w-full border rounded-2xl px-5 py-3.5"
           />
 
-          {/* IMAGES */}
+          {/* UPLOAD IMAGES */}
           <input
             type="file"
             multiple
             onChange={handleUpload}
           />
 
-          <div className="flex gap-3 flex-wrap mt-4">
+          {/* IMAGE PREVIEW */}
+          <div className="flex gap-4 flex-wrap mt-4">
+
             {images.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                className="w-24 h-24 object-cover rounded-xl"
-              />
+              <div key={i} className="relative">
+
+                <img
+                  src={img}
+                  className="w-24 h-24 object-cover rounded-xl border"
+                />
+
+                <button
+                  onClick={() => removeImage(img)}
+                  className="absolute top-0 right-0 bg-red-500 text-white px-2"
+                >
+                  ✕
+                </button>
+
+              </div>
             ))}
+
           </div>
 
         </div>
 
-        {/* BUTTON */}
+        {/* UPDATE BUTTON */}
         <div className="flex justify-end mt-10">
           <button
             onClick={handleUpdate}
             disabled={loading}
-            className="bg-green-600 text-white px-8 py-3 rounded-2xl"
+            className="bg-blue-600 text-white px-8 py-3 rounded-2xl"
           >
             {loading ? "Updating..." : "Update Product"}
           </button>
