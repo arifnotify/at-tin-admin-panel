@@ -1,113 +1,183 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
-  createCategory,
   getMainCategories,
+  createCategory,
 } from "@/src/services/category.service";
 
 import {
-  useEffect,
-  useState,
-} from "react";
+  uploadImage,
+} from "@/src/services/upload.service";
 
 export default function CreateSubCategoryPage() {
   const [name, setName] =
     useState("");
 
-  const [
-    parentCategory,
-    setParentCategory,
-  ] = useState("");
+  const [image, setImage] =
+    useState("");
 
-  const [
-    categories,
-    setCategories,
-  ] = useState<any[]>([]);
+  const [parentCategory, setParentCategory] =
+    useState("");
 
+  const [categories, setCategories] =
+    useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  // LOAD MAIN CATEGORIES
   useEffect(() => {
-    getMainCategories().then(
-      setCategories,
-    );
+    loadMainCategories();
   }, []);
 
+  const loadMainCategories =
+    async () => {
+      try {
+        const res =
+          await getMainCategories();
+
+        setCategories(res);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  // IMAGE UPLOAD
+  const handleUpload =
+    async (
+      e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      const file =
+        e.target.files?.[0];
+
+      if (!file) return;
+
+      try {
+        const res =
+          await uploadImage(
+            file,
+          );
+
+        setImage(
+          res.url,
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  // CREATE SUB CATEGORY
   const handleCreate =
     async () => {
       try {
+        setLoading(true);
+
         await createCategory({
           name,
+          image,
           parentCategory,
         });
 
         alert(
-          "Sub Category Created",
+          "Sub Category Created Successfully",
         );
 
         window.location.href =
           "/categories";
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     };
 
   return (
     <div className="p-6">
 
-      <h1 className="text-2xl font-bold mb-5">
-        Create Sub Category
-      </h1>
+      <div className="bg-white p-6 rounded-xl shadow">
 
-      <input
-        value={name}
-        onChange={(e) =>
-          setName(
-            e.target.value,
-          )
-        }
-        placeholder="Sub Category"
-        className="border p-3 w-full rounded mb-4"
-      />
+        <h1 className="text-2xl font-bold mb-6">
+          Create Sub Category
+        </h1>
 
-      <select
-        value={
-          parentCategory
-        }
-        onChange={(e) =>
-          setParentCategory(
-            e.target.value,
-          )
-        }
-        className="border p-3 w-full rounded"
-      >
-        <option value="">
-          Select Main Category
-        </option>
+        {/* NAME */}
+        <input
+          type="text"
+          placeholder="Sub Category Name"
+          value={name}
+          onChange={(e) =>
+            setName(
+              e.target.value,
+            )
+          }
+          className="w-full border p-3 rounded-lg mb-4"
+        />
 
-        {categories.map(
-          (item) => (
-            <option
-              key={
-                item._id
-              }
-              value={
-                item._id
-              }
-            >
-              {
-                item.name
-              }
-            </option>
-          ),
+        {/* MAIN CATEGORY SELECT */}
+        <select
+          value={
+            parentCategory
+          }
+          onChange={(e) =>
+            setParentCategory(
+              e.target.value,
+            )
+          }
+          className="w-full border p-3 rounded-lg mb-4"
+        >
+          <option value="">
+            Select Main Category
+          </option>
+
+          {categories.map(
+            (cat) => (
+              <option
+                key={
+                  cat._id
+                }
+                value={
+                  cat._id
+                }
+              >
+                {cat.name}
+              </option>
+            ),
+          )}
+        </select>
+
+        {/* IMAGE */}
+        <input
+          type="file"
+          onChange={
+            handleUpload
+          }
+        />
+
+        {image && (
+          <img
+            src={image}
+            className="w-32 h-32 object-cover rounded-lg mt-4"
+          />
         )}
-      </select>
 
-      <button
-        onClick={
-          handleCreate
-        }
-        className="bg-green-600 text-white px-5 py-3 rounded mt-4"
-      >
-        Create
-      </button>
+        {/* BUTTON */}
+        <button
+          onClick={
+            handleCreate
+          }
+          disabled={
+            loading
+          }
+          className="bg-green-600 text-white px-5 py-3 rounded-lg mt-6"
+        >
+          {loading
+            ? "Creating..."
+            : "Create Sub Category"}
+        </button>
+
+      </div>
 
     </div>
   );
