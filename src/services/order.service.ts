@@ -1,38 +1,37 @@
 import api from "./api";
 
-// GET ALL ORDERS
 export const getOrders =
   async () => {
-    const response =
-      await api.get("/orders");
-
-    return response.data;
-  };
-
-// GET SINGLE ORDER
-export const getOrderById =
-  async (id: string) => {
-    const response =
+    const res =
       await api.get(
-        `/orders/${id}`,
+        "/orders/admin"
       );
 
-    return response.data;
+    return res.data;
   };
 
-// UPDATE STATUS
+export const getSingleOrder =
+  async (id: string) => {
+    const res =
+      await api.get(
+        `/orders/${id}`
+      );
+
+    return res.data;
+  };
+
 export const updateOrderStatus =
   async (
     id: string,
-    status: string,
+    orderStatus: string
   ) => {
-    const response =
+    const res =
       await api.patch(
         `/orders/${id}/status`,
         {
-          status,
-        },
+          orderStatus,
+        }
       );
 
-    return response.data;
+    return res.data;
   };
