@@ -1,24 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 import {
   getCategory,
-  getMainCategories,
   updateCategory,
+  getMainCategories,
 } from "@/src/services/category.service";
 
 import {
   uploadImage,
 } from "@/src/services/upload.service";
 
-export default function EditSubCategoryPage({
-  params,
-}: {
-  params: {
-    id: string;
-  };
-}) {
+export default function EditSubCategoryPage() {
+  const params = useParams();
+  const id = params?.id as string;
+
   const [name, setName] =
     useState("");
 
@@ -34,103 +32,88 @@ export default function EditSubCategoryPage({
   const [loading, setLoading] =
     useState(false);
 
+  // =========================
   // LOAD DATA
+  // =========================
   useEffect(() => {
-    loadData();
-    loadMainCategories();
-  }, []);
+    if (id) {
+      loadCategory();
+      loadMainCategories();
+    }
+  }, [id]);
 
-  const loadData =
-    async () => {
-      try {
-        const data =
-          await getCategory(
-            params.id,
-          );
+  const loadCategory = async () => {
+    try {
+      const res = await getCategory(id);
 
-        setName(
-          data.name,
-        );
+      console.log("SUB CATEGORY:", res);
 
-        setImage(
-          data.image || "",
-        );
+      setName(res.name || "");
+      setImage(res.image || "");
+      setParentCategory(
+        res.parentCategory?._id || res.parentCategory || ""
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-        setParentCategory(
-          data.parentCategory?._id ||
-            "",
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  const loadMainCategories = async () => {
+    try {
+      const res = await getMainCategories();
+      setCategories(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  const loadMainCategories =
-    async () => {
-      try {
-        const res =
-          await getMainCategories();
-
-        setCategories(res);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
+  // =========================
   // IMAGE UPLOAD
-  const handleUpload =
-    async (
-      e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-      const file =
-        e.target.files?.[0];
+  // =========================
+  const handleUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
 
-      if (!file) return;
+    if (!file) return;
 
-      try {
-        const res =
-          await uploadImage(
-            file,
-          );
+    try {
+      const res = await uploadImage(file);
 
-        setImage(
-          res.url,
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
+      const url = res.url || res.data?.url;
 
+      setImage(url);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // =========================
   // UPDATE
-  const handleUpdate =
-    async () => {
-      try {
-        setLoading(true);
+  // =========================
+  const handleUpdate = async () => {
+    try {
+      setLoading(true);
 
-        await updateCategory(
-          params.id,
-          {
-            name,
-            image,
-            parentCategory,
-          },
-        );
+      await updateCategory(id, {
+        name,
+        image,
+        parentCategory,
+      });
 
-        alert(
-          "Sub Category Updated Successfully",
-        );
+      alert("Sub Category Updated");
 
-        window.location.href =
-          "/categories";
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      window.location.href = "/categories";
+    } catch (error) {
+      console.log(error);
+      alert("Update Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-2xl mx-auto">
 
       <div className="bg-white p-6 rounded-xl shadow">
 
@@ -143,22 +126,17 @@ export default function EditSubCategoryPage({
           type="text"
           value={name}
           onChange={(e) =>
-            setName(
-              e.target.value,
-            )
+            setName(e.target.value)
           }
           className="w-full border p-3 rounded-lg mb-4"
+          placeholder="Sub Category Name"
         />
 
         {/* MAIN CATEGORY SELECT */}
         <select
-          value={
-            parentCategory
-          }
+          value={parentCategory}
           onChange={(e) =>
-            setParentCategory(
-              e.target.value,
-            )
+            setParentCategory(e.target.value)
           }
           className="w-full border p-3 rounded-lg mb-4"
         >
@@ -166,64 +144,45 @@ export default function EditSubCategoryPage({
             Select Main Category
           </option>
 
-          {categories.map(
-            (cat) => (
-              <option
-                key={
-                  cat._id
-                }
-                value={
-                  cat._id
-                }
-              >
-                {cat.name}
-              </option>
-            ),
-          )}
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat._id}>
+              {cat.name}
+            </option>
+          ))}
         </select>
 
         {/* IMAGE UPLOAD */}
         <input
           type="file"
-          onChange={
-            handleUpload
-          }
+          onChange={handleUpload}
+          className="mb-4"
         />
 
+        {/* IMAGE PREVIEW */}
         {image && (
           <div className="mt-4">
-
             <img
               src={image}
-              className="w-32 h-32 object-cover rounded-lg"
+              className="w-32 h-32 object-cover rounded-lg border"
             />
 
             <button
               type="button"
-              onClick={() =>
-                setImage("")
-              }
+              onClick={() => setImage("")}
               className="bg-red-500 text-white px-4 py-2 rounded mt-3"
             >
               Remove Image
             </button>
-
           </div>
         )}
 
         {/* UPDATE BUTTON */}
         <button
-          onClick={
-            handleUpdate
-          }
-          disabled={
-            loading
-          }
-          className="bg-blue-600 text-white px-5 py-3 rounded-lg mt-6"
+          onClick={handleUpdate}
+          disabled={loading}
+          className="bg-green-600 text-white px-5 py-3 rounded-lg mt-6 w-full"
         >
-          {loading
-            ? "Updating..."
-            : "Update Sub Category"}
+          {loading ? "Updating..." : "Update Sub Category"}
         </button>
 
       </div>
