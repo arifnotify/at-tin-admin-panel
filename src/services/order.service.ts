@@ -1,10 +1,47 @@
 import api from "./api";
 
-export const getOrders = () =>
-  api.get("/orders").then((res) => res.data);
+// 🔥 GET ALL ORDERS (ADMIN)
+export const getOrders = async () => {
+  const token = localStorage.getItem("token");
 
-export const getOrder = (id: string) =>
-  api.get(`/orders/${id}`).then((res) => res.data);
+  const res = await api.get("/orders", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export const updateStatus = (id: string, data: any) =>
-  api.patch(`/orders/${id}/status`, data);
+  return res.data;
+};
+
+// 🔥 GET SINGLE ORDER
+export const getOrder = async (id: string) => {
+  const token = localStorage.getItem("token");
+
+  const res = await api.get(`/orders/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
+// 🔥 UPDATE ORDER STATUS
+export const updateOrderStatus = async (
+  id: string,
+  orderStatus: string
+) => {
+  const token = localStorage.getItem("token");
+
+  const res = await api.patch(
+    `/orders/${id}/status`,
+    { orderStatus },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
