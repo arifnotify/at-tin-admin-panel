@@ -1,14 +1,19 @@
 import api from "./api";
 
-// GET ALL ORDERS
-export const getOrders = async () => {
-  const token = localStorage.getItem("token");
+export const getOrder = async (
+  id: string
+) => {
+  const token =
+    localStorage.getItem("token");
 
-  const res = await api.get("/orders", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await api.get(
+    `/orders/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   return res.data;
 };
