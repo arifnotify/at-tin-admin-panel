@@ -1,154 +1,217 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   getCategory,
   getMainCategories,
   updateCategory,
 } from "@/src/services/category.service";
 
-import { useParams } from "next/navigation";
-
 import {
-  useEffect,
-  useState,
-} from "react";
+  uploadImage,
+} from "@/src/services/upload.service";
 
-export default function EditSubCategoryPage() {
-  const params =
-    useParams();
-
+export default function EditSubCategoryPage({
+  params,
+}: {
+  params: {
+    id: string;
+  };
+}) {
   const [name, setName] =
     useState("");
 
-  const [
-    parentCategory,
-    setParentCategory,
-  ] = useState("");
+  const [image, setImage] =
+    useState("");
 
-  const [
-    mainCategories,
-    setMainCategories,
-  ] = useState<any[]>([]);
+  const [parentCategory, setParentCategory] =
+    useState("");
+
+  const [categories, setCategories] =
+    useState<any[]>([]);
 
   const [loading, setLoading] =
     useState(false);
 
+  // LOAD DATA
   useEffect(() => {
     loadData();
+    loadMainCategories();
   }, []);
 
   const loadData =
     async () => {
       try {
-        const [
-          category,
-          mains,
-        ] = await Promise.all([
-          getCategory(
-            params.id as string
-          ),
-          getMainCategories(),
-        ]);
+        const data =
+          await getCategory(
+            params.id,
+          );
 
         setName(
-          category.name
+          data.name,
+        );
+
+        setImage(
+          data.image || "",
         );
 
         setParentCategory(
-          category.parentCategory?._id ||
-            category.parentCategory ||
-            ""
-        );
-
-        setMainCategories(
-          mains
+          data.parentCategory?._id ||
+            "",
         );
       } catch (error) {
         console.log(error);
       }
     };
 
+  const loadMainCategories =
+    async () => {
+      try {
+        const res =
+          await getMainCategories();
+
+        setCategories(res);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  // IMAGE UPLOAD
+  const handleUpload =
+    async (
+      e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      const file =
+        e.target.files?.[0];
+
+      if (!file) return;
+
+      try {
+        const res =
+          await uploadImage(
+            file,
+          );
+
+        setImage(
+          res.url,
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  // UPDATE
   const handleUpdate =
     async () => {
       try {
         setLoading(true);
 
         await updateCategory(
-          params.id as string,
+          params.id,
           {
             name,
+            image,
             parentCategory,
-          }
+          },
         );
 
         alert(
-          "Sub Category Updated"
+          "Sub Category Updated Successfully",
         );
 
         window.location.href =
           "/categories";
-      } catch (error: any) {
-        console.log(
-          error.response?.data
-        );
+      } catch (error) {
+        console.log(error);
       } finally {
         setLoading(false);
       }
     };
 
   return (
-    <div className="max-w-xl mx-auto p-6">
+    <div className="p-6">
 
       <div className="bg-white p-6 rounded-xl shadow">
 
-        <h1 className="text-2xl font-bold mb-5">
+        <h1 className="text-2xl font-bold mb-6">
           Edit Sub Category
         </h1>
 
+        {/* NAME */}
         <input
           type="text"
           value={name}
           onChange={(e) =>
             setName(
-              e.target.value
+              e.target.value,
             )
           }
           className="w-full border p-3 rounded-lg mb-4"
         />
 
+        {/* MAIN CATEGORY SELECT */}
         <select
           value={
             parentCategory
           }
           onChange={(e) =>
             setParentCategory(
-              e.target.value
+              e.target.value,
             )
           }
-          className="w-full border p-3 rounded-lg"
+          className="w-full border p-3 rounded-lg mb-4"
         >
           <option value="">
             Select Main Category
           </option>
 
-          {mainCategories.map(
-            (item) => (
+          {categories.map(
+            (cat) => (
               <option
                 key={
-                  item._id
+                  cat._id
                 }
                 value={
-                  item._id
+                  cat._id
                 }
               >
-                {
-                  item.name
-                }
+                {cat.name}
               </option>
-            )
+            ),
           )}
         </select>
 
+        {/* IMAGE UPLOAD */}
+        <input
+          type="file"
+          onChange={
+            handleUpload
+          }
+        />
+
+        {image && (
+          <div className="mt-4">
+
+            <img
+              src={image}
+              className="w-32 h-32 object-cover rounded-lg"
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setImage("")
+              }
+              className="bg-red-500 text-white px-4 py-2 rounded mt-3"
+            >
+              Remove Image
+            </button>
+
+          </div>
+        )}
+
+        {/* UPDATE BUTTON */}
         <button
           onClick={
             handleUpdate
@@ -156,7 +219,7 @@ export default function EditSubCategoryPage() {
           disabled={
             loading
           }
-          className="bg-green-600 text-white px-5 py-3 rounded-lg mt-5"
+          className="bg-blue-600 text-white px-5 py-3 rounded-lg mt-6"
         >
           {loading
             ? "Updating..."
