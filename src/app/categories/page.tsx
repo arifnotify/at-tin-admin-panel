@@ -12,6 +12,9 @@ export default function CategoriesPage() {
   const [categories, setCategories] =
     useState<any[]>([]);
 
+  const [loading, setLoading] =
+    useState(true);
+
   useEffect(() => {
     loadCategories();
   }, []);
@@ -25,6 +28,8 @@ export default function CategoriesPage() {
         setCategories(data);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -48,17 +53,20 @@ export default function CategoriesPage() {
         loadCategories();
       } catch (error) {
         console.error(error);
+        alert(
+          "Delete Failed"
+        );
       }
     };
 
-  // MAIN CATEGORIES
+  // MAIN CATEGORY
   const mainCategories =
     categories.filter(
       (item) =>
         !item.parentCategory
     );
 
-  // SUB CATEGORIES
+  // SUB CATEGORY
   const subCategories =
     categories.filter(
       (item) =>
@@ -77,7 +85,7 @@ export default function CategoriesPage() {
             Categories
           </h1>
 
-          <p className="text-gray-500">
+          <p className="text-gray-500 mt-1">
             Manage Main & Sub Categories
           </p>
         </div>
@@ -86,14 +94,14 @@ export default function CategoriesPage() {
 
           <Link
             href="/categories/main/create"
-            className="bg-blue-600 text-white px-5 py-3 rounded-xl"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl"
           >
             + Main Category
           </Link>
 
           <Link
             href="/categories/sub/create"
-            className="bg-green-600 text-white px-5 py-3 rounded-xl"
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl"
           >
             + Sub Category
           </Link>
@@ -117,6 +125,10 @@ export default function CategoriesPage() {
             <tr className="border-b">
 
               <th className="text-left py-3">
+                Image
+              </th>
+
+              <th className="text-left py-3">
                 Name
               </th>
 
@@ -130,42 +142,79 @@ export default function CategoriesPage() {
 
           <tbody>
 
-            {mainCategories.map(
-              (item) => (
-                <tr
-                  key={item._id}
-                  className="border-b"
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="py-10 text-center"
                 >
-                  <td className="py-4">
-                    {item.name}
-                  </td>
+                  Loading...
+                </td>
+              </tr>
+            ) : mainCategories.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="py-10 text-center"
+                >
+                  No Main Categories Found
+                </td>
+              </tr>
+            ) : (
+              mainCategories.map(
+                (item) => (
+                  <tr
+                    key={item._id}
+                    className="border-b"
+                  >
+                    <td className="py-4">
 
-                  <td className="py-4">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-14 h-14 rounded-lg object-cover border"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center">
+                          N/A
+                        </div>
+                      )}
 
-                    <div className="flex gap-3">
+                    </td>
 
-                      <Link
-                        href={`/categories/main/edit/${item._id}`}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                      >
-                        Edit
-                      </Link>
+                    <td className="py-4 font-medium">
+                      {item.name}
+                    </td>
 
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            item._id
-                          )
-                        }
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                      >
-                        Delete
-                      </button>
+                    <td className="py-4">
 
-                    </div>
+                      <div className="flex gap-3">
 
-                  </td>
-                </tr>
+                        <Link
+                          href={`/categories/main/edit/${item._id}`}
+                          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                        >
+                          Edit
+                        </Link>
+
+                        <button
+                          onClick={() =>
+                            handleDelete(
+                              item._id
+                            )
+                          }
+                          className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+                )
               )
             )}
 
@@ -190,6 +239,10 @@ export default function CategoriesPage() {
             <tr className="border-b">
 
               <th className="text-left py-3">
+                Image
+              </th>
+
+              <th className="text-left py-3">
                 Name
               </th>
 
@@ -207,48 +260,85 @@ export default function CategoriesPage() {
 
           <tbody>
 
-            {subCategories.map(
-              (item) => (
-                <tr
-                  key={item._id}
-                  className="border-b"
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="py-10 text-center"
                 >
-                  <td className="py-4">
-                    {item.name}
-                  </td>
+                  Loading...
+                </td>
+              </tr>
+            ) : subCategories.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="py-10 text-center"
+                >
+                  No Sub Categories Found
+                </td>
+              </tr>
+            ) : (
+              subCategories.map(
+                (item) => (
+                  <tr
+                    key={item._id}
+                    className="border-b"
+                  >
+                    <td className="py-4">
 
-                  <td className="py-4">
-                    {item
-                      .parentCategory
-                      ?.name || "-"}
-                  </td>
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-14 h-14 rounded-lg object-cover border"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center">
+                          N/A
+                        </div>
+                      )}
 
-                  <td className="py-4">
+                    </td>
 
-                    <div className="flex gap-3">
+                    <td className="py-4 font-medium">
+                      {item.name}
+                    </td>
 
-                      <Link
-                        href={`/categories/sub/edit/${item._id}`}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                      >
-                        Edit
-                      </Link>
+                    <td className="py-4">
+                      {item
+                        .parentCategory
+                        ?.name || "-"}
+                    </td>
 
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            item._id
-                          )
-                        }
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                      >
-                        Delete
-                      </button>
+                    <td className="py-4">
 
-                    </div>
+                      <div className="flex gap-3">
 
-                  </td>
-                </tr>
+                        <Link
+                          href={`/categories/sub/edit/${item._id}`}
+                          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                        >
+                          Edit
+                        </Link>
+
+                        <button
+                          onClick={() =>
+                            handleDelete(
+                              item._id
+                            )
+                          }
+                          className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+                )
               )
             )}
 

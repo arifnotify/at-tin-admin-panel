@@ -1,35 +1,74 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   getCategory,
   updateCategory,
 } from "@/src/services/category.service";
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  uploadImage,
+} from "@/src/services/upload.service";
 
-export default function EditMainCategoryPage() {
-  const params = useParams();
-
+export default function EditMainCategoryPage({
+  params,
+}: {
+  params: {
+    id: string;
+  };
+}) {
   const [name, setName] =
+    useState("");
+
+  const [image, setImage] =
     useState("");
 
   const [loading, setLoading] =
     useState(false);
 
   useEffect(() => {
-    fetchCategory();
+    loadCategory();
   }, []);
 
-  const fetchCategory =
+  const loadCategory =
     async () => {
       try {
         const data =
           await getCategory(
-            params.id as string
+            params.id,
           );
 
-        setName(data.name);
+        setName(
+          data.name,
+        );
+
+        setImage(
+          data.image || "",
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  const handleUpload =
+    async (
+      e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      const file =
+        e.target.files?.[0];
+
+      if (!file) return;
+
+      try {
+        const res =
+          await uploadImage(
+            file,
+          );
+
+        setImage(
+          res.url,
+        );
       } catch (error) {
         console.log(error);
       }
@@ -41,47 +80,76 @@ export default function EditMainCategoryPage() {
         setLoading(true);
 
         await updateCategory(
-          params.id as string,
+          params.id,
           {
             name,
-            parentCategory: null,
-          }
+            image,
+            parentCategory:
+              null,
+          },
         );
 
         alert(
-          "Main Category Updated"
+          "Category Updated Successfully",
         );
 
         window.location.href =
           "/categories";
-      } catch (error: any) {
-        console.log(
-          error.response?.data
-        );
+      } catch (error) {
+        console.log(error);
       } finally {
         setLoading(false);
       }
     };
 
   return (
-    <div className="max-w-xl mx-auto p-6">
+    <div className="p-6">
 
       <div className="bg-white p-6 rounded-xl shadow">
 
-        <h1 className="text-2xl font-bold mb-5">
+        <h1 className="text-2xl font-bold mb-6">
           Edit Main Category
         </h1>
 
         <input
           type="text"
+          placeholder="Category Name"
           value={name}
           onChange={(e) =>
             setName(
-              e.target.value
+              e.target.value,
             )
           }
-          className="w-full border p-3 rounded-lg"
+          className="w-full border p-3 rounded-lg mb-5"
         />
+
+        <input
+          type="file"
+          onChange={
+            handleUpload
+          }
+        />
+
+        {image && (
+          <div className="mt-5">
+
+            <img
+              src={image}
+              className="w-32 h-32 object-cover rounded-lg"
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setImage("")
+              }
+              className="bg-red-500 text-white px-4 py-2 rounded mt-3"
+            >
+              Remove Image
+            </button>
+
+          </div>
+        )}
 
         <button
           onClick={
@@ -90,7 +158,7 @@ export default function EditMainCategoryPage() {
           disabled={
             loading
           }
-          className="bg-blue-600 text-white px-5 py-3 rounded-lg mt-5"
+          className="bg-blue-600 text-white px-5 py-3 rounded-lg mt-6"
         >
           {loading
             ? "Updating..."

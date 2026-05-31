@@ -1,26 +1,20 @@
 import api from "./api";
 
-export const uploadImages = async (
-  files: FileList,
+// SINGLE IMAGE
+export const uploadImage = async (
+  file: File,
 ) => {
   const formData =
     new FormData();
 
-  // MULTIPLE FILES
-  for (
-    let i = 0;
-    i < files.length;
-    i++
-  ) {
-    formData.append(
-      "files",
-      files[i],
-    );
-  }
+  formData.append(
+    "file",
+    file,
+  );
 
   const response =
     await api.post(
-      "/upload/multiple",
+      "/upload/single",
       formData,
       {
         headers: {
@@ -32,3 +26,37 @@ export const uploadImages = async (
 
   return response.data;
 };
+
+// MULTIPLE IMAGE
+export const uploadImages =
+  async (
+    files: FileList,
+  ) => {
+    const formData =
+      new FormData();
+
+    for (
+      let i = 0;
+      i < files.length;
+      i++
+    ) {
+      formData.append(
+        "files",
+        files[i],
+      );
+    }
+
+    const response =
+      await api.post(
+        "/upload/multiple",
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        },
+      );
+
+    return response.data;
+  };
