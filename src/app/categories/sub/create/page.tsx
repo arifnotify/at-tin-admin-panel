@@ -14,27 +14,39 @@ export default function CreateSubCategoryPage() {
   const [name, setName] =
     useState("");
 
-  const [parentId, setParentId] =
-    useState("");
+  const [
+    parentCategory,
+    setParentCategory,
+  ] = useState("");
 
-  const [categories, setCategories] =
-    useState<any[]>([]);
+  const [
+    categories,
+    setCategories,
+  ] = useState<any[]>([]);
 
   useEffect(() => {
     getMainCategories().then(
-      setCategories
+      setCategories,
     );
   }, []);
 
   const handleCreate =
     async () => {
-      await createCategory({
-        name,
-        parentId,
-      });
+      try {
+        await createCategory({
+          name,
+          parentCategory,
+        });
 
-      window.location.href =
-        "/categories";
+        alert(
+          "Sub Category Created",
+        );
+
+        window.location.href =
+          "/categories";
+      } catch (error) {
+        console.log(error);
+      }
     };
 
   return (
@@ -45,24 +57,26 @@ export default function CreateSubCategoryPage() {
       </h1>
 
       <input
-        className="border p-3 w-full mb-4"
-        placeholder="Sub Category"
         value={name}
         onChange={(e) =>
           setName(
-            e.target.value
+            e.target.value,
           )
         }
+        placeholder="Sub Category"
+        className="border p-3 w-full rounded mb-4"
       />
 
       <select
-        className="border p-3 w-full"
-        value={parentId}
+        value={
+          parentCategory
+        }
         onChange={(e) =>
-          setParentId(
-            e.target.value
+          setParentCategory(
+            e.target.value,
           )
         }
+        className="border p-3 w-full rounded"
       >
         <option value="">
           Select Main Category
@@ -82,7 +96,7 @@ export default function CreateSubCategoryPage() {
                 item.name
               }
             </option>
-          )
+          ),
         )}
       </select>
 
@@ -90,7 +104,7 @@ export default function CreateSubCategoryPage() {
         onClick={
           handleCreate
         }
-        className="bg-green-600 text-white px-5 py-3 mt-4"
+        className="bg-green-600 text-white px-5 py-3 rounded mt-4"
       >
         Create
       </button>

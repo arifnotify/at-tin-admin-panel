@@ -9,37 +9,46 @@ export default function CreateMainCategoryPage() {
 
   const handleCreate =
     async () => {
-      await createCategory({
-        name,
-        parentId: null,
-      });
+      try {
+        await createCategory({
+          name,
+          parentCategory: null,
+        });
 
-      window.location.href =
-        "/categories";
+        alert(
+          "Category Created",
+        );
+
+        window.location.href =
+          "/categories";
+      } catch (error) {
+        console.log(error);
+      }
     };
 
   return (
     <div className="p-6">
 
-      <h1 className="text-2xl font-bold mb-4">
+      <h1 className="text-2xl font-bold mb-5">
         Create Main Category
       </h1>
 
       <input
-        className="border p-3 w-full"
         value={name}
         onChange={(e) =>
           setName(
-            e.target.value
+            e.target.value,
           )
         }
+        placeholder="Category Name"
+        className="border p-3 w-full rounded"
       />
 
       <button
         onClick={
           handleCreate
         }
-        className="bg-blue-600 text-white px-5 py-3 mt-4"
+        className="bg-blue-600 text-white px-5 py-3 rounded mt-4"
       >
         Create
       </button>
