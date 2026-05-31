@@ -1,86 +1,97 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  getOrder,
-  updateOrderStatus,
-} from "@/src/services/order.service";
+import { getOrder } from "@/src/services/order.service";
 
-export default function OrderDetails({
-  params,
-}: any) {
+export default function OrderDetails({ params }: any) {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const load = async () => {
+    const loadOrder = async () => {
       try {
+        console.log("ORDER ID:", params?.id);
+
+        if (!params?.id) {
+          setError("Invalid Order ID");
+          setLoading(false);
+          return;
+        }
+
         const data = await getOrder(params.id);
-        setOrder(data);
-      } catch (err) {
+
+        if (!data) {
+          setError("Order not found");
+        } else {
+          setOrder(data);
+        }
+      } catch (err: any) {
         console.log("ERROR:", err);
+        setError("Failed to load order");
       } finally {
         setLoading(false);
       }
     };
 
-    load();
-  }, [params.id]);
+    loadOrder();
+  }, [params?.id]);
 
-  const handleStatus = async (status: string) => {
-    try {
-      await updateOrderStatus(order._id, {
-        orderStatus: status,
-      });
+  // LOADING UI
+  if (loading) {
+    return <p className="p-5">Loading...</p>;
+  }
 
-      const updated = await getOrder(order._id);
-      setOrder(updated);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  // ERROR UI
+  if (error) {
+    return <p className="p-5 text-red-500">{error}</p>;
+  }
 
-  if (loading) return <p className="p-5">Loading...</p>;
-  if (!order) return <p className="p-5">Order not found</p>;
+  // NO ORDER
+  if (!order) {
+    return <p className="p-5">Order not found</p>;
+  }
 
   return (
     <div className="p-5">
-      <h1 className="text-2xl font-bold mb-5">
+      <h1 className="text-2xl font-bold mb-4">
         Order Details
       </h1>
 
-      <div className="border p-4 rounded">
+      {/* CUSTOMER INFO */}
+      <div className="border p-3 rounded mb-4">
         <p>📞 {order.customerPhone}</p>
         <p>🏠 {order.shippingAddress}</p>
-        <p>💰 {order.totalAmount}</p>
+        <p>💰 Total: {order.totalAmount}</p>
+        <p>📦 Status: {order.orderStatus}</p>
+      </div>
 
-        <hr className="my-3" />
+      {/* ITEMS */}
+      <div>
+        <h2 className="font-bold mb-2">Products</h2>
 
-        <h2 className="font-bold">Products</h2>
+        {order.items?.map((item: any) => (
+          <div
+            key={item._id}
+            className="border p-2 mb-2 flex gap-3"
+          >
+            <img
+              src={item.productImage}
+              alt=""
+              width={70}
+              height={70}
+            />
 
-        {order.items.map((item: any, i: number) => (
-          <div key={i} className="border p-2 my-2">
-            <p>{item.productName}</p>
-            <p>Qty: {item.quantity}</p>
-            <p>Price: {item.price}</p>
+            <div>
+              <p className="font-semibold">
+                {item.productName}
+              </p>
+              <p>Qty: {item.quantity}</p>
+              <p>Price: {item.price}</p>
+              <p>Total: {item.totalPrice}</p>
+            </div>
           </div>
         ))}
-
-        <hr className="my-3" />
-
-        <select
-          value={order.orderStatus}
-          onChange={(e) =>
-            handleStatus(e.target.value)
-          }
-          className="border p-2"
-        >
-          <option>Pending</option>
-          <option>Processing</option>
-          <option>Shipped</option>
-          <option>Delivered</option>
-          <option>Cancelled</option>
-        </select>
       </div>
     </div>
   );
