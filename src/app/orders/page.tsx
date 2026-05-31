@@ -1,6 +1,5 @@
 "use client";
 
-import { getOrders } from "@/src/services/order.service";
 import Link from "next/link";
 
 import {
@@ -8,7 +7,9 @@ import {
   useState,
 } from "react";
 
-
+import {
+  getOrders,
+} from "@/src/services/order.service";
 
 export default function OrdersPage() {
   const [orders, setOrders] =
@@ -17,134 +18,115 @@ export default function OrdersPage() {
   const [loading, setLoading] =
     useState(true);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders =
+  const loadOrders =
     async () => {
       try {
         const data =
           await getOrders();
 
         setOrders(data);
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        console.log(error);
       } finally {
         setLoading(false);
       }
     };
 
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
   if (loading) {
     return (
-      <div>
-        Loading Orders...
+      <div className="p-5">
+        Loading...
       </div>
     );
   }
 
   return (
-    <div>
-
-      <h1 className="text-3xl font-bold mb-6">
+    <div className="p-5">
+      <h1 className="text-3xl font-bold mb-5">
         Orders
       </h1>
 
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
-
+      <div className="bg-white rounded shadow overflow-x-auto">
         <table className="w-full">
-
-          <thead className="bg-gray-100">
-
-            <tr>
-
-              <th className="p-4">
+          <thead>
+            <tr className="border-b">
+              <th className="p-3">
                 Order No
               </th>
 
-              <th className="p-4">
-                Customer
-              </th>
-
-              <th className="p-4">
+              <th className="p-3">
                 Phone
               </th>
 
-              <th className="p-4">
+              <th className="p-3">
                 Amount
               </th>
 
-              <th className="p-4">
+              <th className="p-3">
                 Status
               </th>
 
-              <th className="p-4">
+              <th className="p-3">
                 Action
               </th>
-
             </tr>
-
           </thead>
 
           <tbody>
-
             {orders.map(
-              (order) => (
+              (
+                order,
+                index
+              ) => (
                 <tr
-                  key={order._id}
-                  className="border-t"
+                  key={
+                    order._id
+                  }
+                  className="border-b"
                 >
-
-                  <td className="p-4">
-                    {
-                      order.orderNumber
-                    }
+                  <td className="p-3">
+                    {index + 1}
                   </td>
 
-                  <td className="p-4">
-                    {
-                      order.customerName
-                    }
-                  </td>
-
-                  <td className="p-4">
+                  <td className="p-3">
                     {
                       order.customerPhone
                     }
                   </td>
 
-                  <td className="p-4">
-                    ৳
+                  <td className="p-3">
+                    $
                     {
                       order.totalAmount
                     }
                   </td>
 
-                  <td className="p-4 capitalize">
-                    {order.status}
+                  <td className="p-3">
+                    <span className="px-2 py-1 rounded border">
+                      {
+                        order.orderStatus
+                      }
+                    </span>
                   </td>
 
-                  <td className="p-4">
-
+                  <td className="p-3">
                     <Link
                       href={`/orders/${order._id}`}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                      className="bg-blue-500 text-white px-3 py-2 rounded"
                     >
                       View
                     </Link>
-
                   </td>
-
                 </tr>
-              ),
+              )
             )}
-
           </tbody>
-
         </table>
-
       </div>
-
     </div>
   );
 }
