@@ -1,6 +1,6 @@
 import api from "./api";
 
-// 🔥 GET ALL ORDERS (ADMIN)
+// GET ALL ORDERS
 export const getOrders = async () => {
   const token = localStorage.getItem("token");
 
@@ -13,7 +13,7 @@ export const getOrders = async () => {
   return res.data;
 };
 
-// 🔥 GET SINGLE ORDER
+// GET SINGLE ORDER
 export const getOrder = async (id: string) => {
   const token = localStorage.getItem("token");
 
@@ -26,16 +26,16 @@ export const getOrder = async (id: string) => {
   return res.data;
 };
 
-// 🔥 UPDATE ORDER STATUS
+// UPDATE STATUS
 export const updateOrderStatus = async (
   id: string,
-  orderStatus: string
+  data: { orderStatus: string }
 ) => {
   const token = localStorage.getItem("token");
 
   const res = await api.patch(
     `/orders/${id}/status`,
-    { orderStatus },
+    data,
     {
       headers: {
         Authorization: `Bearer ${token}`,
