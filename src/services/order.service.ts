@@ -1,23 +1,17 @@
 import api from "./api";
 
-export const getOrder = async (
-  id: string
-) => {
-  const token =
-    localStorage.getItem("token");
+// GET ALL ORDERS
+export const getOrders = async () => {
+  const token = localStorage.getItem("token");
 
-  const res = await api.get(
-    `/orders/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await api.get("/orders", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return res.data;
 };
-
 
 // GET SINGLE ORDER
 export const getOrder = async (id: string) => {
@@ -32,16 +26,18 @@ export const getOrder = async (id: string) => {
   return res.data;
 };
 
-// UPDATE STATUS
+// UPDATE ORDER STATUS
 export const updateOrderStatus = async (
   id: string,
-  data: { orderStatus: string }
+  orderStatus: string
 ) => {
   const token = localStorage.getItem("token");
 
   const res = await api.patch(
     `/orders/${id}/status`,
-    data,
+    {
+      orderStatus,
+    },
     {
       headers: {
         Authorization: `Bearer ${token}`,
