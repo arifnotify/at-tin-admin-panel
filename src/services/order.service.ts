@@ -4,7 +4,7 @@ export const getOrders =
   async () => {
     const res =
       await api.get(
-        "/orders/admin"
+        "/orders"
       );
 
     return res.data;
