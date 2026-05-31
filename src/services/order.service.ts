@@ -13,6 +13,7 @@ export const getOrders = async () => {
   return res.data;
 };
 
+
 // GET SINGLE ORDER
 export const getOrder = async (id: string) => {
   const token = localStorage.getItem("token");
