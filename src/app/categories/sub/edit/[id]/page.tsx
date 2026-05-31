@@ -7,6 +7,7 @@ import {
 } from "@/src/services/category.service";
 
 import { useParams } from "next/navigation";
+
 import {
   useEffect,
   useState,
@@ -19,12 +20,18 @@ export default function EditSubCategoryPage() {
   const [name, setName] =
     useState("");
 
-  const [parentId, setParentId] =
-    useState("");
+  const [
+    parentCategory,
+    setParentCategory,
+  ] = useState("");
 
-  const [mainCategories,
-    setMainCategories] =
-    useState<any[]>([]);
+  const [
+    mainCategories,
+    setMainCategories,
+  ] = useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(false);
 
   useEffect(() => {
     loadData();
@@ -47,27 +54,30 @@ export default function EditSubCategoryPage() {
           category.name
         );
 
-        setParentId(
-          category.parentId
+        setParentCategory(
+          category.parentCategory?._id ||
+            category.parentCategory ||
+            ""
         );
 
         setMainCategories(
           mains
         );
-
       } catch (error) {
-        console.error(error);
+        console.log(error);
       }
     };
 
   const handleUpdate =
     async () => {
       try {
+        setLoading(true);
+
         await updateCategory(
           params.id as string,
           {
             name,
-            parentId,
+            parentCategory,
           }
         );
 
@@ -77,21 +87,23 @@ export default function EditSubCategoryPage() {
 
         window.location.href =
           "/categories";
-      } catch (error) {
-        console.error(error);
+      } catch (error: any) {
+        console.log(
+          error.response?.data
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
   return (
     <div className="max-w-xl mx-auto p-6">
 
-      <div className="bg-white shadow rounded-xl p-6">
+      <div className="bg-white p-6 rounded-xl shadow">
 
         <h1 className="text-2xl font-bold mb-5">
           Edit Sub Category
         </h1>
-
-        {/* Name */}
 
         <input
           type="text"
@@ -101,22 +113,20 @@ export default function EditSubCategoryPage() {
               e.target.value
             )
           }
-          className="w-full border p-3 rounded mb-4"
-          placeholder="Sub Category Name"
+          className="w-full border p-3 rounded-lg mb-4"
         />
 
-        {/* Parent */}
-
         <select
-          value={parentId}
+          value={
+            parentCategory
+          }
           onChange={(e) =>
-            setParentId(
+            setParentCategory(
               e.target.value
             )
           }
-          className="w-full border p-3 rounded"
+          className="w-full border p-3 rounded-lg"
         >
-
           <option value="">
             Select Main Category
           </option>
@@ -137,16 +147,20 @@ export default function EditSubCategoryPage() {
               </option>
             )
           )}
-
         </select>
 
         <button
           onClick={
             handleUpdate
           }
-          className="bg-green-600 text-white px-5 py-3 rounded mt-5"
+          disabled={
+            loading
+          }
+          className="bg-green-600 text-white px-5 py-3 rounded-lg mt-5"
         >
-          Update Sub Category
+          {loading
+            ? "Updating..."
+            : "Update Sub Category"}
         </button>
 
       </div>

@@ -14,11 +14,14 @@ export default function EditMainCategoryPage() {
   const [name, setName] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
   useEffect(() => {
-    loadCategory();
+    fetchCategory();
   }, []);
 
-  const loadCategory =
+  const fetchCategory =
     async () => {
       try {
         const data =
@@ -28,18 +31,20 @@ export default function EditMainCategoryPage() {
 
         setName(data.name);
       } catch (error) {
-        console.error(error);
+        console.log(error);
       }
     };
 
   const handleUpdate =
     async () => {
       try {
+        setLoading(true);
+
         await updateCategory(
           params.id as string,
           {
             name,
-            parentId: null,
+            parentCategory: null,
           }
         );
 
@@ -49,15 +54,19 @@ export default function EditMainCategoryPage() {
 
         window.location.href =
           "/categories";
-      } catch (error) {
-        console.error(error);
+      } catch (error: any) {
+        console.log(
+          error.response?.data
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
   return (
     <div className="max-w-xl mx-auto p-6">
 
-      <div className="bg-white shadow rounded-xl p-6">
+      <div className="bg-white p-6 rounded-xl shadow">
 
         <h1 className="text-2xl font-bold mb-5">
           Edit Main Category
@@ -71,17 +80,21 @@ export default function EditMainCategoryPage() {
               e.target.value
             )
           }
-          className="w-full border p-3 rounded"
-          placeholder="Category Name"
+          className="w-full border p-3 rounded-lg"
         />
 
         <button
           onClick={
             handleUpdate
           }
-          className="bg-blue-600 text-white px-5 py-3 rounded mt-5"
+          disabled={
+            loading
+          }
+          className="bg-blue-600 text-white px-5 py-3 rounded-lg mt-5"
         >
-          Update Category
+          {loading
+            ? "Updating..."
+            : "Update Category"}
         </button>
 
       </div>
