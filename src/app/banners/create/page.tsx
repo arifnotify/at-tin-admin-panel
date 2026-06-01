@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBanner } from "@/src/services/banner.service";
 import { uploadImage } from "@/src/services/upload.service";
+
+
 export default function CreateBannerPage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
   const [status, setStatus] = useState(true);
-
   const [loading, setLoading] = useState(false);
 
   // IMAGE UPLOAD
@@ -23,21 +24,27 @@ export default function CreateBannerPage() {
 
       console.log("UPLOAD RESPONSE:", res);
 
-      // IMPORTANT FIX (backend key mismatch safe)
-      setImage(
+      const imageUrl =
         res.url ||
-        res.image ||
         res.imageUrl ||
-        res.secure_url
-      );
+        res.secure_url ||
+        res.data?.url ||
+        res.data?.imageUrl;
+
+      setImage(imageUrl);
     } catch (err) {
-      console.log(err);
+      console.log("UPLOAD ERROR:", err);
     }
   };
 
   // CREATE BANNER
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    if (!image) {
+      alert("Please upload image first");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -48,17 +55,15 @@ export default function CreateBannerPage() {
         status,
       };
 
-      console.log("FINAL PAYLOAD:", payload);
+      console.log("PAYLOAD:", payload);
 
-      const res = await createBanner(payload);
-
-      console.log("CREATE RESPONSE:", res);
+      await createBanner(payload);
 
       alert("Banner Created Successfully");
 
       router.push("/banners");
     } catch (err: any) {
-      console.log("ERROR:", err?.response?.data || err);
+      console.log(err?.response?.data || err);
       alert("Create Failed");
     } finally {
       setLoading(false);
@@ -90,13 +95,15 @@ export default function CreateBannerPage() {
         {image && (
           <img
             src={image}
-            className="w-full h-[200px] object-cover"
+            className="w-full h-[200px] object-cover rounded"
           />
         )}
 
         <select
           value={String(status)}
-          onChange={(e) => setStatus(e.target.value === "true")}
+          onChange={(e) =>
+            setStatus(e.target.value === "true")
+          }
           className="border p-3 w-full"
         >
           <option value="true">Active</option>
