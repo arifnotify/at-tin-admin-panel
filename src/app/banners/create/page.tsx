@@ -19,60 +19,84 @@ export default function CreateBannerPage() {
   const [loading, setLoading] =
     useState(false);
 
-  const [image,
-    setImage] =
+  const [title, setTitle] =
     useState("");
 
-  const [formData,
-    setFormData] =
-    useState({
-      title: "",
-      link: "",
-      status: true,
-    });
+  const [image, setImage] =
+    useState("");
+
+  const [status, setStatus] =
+    useState(true);
 
   // IMAGE UPLOAD
   const handleUpload =
     async (
-      e: React.ChangeEvent<HTMLInputElement>,
+      e: React.ChangeEvent<HTMLInputElement>
     ) => {
-      const file =
-        e.target.files?.[0];
+      try {
+        const file =
+          e.target.files?.[0];
 
-      if (!file) return;
+        if (!file) return;
 
-      const res =
-        await uploadImage(
-          file,
+        const res =
+          await uploadImage(
+            file
+          );
+
+        console.log(res);
+
+        setImage(
+          res.url
         );
-
-      setImage(res.url);
+      } catch (error) {
+        console.log(error);
+      }
     };
 
-  // SUBMIT
+  // CREATE
   const handleSubmit =
     async (
-      e: React.FormEvent,
+      e: React.FormEvent
     ) => {
       e.preventDefault();
 
       try {
         setLoading(true);
 
-        await createBanner({
-          ...formData,
+        console.log({
+          title,
           image,
+          status,
+        });
+
+        await createBanner({
+          title,
+          image,
+          status,
         });
 
         alert(
-          "Banner Created",
+          "Banner Created"
         );
 
         router.push(
-          "/banners",
+          "/banners"
         );
-      } catch (err) {
-        console.log(err);
+      } catch (error: any) {
+        console.log(error);
+
+        console.log(
+          error?.response
+            ?.data
+        );
+
+        alert(
+          JSON.stringify(
+            error?.response
+              ?.data
+          )
+        );
       } finally {
         setLoading(false);
       }
@@ -89,34 +113,18 @@ export default function CreateBannerPage() {
         onSubmit={
           handleSubmit
         }
-        className="bg-white p-6 rounded-2xl shadow space-y-5"
+        className="bg-white p-6 rounded-xl shadow space-y-5"
       >
 
         <input
           type="text"
           placeholder="Banner Title"
           className="w-full border p-3 rounded-xl"
+          value={title}
           onChange={(e) =>
-            setFormData({
-              ...formData,
-              title:
-                e.target
-                  .value,
-            })
-          }
-        />
-
-        <input
-          type="text"
-          placeholder="Link (optional)"
-          className="w-full border p-3 rounded-xl"
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              link:
-                e.target
-                  .value,
-            })
+            setTitle(
+              e.target.value
+            )
           }
         />
 
@@ -130,18 +138,43 @@ export default function CreateBannerPage() {
         {image && (
           <img
             src={image}
+            alt=""
             className="w-full h-[200px] object-cover rounded-xl"
           />
         )}
 
-        <button
-          className="bg-black text-white px-6 py-3 rounded-xl"
-          disabled={
-            loading
+        <select
+          value={
+            String(
+              status
+            )
           }
+          onChange={(e) =>
+            setStatus(
+              e.target.value ===
+                "true"
+            )
+          }
+          className="w-full border p-3 rounded-xl"
+        >
+
+          <option value="true">
+            Active
+          </option>
+
+          <option value="false">
+            Inactive
+          </option>
+
+        </select>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-black text-white px-6 py-3 rounded-xl"
         >
           {loading
-            ? "Saving..."
+            ? "Creating..."
             : "Create Banner"}
         </button>
 

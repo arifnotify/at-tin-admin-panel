@@ -1,6 +1,6 @@
 import api from "./api";
 
-// GET ALL BANNERS
+// GET ALL
 export const getBanners =
   async () => {
     const res =
@@ -11,7 +11,7 @@ export const getBanners =
     return res.data;
   };
 
-// GET SINGLE BANNER
+// GET ONE
 export const getBannerById =
   async (id: string) => {
     const res =
@@ -22,7 +22,7 @@ export const getBannerById =
     return res.data;
   };
 
-// CREATE BANNER
+// CREATE
 export const createBanner =
   async (data: any) => {
     const res =
@@ -34,7 +34,7 @@ export const createBanner =
     return res.data;
   };
 
-// UPDATE BANNER
+// UPDATE
 export const updateBanner =
   async (
     id: string,
@@ -49,7 +49,7 @@ export const updateBanner =
     return res.data;
   };
 
-// DELETE BANNER
+// DELETE
 export const deleteBanner =
   async (id: string) => {
     const res =

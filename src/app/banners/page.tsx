@@ -1,12 +1,12 @@
 "use client";
 
+import { deleteBanner, getBanners } from "@/src/services/banner.service";
+import Link from "next/link";
+
 import {
   useEffect,
   useState,
 } from "react";
-
-import Link from "next/link";
-import { deleteBanner, getBanners } from "@/src/services/banner.service";
 
 
 
@@ -28,8 +28,8 @@ export default function BannersPage() {
           await getBanners();
 
         setBanners(data);
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        console.log(error);
       } finally {
         setLoading(false);
       }
@@ -39,22 +39,31 @@ export default function BannersPage() {
     async (id: string) => {
       if (
         !confirm(
-          "Delete Banner?",
+          "Delete Banner?"
         )
       )
         return;
 
-      await deleteBanner(id);
+      try {
+        await deleteBanner(id);
 
-      fetchBanners();
+        fetchBanners();
+
+        alert(
+          "Banner Deleted"
+        );
+      } catch (error) {
+        console.log(error);
+      }
     };
 
-  if (loading)
+  if (loading) {
     return (
       <div>
         Loading...
       </div>
     );
+  }
 
   return (
     <div>
@@ -80,28 +89,23 @@ export default function BannersPage() {
         {banners.map(
           (banner) => (
             <div
-              key={
-                banner._id
-              }
-              className="bg-white rounded-2xl shadow overflow-hidden"
+              key={banner._id}
+              className="bg-white rounded-xl shadow overflow-hidden"
             >
 
               <img
-                src={
-                  banner.image
-                }
+                src={banner.image}
+                alt=""
                 className="w-full h-[180px] object-cover"
               />
 
-              <div className="p-4 space-y-2">
+              <div className="p-4">
 
                 <h2 className="font-bold">
-                  {
-                    banner.title
-                  }
+                  {banner.title}
                 </h2>
 
-                <p className="text-sm text-gray-500">
+                <p>
                   Status:
                   {" "}
                   {banner.status
@@ -109,12 +113,12 @@ export default function BannersPage() {
                     : "Inactive"}
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3 mt-4">
 
                   <Link
                     href={`/banners/edit/${banner._id}`}
                   >
-                    <button className="bg-blue-500 text-white px-3 py-2 rounded-lg">
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
                       Edit
                     </button>
                   </Link>
@@ -122,10 +126,10 @@ export default function BannersPage() {
                   <button
                     onClick={() =>
                       handleDelete(
-                        banner._id,
+                        banner._id
                       )
                     }
-                    className="bg-red-500 text-white px-3 py-2 rounded-lg"
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg"
                   >
                     Delete
                   </button>
@@ -135,7 +139,7 @@ export default function BannersPage() {
               </div>
 
             </div>
-          ),
+          )
         )}
 
       </div>
