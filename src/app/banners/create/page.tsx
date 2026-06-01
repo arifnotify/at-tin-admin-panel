@@ -1,181 +1,114 @@
 "use client";
 
-import {
-  useState,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
-import { uploadImage } from "@/src/services/upload.service";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createBanner } from "@/src/services/banner.service";
-
-
-
+import { uploadImage } from "@/src/services/upload.service";
 export default function CreateBannerPage() {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  const [loading, setLoading] =
-    useState(false);
+  const [title, setTitle] = useState("");
+  const [image, setImage] = useState("");
+  const [status, setStatus] = useState(true);
 
-  const [title, setTitle] =
-    useState("");
-
-  const [image, setImage] =
-    useState("");
-
-  const [status, setStatus] =
-    useState(true);
+  const [loading, setLoading] = useState(false);
 
   // IMAGE UPLOAD
-  const handleUpload =
-    async (
-      e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      try {
-        const file =
-          e.target.files?.[0];
+  const handleUpload = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-        if (!file) return;
+    try {
+      const res = await uploadImage(file);
 
-        const res =
-          await uploadImage(
-            file
-          );
+      console.log("UPLOAD RESPONSE:", res);
 
-        console.log(res);
+      // IMPORTANT FIX (backend key mismatch safe)
+      setImage(
+        res.url ||
+        res.image ||
+        res.imageUrl ||
+        res.secure_url
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-        setImage(
-          res.url
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  // CREATE BANNER
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-  // CREATE
-  const handleSubmit =
-    async (
-      e: React.FormEvent
-    ) => {
-      e.preventDefault();
+    try {
+      setLoading(true);
 
-      try {
-        setLoading(true);
+      const payload = {
+        title,
+        image,
+        status,
+      };
 
-        console.log({
-          title,
-          image,
-          status,
-        });
+      console.log("FINAL PAYLOAD:", payload);
 
-        await createBanner({
-          title,
-          image,
-          status,
-        });
+      const res = await createBanner(payload);
 
-        alert(
-          "Banner Created"
-        );
+      console.log("CREATE RESPONSE:", res);
 
-        router.push(
-          "/banners"
-        );
-      } catch (error: any) {
-        console.log(error);
+      alert("Banner Created Successfully");
 
-        console.log(
-          error?.response
-            ?.data
-        );
-
-        alert(
-          JSON.stringify(
-            error?.response
-              ?.data
-          )
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      router.push("/banners");
+    } catch (err: any) {
+      console.log("ERROR:", err?.response?.data || err);
+      alert("Create Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div>
+    <div className="p-6">
 
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-2xl font-bold mb-6">
         Create Banner
       </h1>
 
-      <form
-        onSubmit={
-          handleSubmit
-        }
-        className="bg-white p-6 rounded-xl shadow space-y-5"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
 
         <input
           type="text"
           placeholder="Banner Title"
-          className="w-full border p-3 rounded-xl"
+          className="border p-3 w-full"
           value={title}
-          onChange={(e) =>
-            setTitle(
-              e.target.value
-            )
-          }
+          onChange={(e) => setTitle(e.target.value)}
         />
 
         <input
           type="file"
-          onChange={
-            handleUpload
-          }
+          onChange={handleUpload}
         />
 
         {image && (
           <img
             src={image}
-            alt=""
-            className="w-full h-[200px] object-cover rounded-xl"
+            className="w-full h-[200px] object-cover"
           />
         )}
 
         <select
-          value={
-            String(
-              status
-            )
-          }
-          onChange={(e) =>
-            setStatus(
-              e.target.value ===
-                "true"
-            )
-          }
-          className="w-full border p-3 rounded-xl"
+          value={String(status)}
+          onChange={(e) => setStatus(e.target.value === "true")}
+          className="border p-3 w-full"
         >
-
-          <option value="true">
-            Active
-          </option>
-
-          <option value="false">
-            Inactive
-          </option>
-
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
         </select>
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded-xl"
+          className="bg-black text-white px-6 py-3"
         >
-          {loading
-            ? "Creating..."
-            : "Create Banner"}
+          {loading ? "Creating..." : "Create Banner"}
         </button>
 
       </form>
