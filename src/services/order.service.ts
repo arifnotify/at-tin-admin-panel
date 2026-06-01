@@ -46,8 +46,4 @@ export const updateOrderStatus = async (
   );
 
   return res.data;
-<<<<<<< HEAD
-};
-=======
-};
->>>>>>> a7315c2 (update 8)
+}
