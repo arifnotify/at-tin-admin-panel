@@ -7,7 +7,7 @@ export interface Banner {
 
   link?: string;
 
-  status: boolean;
+  isActive: boolean;
 
   createdAt: string;
 }

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBanner } from "@/src/services/banner.service";
 import { uploadImage } from "@/src/services/upload.service";
+import { createBanner } from "@/src/services/banner.service";
 
 
 export default function CreateBannerPage() {
@@ -11,7 +11,9 @@ export default function CreateBannerPage() {
 
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
-  const [status, setStatus] = useState(true);
+  const [link, setLink] = useState("/products");
+  const [isActive, setIsActive] = useState(true);
+
   const [loading, setLoading] = useState(false);
 
   // IMAGE UPLOAD
@@ -38,40 +40,44 @@ export default function CreateBannerPage() {
   };
 
   // CREATE BANNER
-const handleSubmit = async (e: any) => {
-  e.preventDefault();
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-  const payload = {
-    title,
-    image,
-    status,
+    if (!image) {
+      alert("Please upload image first");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const payload = {
+        title,
+        image,
+        link,
+        isActive,
+      };
+
+      console.log("FINAL PAYLOAD:", payload);
+
+      await createBanner(payload);
+
+      alert("Banner Created Successfully");
+
+      router.push("/banners");
+    } catch (err: any) {
+      console.log("ERROR:", err?.response?.data || err);
+      alert(
+        err?.response?.data?.message ||
+          "Create Failed"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  console.log("FINAL PAYLOAD:", payload);
-
-  if (!image) {
-    alert("Image missing");
-    return;
-  }
-
-  try {
-    const res = await createBanner(payload);
-
-    console.log("SUCCESS:", res);
-
-    alert("Banner Created");
-  } catch (err: any) {
-    console.log("ERROR RESPONSE:", err?.response?.data);
-    console.log("FULL ERROR:", err);
-    alert(
-      err?.response?.data?.message ||
-      "Create Failed"
-    );
-  }
-};
-
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-xl mx-auto">
 
       <h1 className="text-2xl font-bold mb-6">
         Create Banner
@@ -79,14 +85,25 @@ const handleSubmit = async (e: any) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
 
+        {/* TITLE */}
         <input
           type="text"
           placeholder="Banner Title"
-          className="border p-3 w-full"
+          className="border p-3 w-full rounded"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
+        {/* LINK */}
+        <input
+          type="text"
+          placeholder="Link (e.g /products)"
+          className="border p-3 w-full rounded"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+        />
+
+        {/* IMAGE */}
         <input
           type="file"
           onChange={handleUpload}
@@ -99,21 +116,23 @@ const handleSubmit = async (e: any) => {
           />
         )}
 
+        {/* ACTIVE STATUS */}
         <select
-          value={String(status)}
+          value={String(isActive)}
           onChange={(e) =>
-            setStatus(e.target.value === "true")
+            setIsActive(e.target.value === "true")
           }
-          className="border p-3 w-full"
+          className="border p-3 w-full rounded"
         >
           <option value="true">Active</option>
           <option value="false">Inactive</option>
         </select>
 
+        {/* SUBMIT */}
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white px-6 py-3"
+          className="bg-black text-white px-6 py-3 rounded w-full"
         >
           {loading ? "Creating..." : "Create Banner"}
         </button>
