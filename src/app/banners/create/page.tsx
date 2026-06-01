@@ -38,37 +38,37 @@ export default function CreateBannerPage() {
   };
 
   // CREATE BANNER
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+const handleSubmit = async (e: any) => {
+  e.preventDefault();
 
-    if (!image) {
-      alert("Please upload image first");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const payload = {
-        title,
-        image,
-        status,
-      };
-
-      console.log("PAYLOAD:", payload);
-
-      await createBanner(payload);
-
-      alert("Banner Created Successfully");
-
-      router.push("/banners");
-    } catch (err: any) {
-      console.log(err?.response?.data || err);
-      alert("Create Failed");
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    title,
+    image,
+    status,
   };
+
+  console.log("FINAL PAYLOAD:", payload);
+
+  if (!image) {
+    alert("Image missing");
+    return;
+  }
+
+  try {
+    const res = await createBanner(payload);
+
+    console.log("SUCCESS:", res);
+
+    alert("Banner Created");
+  } catch (err: any) {
+    console.log("ERROR RESPONSE:", err?.response?.data);
+    console.log("FULL ERROR:", err);
+    alert(
+      err?.response?.data?.message ||
+      "Create Failed"
+    );
+  }
+};
 
   return (
     <div className="p-6">
