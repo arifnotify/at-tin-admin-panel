@@ -1,15 +1,22 @@
 import api from "./api";
 
-// GET USERS
-export const getUsers =
-  async () => {
+export const getUsers = async () => {
+  const response =
+    await api.get("/users");
+
+  return response.data;
+};
+
+export const getUserById =
+  async (id: string) => {
     const response =
-      await api.get("/users");
+      await api.get(
+        `/users/${id}`,
+      );
 
     return response.data;
   };
 
-// BLOCK USER
 export const blockUser =
   async (
     phone: string,
@@ -27,11 +34,8 @@ export const blockUser =
     return response.data;
   };
 
-// UNBLOCK USER
 export const unblockUser =
-  async (
-    phone: string,
-  ) => {
+  async (phone: string) => {
     const response =
       await api.patch(
         "/users/unblock",
