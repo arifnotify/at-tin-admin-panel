@@ -44,3 +44,14 @@ export const expireFlashSales =
 
     return res.data;
   };
+
+  // SINGLE FLASH SALE
+export const getFlashSaleById =
+  async (id: string) => {
+    const res =
+      await api.get(
+        `/flash-sale/${id}`,
+      );
+
+    return res.data;
+  };
