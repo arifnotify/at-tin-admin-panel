@@ -55,3 +55,19 @@ export const getFlashSaleById =
 
     return res.data;
   };
+
+
+// UPDATE
+export const updateFlashSale =
+  async (
+    id: string,
+    data: any,
+  ) => {
+    const res =
+      await api.patch(
+        `/flash-sale/${id}`,
+        data,
+      );
+
+    return res.data;
+  };
