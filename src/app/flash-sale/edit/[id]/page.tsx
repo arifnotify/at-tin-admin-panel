@@ -1,18 +1,9 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
-import {
-  useParams,
-  useRouter,
-} from "next/navigation";
-
-import {
-  getProducts,
-} from "@/src/services/product.service";
+import { getProducts } from "@/src/services/product.service";
 
 import {
   getFlashSaleById,
@@ -20,175 +11,152 @@ import {
 } from "@/src/services/flash-sale.service";
 
 export default function EditFlashSalePage() {
-  const params =
-    useParams();
+  const params = useParams();
+  const router = useRouter();
 
-  const router =
-    useRouter();
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
 
-  const [allProducts,
-    setAllProducts] =
+  const [selectedProducts, setSelectedProducts] =
     useState<any[]>([]);
 
-  const [title,
-    setTitle] =
+  const [search, setSearch] =
     useState("");
 
-  const [startTime,
-    setStartTime] =
+  const [title, setTitle] =
     useState("");
 
-  const [endTime,
-    setEndTime] =
+  const [startTime, setStartTime] =
     useState("");
 
-  const [isActive,
-    setIsActive] =
+  const [endTime, setEndTime] =
+    useState("");
+
+  const [isActive, setIsActive] =
     useState(true);
-
-  const [
-    selectedProducts,
-    setSelectedProducts,
-  ] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData =
-    async () => {
-      try {
-
-        const [
-          sale,
-          products,
-        ] = await Promise.all([
+  const fetchData = async () => {
+    try {
+      const [sale, products] =
+        await Promise.all([
           getFlashSaleById(
             params.id as string,
           ),
           getProducts(),
         ]);
 
-        setAllProducts(
-          products,
-        );
+      setAllProducts(products);
 
-        setTitle(
-          sale.title,
-        );
+      setTitle(sale.title);
 
-        setStartTime(
-          new Date(
-            sale.startTime,
-          )
-            .toISOString()
-            .slice(0, 16),
-        );
-
-        setEndTime(
-          new Date(
-            sale.endTime,
-          )
-            .toISOString()
-            .slice(0, 16),
-        );
-
-        setIsActive(
-          sale.isActive,
-        );
-
-        setSelectedProducts(
-          sale.products.map(
-            (item: any) => ({
-              product:
-                item.product._id ||
-                item.product,
-              productData:
-                item.product,
-              salePrice:
-                item.salePrice,
-              oldPrice:
-                item.oldPrice,
-            }),
-          ),
-        );
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const removeProduct =
-    (
-      productId: string,
-    ) => {
-      setSelectedProducts(
-        selectedProducts.filter(
-          (item) =>
-            item.product !==
-            productId,
-        ),
+      setStartTime(
+        new Date(sale.startTime)
+          .toISOString()
+          .slice(0, 16),
       );
-    };
 
-  const addProduct =
-    (
-      product: any,
-    ) => {
+      setEndTime(
+        new Date(sale.endTime)
+          .toISOString()
+          .slice(0, 16),
+      );
 
-      const exists =
-        selectedProducts.find(
-          (item) =>
-            item.product ===
-            product._id,
-        );
-
-      if (exists) {
-        alert(
-          "Already Added",
-        );
-        return;
-      }
-
-      setSelectedProducts([
-        ...selectedProducts,
-        {
-          product:
-            product._id,
-          productData:
-            product,
-          salePrice:
-            product.price,
-          oldPrice:
-            product.price,
-        },
-      ]);
-    };
-
-  const updateSalePrice =
-    (
-      productId: string,
-      value: number,
-    ) => {
+      setIsActive(sale.isActive);
 
       setSelectedProducts(
-        selectedProducts.map(
-          (item) =>
-            item.product ===
-            productId
-              ? {
-                  ...item,
-                  salePrice:
-                    value,
-                }
-              : item,
+        sale.products.map(
+          (item: any) => ({
+            product:
+              item.product._id ||
+              item.product,
+
+            productData:
+              item.product,
+
+            salePrice:
+              item.salePrice,
+
+            oldPrice:
+              item.oldPrice,
+          }),
         ),
       );
-    };
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeProduct = (
+    productId: string,
+  ) => {
+    setSelectedProducts(
+      selectedProducts.filter(
+        (item) =>
+          item.product !==
+          productId,
+      ),
+    );
+  };
+
+  const addProduct = (
+    product: any,
+  ) => {
+    const exists =
+      selectedProducts.find(
+        (item) =>
+          item.product ===
+          product._id,
+      );
+
+    if (exists) {
+      alert(
+        "Product already added",
+      );
+      return;
+    }
+
+    setSelectedProducts([
+      ...selectedProducts,
+      {
+        product:
+          product._id,
+
+        productData:
+          product,
+
+        salePrice:
+          product.price,
+
+        oldPrice:
+          product.price,
+      },
+    ]);
+  };
+
+  const updateSalePrice = (
+    productId: string,
+    value: number,
+  ) => {
+    setSelectedProducts(
+      selectedProducts.map(
+        (item) =>
+          item.product ===
+          productId
+            ? {
+                ...item,
+                salePrice: value,
+              }
+            : item,
+      ),
+    );
+  };
 
   const handleSubmit =
     async (
@@ -197,23 +165,18 @@ export default function EditFlashSalePage() {
       e.preventDefault();
 
       try {
-
         const payload = {
           title,
-
           startTime,
-
           endTime,
-
           isActive,
 
           products:
             selectedProducts.map(
-              (
-                item,
-              ) => ({
+              (item) => ({
                 product:
                   item.product,
+
                 salePrice:
                   Number(
                     item.salePrice,
@@ -221,10 +184,6 @@ export default function EditFlashSalePage() {
               }),
             ),
         };
-
-        console.log(
-          payload,
-        );
 
         await updateFlashSale(
           params.id as string,
@@ -271,6 +230,8 @@ export default function EditFlashSalePage() {
         }
       >
 
+        {/* Flash Sale Info */}
+
         <div className="bg-white rounded-xl shadow p-6">
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -284,14 +245,13 @@ export default function EditFlashSalePage() {
                 )
               }
               className="border p-3 rounded-xl"
+              placeholder="Title"
             />
 
             <select
-              value={
-                String(
-                  isActive,
-                )
-              }
+              value={String(
+                isActive,
+              )}
               onChange={(e) =>
                 setIsActive(
                   e.target.value ===
@@ -342,15 +302,23 @@ export default function EditFlashSalePage() {
         <div className="bg-white rounded-xl shadow p-6 mt-6">
 
           <h2 className="text-2xl font-bold mb-5">
+
             Selected Products
+
+            <span className="ml-2 text-blue-600">
+              (
+              {
+                selectedProducts.length
+              }
+              )
+            </span>
+
           </h2>
 
           <div className="grid md:grid-cols-2 gap-5">
 
             {selectedProducts.map(
-              (
-                item,
-              ) => (
+              (item) => (
                 <div
                   key={
                     item.product
@@ -358,21 +326,39 @@ export default function EditFlashSalePage() {
                   className="border rounded-xl p-4"
                 >
 
-                  <h3 className="font-bold">
-                    {
-                      item
-                        .productData
-                        ?.name
-                    }
-                  </h3>
+                  <div className="flex items-center gap-3">
 
-                  <p>
-                    Old Price:
-                    ৳
-                    {
-                      item.oldPrice
-                    }
-                  </p>
+                    <img
+                      src={
+                        item
+                          .productData
+                          ?.images?.[0]
+                      }
+                      alt=""
+                      className="w-16 h-16 rounded-lg object-cover border"
+                    />
+
+                    <div>
+
+                      <h3 className="font-bold">
+                        {
+                          item
+                            .productData
+                            ?.name
+                        }
+                      </h3>
+
+                      <p className="text-sm text-gray-500">
+                        Old Price:
+                        ৳
+                        {
+                          item.oldPrice
+                        }
+                      </p>
+
+                    </div>
+
+                  </div>
 
                   <input
                     type="number"
@@ -391,7 +377,7 @@ export default function EditFlashSalePage() {
                         ),
                       )
                     }
-                    className="border p-2 rounded mt-3 w-full"
+                    className="border p-2 rounded mt-4 w-full"
                   />
 
                   <button
@@ -414,81 +400,115 @@ export default function EditFlashSalePage() {
 
         </div>
 
-        {/* Available Products */}
+        {/* Add Products */}
 
         <div className="bg-white rounded-xl shadow p-6 mt-6">
 
-          <h2 className="text-2xl font-bold mb-5">
-            Add Products
-          </h2>
+          <div className="flex justify-between items-center mb-5">
+
+            <h2 className="text-2xl font-bold">
+
+              Add Products
+
+              <span className="ml-2 text-green-600">
+                (
+                {
+                  allProducts.length -
+                  selectedProducts.length
+                }
+                )
+              </span>
+
+            </h2>
+
+          </div>
+
+          <input
+            type="text"
+            placeholder="Search Product..."
+            value={search}
+            onChange={(e) =>
+              setSearch(
+                e.target.value,
+              )
+            }
+            className="w-full border p-3 rounded-xl mb-5"
+          />
 
           <div className="grid md:grid-cols-3 gap-5">
 
-            {allProducts.map(
-              (
-                product,
-              ) => {
+            {allProducts
+              .filter(
+                (product) =>
+                  product.name
+                    ?.toLowerCase()
+                    .includes(
+                      search.toLowerCase(),
+                    ),
+              )
+              .map(
+                (product) => {
 
-                const exists =
-                  selectedProducts.find(
-                    (
-                      item,
-                    ) =>
-                      item.product ===
-                      product._id,
-                  );
+                  const exists =
+                    selectedProducts.find(
+                      (
+                        item,
+                      ) =>
+                        item.product ===
+                        product._id,
+                    );
 
-                if (
-                  exists
-                )
-                  return null;
+                  if (
+                    exists
+                  )
+                    return null;
 
-                return (
-                  <div
-                    key={
-                      product._id
-                    }
-                    className="border rounded-xl p-4"
-                  >
-
-                    <img
-                      src={
-                        product
-                          ?.images?.[0]
+                  return (
+                    <div
+                      key={
+                        product._id
                       }
-                      alt=""
-                      className="h-40 w-full object-cover rounded-lg"
-                    />
-
-                    <h3 className="font-semibold mt-3">
-                      {
-                        product.name
-                      }
-                    </h3>
-
-                    <p>
-                      ৳
-                      {
-                        product.price
-                      }
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        addProduct(
-                          product,
-                        )
-                      }
-                      className="bg-green-600 text-white px-4 py-2 rounded mt-3"
+                      className="border rounded-xl p-4"
                     >
-                      Add
-                    </button>
 
-                  </div>
-                );
-              },
-            )}
+                      <img
+                        src={
+                          product
+                            ?.images?.[0]
+                        }
+                        alt=""
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+
+                      <h3 className="font-semibold mt-3">
+                        {
+                          product.name
+                        }
+                      </h3>
+
+                      <p>
+                        ৳
+                        {
+                          product.price
+                        }
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addProduct(
+                            product,
+                          )
+                        }
+                        className="bg-green-600 text-white px-4 py-2 rounded mt-3"
+                      >
+                        Add Product
+                      </button>
+
+                    </div>
+                  );
+                },
+              )}
 
           </div>
 
