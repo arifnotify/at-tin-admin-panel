@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import { getProducts } from "@/src/services/product.service";
-
 import {
   getFlashSaleById,
   updateFlashSale,
 } from "@/src/services/flash-sale.service";
+
+import { getProducts } from "@/src/services/product.service";
 
 export default function EditFlashSalePage() {
   const params = useParams();
@@ -16,25 +16,14 @@ export default function EditFlashSalePage() {
 
   const [loading, setLoading] = useState(true);
 
+  const [title, setTitle] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [isActive, setIsActive] = useState(true);
+
   const [allProducts, setAllProducts] = useState<any[]>([]);
-
-  const [selectedProducts, setSelectedProducts] =
-    useState<any[]>([]);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [title, setTitle] =
-    useState("");
-
-  const [startTime, setStartTime] =
-    useState("");
-
-  const [endTime, setEndTime] =
-    useState("");
-
-  const [isActive, setIsActive] =
-    useState(true);
+  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -42,49 +31,25 @@ export default function EditFlashSalePage() {
 
   const fetchData = async () => {
     try {
-      const [sale, products] =
-        await Promise.all([
-          getFlashSaleById(
-            params.id as string,
-          ),
-          getProducts(),
-        ]);
+      const [sale, products] = await Promise.all([
+        getFlashSaleById(params.id as string),
+        getProducts(),
+      ]);
 
       setAllProducts(products);
 
       setTitle(sale.title);
-
-      setStartTime(
-        new Date(sale.startTime)
-          .toISOString()
-          .slice(0, 16),
-      );
-
-      setEndTime(
-        new Date(sale.endTime)
-          .toISOString()
-          .slice(0, 16),
-      );
-
+      setStartTime(new Date(sale.startTime).toISOString().slice(0, 16));
+      setEndTime(new Date(sale.endTime).toISOString().slice(0, 16));
       setIsActive(sale.isActive);
 
       setSelectedProducts(
-        sale.products.map(
-          (item: any) => ({
-            product:
-              item.product._id ||
-              item.product,
-
-            productData:
-              item.product,
-
-            salePrice:
-              item.salePrice,
-
-            oldPrice:
-              item.oldPrice,
-          }),
-        ),
+        sale.products.map((item: any) => ({
+          product: item.product._id || item.product,
+          productData: item.product,
+          salePrice: item.salePrice,
+          oldPrice: item.oldPrice,
+        })),
       );
     } catch (error) {
       console.log(error);
@@ -93,430 +58,283 @@ export default function EditFlashSalePage() {
     }
   };
 
-  const removeProduct = (
-    productId: string,
-  ) => {
-    setSelectedProducts(
-      selectedProducts.filter(
-        (item) =>
-          item.product !==
-          productId,
-      ),
+  // -----------------------
+  // PRODUCT FUNCTIONS
+  // -----------------------
+
+  const addProduct = (product: any) => {
+    const exists = selectedProducts.find(
+      (item) => item.product === product._id,
     );
-  };
 
-  const addProduct = (
-    product: any,
-  ) => {
-    const exists =
-      selectedProducts.find(
-        (item) =>
-          item.product ===
-          product._id,
-      );
-
-    if (exists) {
-      alert(
-        "Product already added",
-      );
-      return;
-    }
+    if (exists) return;
 
     setSelectedProducts([
       ...selectedProducts,
       {
-        product:
-          product._id,
-
-        productData:
-          product,
-
-        salePrice:
-          product.price,
-
-        oldPrice:
-          product.price,
+        product: product._id,
+        productData: product,
+        salePrice: product.price,
+        oldPrice: product.price,
       },
     ]);
   };
 
-  const updateSalePrice = (
-    productId: string,
-    value: number,
-  ) => {
+  const removeProduct = (id: string) => {
     setSelectedProducts(
-      selectedProducts.map(
-        (item) =>
-          item.product ===
-          productId
-            ? {
-                ...item,
-                salePrice: value,
-              }
-            : item,
+      selectedProducts.filter((p) => p.product !== id),
+    );
+  };
+
+  const updateSalePrice = (id: string, value: number) => {
+    setSelectedProducts(
+      selectedProducts.map((p) =>
+        p.product === id
+          ? { ...p, salePrice: value }
+          : p,
       ),
     );
   };
 
-  const handleSubmit =
-    async (
-      e: React.FormEvent,
-    ) => {
-      e.preventDefault();
+  // -----------------------
+  // FILTER PRODUCTS
+  // -----------------------
 
-      try {
-        const payload = {
-          title,
-          startTime,
-          endTime,
-          isActive,
+  const filteredProducts = allProducts
+    .filter((p) => {
+      if (!search) return true;
+      return p.title.toLowerCase().includes(search.toLowerCase());
+    })
+    .sort((a, b) => {
+      const aMatch = a.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const bMatch = b.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
 
-          products:
-            selectedProducts.map(
-              (item) => ({
-                product:
-                  item.product,
+      return aMatch === bMatch ? 0 : aMatch ? -1 : 1;
+    });
 
-                salePrice:
-                  Number(
-                    item.salePrice,
-                  ),
-              }),
-            ),
-        };
+  // -----------------------
+  // UPDATE FLASH SALE
+  // -----------------------
 
-        await updateFlashSale(
-          params.id as string,
-          payload,
-        );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        alert(
-          "Flash Sale Updated",
-        );
+    try {
+      const payload = {
+        title,
+        startTime,
+        endTime,
+        isActive,
+        products: selectedProducts.map((p) => ({
+          product: p.product,
+          salePrice: Number(p.salePrice),
+        })),
+      };
 
-        router.push(
-          "/flash-sale",
-        );
-      } catch (error: any) {
-        console.log(error);
+      await updateFlashSale(params.id as string, payload);
 
-        alert(
-          error?.response
-            ?.data
-            ?.message ||
-            "Update Failed",
-        );
-      }
-    };
+      alert("Flash Sale Updated Successfully");
 
-  if (loading) {
-    return (
-      <div className="p-10">
-        Loading...
-      </div>
-    );
-  }
+      router.push("/flash-sale");
+    } catch (error: any) {
+      console.log(error);
+      alert(error?.response?.data?.message || "Update Failed");
+    }
+  };
+
+  if (loading) return <div className="p-10">Loading...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-4">
 
+      {/* HEADER */}
       <h1 className="text-3xl font-bold mb-6">
         Edit Flash Sale
       </h1>
 
-      <form
-        onSubmit={
-          handleSubmit
-        }
-      >
+      {/* BASIC INFO */}
+      <form onSubmit={handleSubmit}>
 
-        {/* Flash Sale Info */}
+        <div className="bg-white p-6 rounded-xl shadow space-y-4">
 
-        <div className="bg-white rounded-xl shadow p-6">
+          <input
+            className="w-full border p-3 rounded-xl"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Flash Sale Title"
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+
+            <input
+              type="datetime-local"
+              className="border p-3 rounded-xl"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+            />
+
+            <input
+              type="datetime-local"
+              className="border p-3 rounded-xl"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+            />
+
+          </div>
+
+          <select
+            className="w-full border p-3 rounded-xl"
+            value={String(isActive)}
+            onChange={(e) =>
+              setIsActive(e.target.value === "true")
+            }
+          >
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+
+        </div>
+
+        {/* SELECTED PRODUCTS */}
+        <div className="bg-white p-6 mt-6 rounded-xl shadow">
+
+          <h2 className="text-xl font-bold mb-4">
+            Selected Products ({selectedProducts.length})
+          </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
 
-            <input
-              type="text"
-              value={title}
-              onChange={(e) =>
-                setTitle(
-                  e.target.value,
-                )
-              }
-              className="border p-3 rounded-xl"
-              placeholder="Title"
-            />
+            {selectedProducts.map((item) => (
+              <div key={item.product} className="border p-4 rounded-xl">
 
-            <select
-              value={String(
-                isActive,
-              )}
-              onChange={(e) =>
-                setIsActive(
-                  e.target.value ===
-                    "true",
-                )
-              }
-              className="border p-3 rounded-xl"
-            >
-              <option value="true">
-                Active
-              </option>
+                <div className="flex gap-3 items-center">
 
-              <option value="false">
-                Inactive
-              </option>
-            </select>
-
-            <input
-              type="datetime-local"
-              value={
-                startTime
-              }
-              onChange={(e) =>
-                setStartTime(
-                  e.target.value,
-                )
-              }
-              className="border p-3 rounded-xl"
-            />
-
-            <input
-              type="datetime-local"
-              value={endTime}
-              onChange={(e) =>
-                setEndTime(
-                  e.target.value,
-                )
-              }
-              className="border p-3 rounded-xl"
-            />
-
-          </div>
-
-        </div>
-
-        {/* Selected Products */}
-
-        <div className="bg-white rounded-xl shadow p-6 mt-6">
-
-          <h2 className="text-2xl font-bold mb-5">
-
-            Selected Products
-
-            <span className="ml-2 text-blue-600">
-              (
-              {
-                selectedProducts.length
-              }
-              )
-            </span>
-
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-5">
-
-            {selectedProducts.map(
-              (item) => (
-                <div
-                  key={
-                    item.product
-                  }
-                  className="border rounded-xl p-4"
-                >
-
-                  <div className="flex items-center gap-3">
-
-                    <img
-                      src={
-                        item
-                          .productData
-                          ?.images?.[0]
-                      }
-                      alt=""
-                      className="w-16 h-16 rounded-lg object-cover border"
-                    />
-
-                    <div>
-
-                      <h3 className="font-bold">
-                        {
-                          item
-                            .productData
-                            ?.name
-                        }
-                      </h3>
-
-                      <p className="text-sm text-gray-500">
-                        Old Price:
-                        ৳
-                        {
-                          item.oldPrice
-                        }
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <input
-                    type="number"
-                    value={
-                      item.salePrice
-                    }
-                    onChange={(
-                      e,
-                    ) =>
-                      updateSalePrice(
-                        item.product,
-                        Number(
-                          e
-                            .target
-                            .value,
-                        ),
-                      )
-                    }
-                    className="border p-2 rounded mt-4 w-full"
+                  <img
+                    src={item.productData?.images?.[0]}
+                    className="w-14 h-14 rounded-lg object-cover"
                   />
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      removeProduct(
-                        item.product,
-                      )
-                    }
-                    className="bg-red-500 text-white px-4 py-2 rounded mt-3"
-                  >
-                    Remove
-                  </button>
+                  <div>
+                    <p className="font-semibold">
+                      {item.productData?.title}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      Old: ৳{item.oldPrice}
+                    </p>
+                  </div>
 
                 </div>
-              ),
-            )}
+
+                <input
+                  type="number"
+                  className="w-full border p-2 mt-3 rounded"
+                  value={item.salePrice}
+                  onChange={(e) =>
+                    updateSalePrice(
+                      item.product,
+                      Number(e.target.value),
+                    )
+                  }
+                />
+
+                <button
+                  type="button"
+                  onClick={() => removeProduct(item.product)}
+                  className="mt-3 bg-red-500 text-white px-4 py-2 rounded"
+                >
+                  Remove
+                </button>
+
+              </div>
+            ))}
 
           </div>
 
         </div>
 
-        {/* Add Products */}
+        {/* ADD PRODUCTS */}
+        <div className="bg-white p-6 mt-6 rounded-xl shadow">
 
-        <div className="bg-white rounded-xl shadow p-6 mt-6">
+          <h2 className="text-xl font-bold mb-3">
+            Add Products
+          </h2>
 
-          <div className="flex justify-between items-center mb-5">
-
-            <h2 className="text-2xl font-bold">
-
-              Add Products
-
-              <span className="ml-2 text-green-600">
-                (
-                {
-                  allProducts.length -
-                  selectedProducts.length
-                }
-                )
-              </span>
-
-            </h2>
-
-          </div>
-
+          {/* SEARCH */}
           <input
-            type="text"
-            placeholder="Search Product..."
+            className="w-full border p-3 rounded-xl mb-4"
+            placeholder="Search product..."
             value={search}
-            onChange={(e) =>
-              setSearch(
-                e.target.value,
-              )
-            }
-            className="w-full border p-3 rounded-xl mb-5"
+            onChange={(e) => setSearch(e.target.value)}
           />
 
-          <div className="grid md:grid-cols-3 gap-5">
+          {/* TABLE */}
+          <div className="overflow-x-auto">
 
-            {allProducts
-              .filter(
-                (product) =>
-                  product.name
-                    ?.toLowerCase()
-                    .includes(
-                      search.toLowerCase(),
-                    ),
-              )
-              .map(
-                (product) => {
+            <table className="w-full text-left">
 
-                  const exists =
-                    selectedProducts.find(
-                      (
-                        item,
-                      ) =>
-                        item.product ===
-                        product._id,
-                    );
+              <thead>
+                <tr className="border-b">
+                  <th className="p-3">Image</th>
+                  <th>Title</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-                  if (
-                    exists
-                  )
-                    return null;
+              <tbody>
+
+                {filteredProducts.map((product) => {
+                  const exists = selectedProducts.find(
+                    (p) => p.product === product._id,
+                  );
+
+                  if (exists) return null;
 
                   return (
-                    <div
-                      key={
-                        product._id
-                      }
-                      className="border rounded-xl p-4"
-                    >
+                    <tr key={product._id} className="border-b">
 
-                      <img
-                        src={
-                          product
-                            ?.images?.[0]
-                        }
-                        alt=""
-                        className="w-full h-40 object-cover rounded-lg"
-                      />
+                      <td className="p-3">
+                        <img
+                          src={product.images?.[0]}
+                          className="w-12 h-12 rounded object-cover"
+                        />
+                      </td>
 
-                      <h3 className="font-semibold mt-3">
-                        {
-                          product.name
-                        }
-                      </h3>
+                      <td>{product.title}</td>
 
-                      <p>
-                        ৳
-                        {
-                          product.price
-                        }
-                      </p>
+                      <td>৳{product.price}</td>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          addProduct(
-                            product,
-                          )
-                        }
-                        className="bg-green-600 text-white px-4 py-2 rounded mt-3"
-                      >
-                        Add Product
-                      </button>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => addProduct(product)}
+                          className="bg-green-600 text-white px-3 py-1 rounded"
+                        >
+                          Add
+                        </button>
+                      </td>
 
-                    </div>
+                    </tr>
                   );
-                },
-              )}
+                })}
+
+              </tbody>
+
+            </table>
 
           </div>
 
         </div>
 
+        {/* SUBMIT */}
         <button
           type="submit"
-          className="bg-blue-600 text-white px-8 py-3 rounded-xl mt-6"
+          className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-xl"
         >
           Update Flash Sale
         </button>
