@@ -28,6 +28,9 @@ export default function EditProductPage() {
   const [stock, setStock] = useState("");
   const [brand, setBrand] = useState("");
   const [unit, setUnit] = useState("");
+  const [productType, setProductType] = useState("regular");
+
+  const [expiryDate, setExpiryDate] =useState("");
   const [location, setLocation] = useState("");
 
   const [mainCategory, setMainCategory] = useState("");
@@ -62,6 +65,9 @@ export default function EditProductPage() {
       setStock(product.stock);
       setBrand(product.brand);
       setUnit(product.unit || "pcs");
+      setProductType(product.productType || "regular");
+      setExpiryDate( product.expiryDate || "");
+      setExpiryDate(product.expiryDate? product.expiryDate.split("T")[0] : "",);
       setLocation(product.location);
       setImages(product.images || []);
 
@@ -141,6 +147,11 @@ export default function EditProductPage() {
         stock: Number(stock),
         brand,
         unit,
+        productType,
+
+        expiryDate:  productType === "regular"
+              ? expiryDate
+              : undefined,
         location,
         category,
         images,
@@ -269,6 +280,48 @@ export default function EditProductPage() {
               className="w-full border rounded-2xl px-5 py-3.5"
             />
 
+            {/* product type */}
+                    <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Product Type
+                    </label>
+
+                    <select
+                      value={productType}
+                    onChange={(e) => {
+                    setProductType(e.target.value);
+
+                    if (e.target.value === "fresh") {
+                      setExpiryDate("");
+                    }
+                  }}
+                      className="w-full border rounded-2xl px-5 py-3.5"
+                    >
+                      <option value="regular">
+                        Regular Product
+                      </option>
+
+                      <option value="fresh">
+                        Fresh Product
+                      </option>
+                    </select>
+                  </div>
+                  {productType === "regular" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Expiry Date
+                      </label>
+
+                      <input
+                        type="date"
+                        value={expiryDate}
+                        onChange={(e) =>
+                          setExpiryDate(e.target.value)
+                        }
+                        className="w-full border rounded-2xl px-5 py-3.5"
+                      />
+                    </div>
+                  )}
           {/* LOCATION */}
           <input
             type="text"
