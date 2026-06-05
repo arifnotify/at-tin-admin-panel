@@ -17,6 +17,8 @@ export interface Product {
 
   category: string;
 
+  unit: string;
+
   brand: string;
 
   location: string;

@@ -16,6 +16,7 @@ export default function CreateProductPage() {
   const [discountPrice, setDiscountPrice] = useState("");
   const [stock, setStock] = useState("");
   const [brand, setBrand] = useState("");
+  const [unit, setUnit] = useState("pcs");
   const [location, setLocation] = useState("");
 
   const [mainCategory, setMainCategory] = useState("");
@@ -82,6 +83,7 @@ export default function CreateProductPage() {
         discountPrice: Number(discountPrice) || undefined,
         stock: Number(stock),
         brand,
+        unit,
         location,
         category,
         images,
@@ -276,6 +278,31 @@ export default function CreateProductPage() {
               </div>
             </div>
           </div>
+
+          {/* Unit */}
+              <div className="flex gap-6 items-start">
+                <div className="w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
+                  ⚖️
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-2">
+                    Unit <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="kg / gm / pcs / each / liter"
+                    className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:border-blue-500 outline-none"
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                  />
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    Example: kg, gm, pcs, each, liter, ml
+                  </p>
+                </div>
+              </div>
 
           {/* Location */}
           <div className="flex gap-6 items-start">
