@@ -78,24 +78,22 @@ export default function CreateProductPage() {
   const handleCreate = async () => {
     try {
       setLoading(true);
-              await createProduct({
-                title,
-                description,
-                price: Number(price),
-                stock: Number(stock),
-
-                unit,
-
-                productType,
-
-                expiryDate:
-                  productType === "regular"
-                    ? expiryDate
-                    : undefined,
-
-                category,
-                images,
-              });
+      await createProduct({
+        title,
+        description,
+        price: Number(price),
+        discountPrice: Number(discountPrice) || undefined,
+        stock: Number(stock),
+        brand,
+        unit,
+        productType,
+        expiryDate:  productType === "regular"
+            ? expiryDate
+            : undefined,
+        location,
+        category,
+        images,
+      });
       alert("Product Created Successfully");
       window.location.href = "/products";
     } catch (err) {
