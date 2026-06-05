@@ -17,6 +17,8 @@ export default function CreateProductPage() {
   const [stock, setStock] = useState("");
   const [brand, setBrand] = useState("");
   const [unit, setUnit] = useState("pcs");
+  const [productType, setProductType] = useState("regular");
+  const [expiryDate, setExpiryDate] = useState("");
   const [location, setLocation] = useState("");
 
   const [mainCategory, setMainCategory] = useState("");
@@ -76,18 +78,24 @@ export default function CreateProductPage() {
   const handleCreate = async () => {
     try {
       setLoading(true);
-      await createProduct({
-        title,
-        description,
-        price: Number(price),
-        discountPrice: Number(discountPrice) || undefined,
-        stock: Number(stock),
-        brand,
-        unit,
-        location,
-        category,
-        images,
-      });
+              await createProduct({
+                title,
+                description,
+                price: Number(price),
+                stock: Number(stock),
+
+                unit,
+
+                productType,
+
+                expiryDate:
+                  productType === "regular"
+                    ? expiryDate
+                    : undefined,
+
+                category,
+                images,
+              });
       alert("Product Created Successfully");
       window.location.href = "/products";
     } catch (err) {
@@ -303,6 +311,47 @@ export default function CreateProductPage() {
                   </p>
                 </div>
               </div>
+
+                    {/* Product Type */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Product Type
+                      </label>
+
+                      <select
+                        value={productType}
+                        onChange={(e) =>
+                          setProductType(e.target.value)
+                        }
+                        className="w-full border rounded-2xl px-5 py-3.5"
+                      >
+                        <option value="regular">
+                          Regular Product
+                        </option>
+
+                        <option value="fresh">
+                          Fresh Product
+                        </option>
+                      </select>
+                    </div>
+
+                    {/* Expiry Date */}
+                    {productType === "regular" && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Expiry Date
+                        </label>
+
+                        <input
+                          type="date"
+                          value={expiryDate}
+                          onChange={(e) =>
+                            setExpiryDate(e.target.value)
+                          }
+                          className="w-full border rounded-2xl px-5 py-3.5"
+                        />
+                      </div>
+                    )}
 
           {/* Location */}
           <div className="flex gap-6 items-start">
