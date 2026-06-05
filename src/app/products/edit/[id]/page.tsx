@@ -27,6 +27,7 @@ export default function EditProductPage() {
   const [discountPrice, setDiscountPrice] = useState("");
   const [stock, setStock] = useState("");
   const [brand, setBrand] = useState("");
+  const [unit, setUnit] = useState("");
   const [location, setLocation] = useState("");
 
   const [mainCategory, setMainCategory] = useState("");
@@ -60,6 +61,7 @@ export default function EditProductPage() {
       setDiscountPrice(product.discountPrice || "");
       setStock(product.stock);
       setBrand(product.brand);
+      setUnit(product.unit || "pcs");
       setLocation(product.location);
       setImages(product.images || []);
 
@@ -138,6 +140,7 @@ export default function EditProductPage() {
         discountPrice: Number(discountPrice) || undefined,
         stock: Number(stock),
         brand,
+        unit,
         location,
         category,
         images,
@@ -257,6 +260,14 @@ export default function EditProductPage() {
             onChange={(e) => setBrand(e.target.value)}
             className="w-full border rounded-2xl px-5 py-3.5"
           />
+          {/* unit */}
+                      <input
+              type="text"
+              placeholder="kg / gm / pcs / each"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              className="w-full border rounded-2xl px-5 py-3.5"
+            />
 
           {/* LOCATION */}
           <input
