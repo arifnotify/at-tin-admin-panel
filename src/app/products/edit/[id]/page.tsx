@@ -232,7 +232,7 @@ export default function EditProductPage() {
               <option value="">Sub Category</option>
 
               {subCategories.map((item) => (
-                <option key={item._id} value={item.name}>
+                <option key={item._id} value={item._id}>
                   {item.name}
                 </option>
               ))}

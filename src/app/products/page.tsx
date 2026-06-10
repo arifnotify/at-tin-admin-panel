@@ -193,7 +193,7 @@ export default function ProductsPage() {
                   <td className="p-4">
 
                     {
-                      product.category
+                      product.category?.name
                     }
 
                   </td>

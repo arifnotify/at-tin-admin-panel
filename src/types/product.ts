@@ -15,7 +15,10 @@ export interface Product {
 
   images: string[];
 
-  category: string;
+  category: {
+  _id: string;
+  name: string;
+      };
 
   unit: string;
 
