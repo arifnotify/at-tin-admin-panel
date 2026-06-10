@@ -21,8 +21,11 @@ export default function EditProductPage() {
   const { id } = useParams();
 
   // SAME AS CREATE PAGE STATES
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [titleBn, setTitleBn] = useState("");
+
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionBn, setDescriptionBn] = useState("");
   const [price, setPrice] = useState("");
   const [discountPrice, setDiscountPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -58,8 +61,12 @@ export default function EditProductPage() {
       setCategories(mains);
 
       // PREFILL DATA
-      setTitle(product.title);
-      setDescription(product.description);
+      setTitleEn(product.title?.en || "");
+      setTitleBn(product.title?.bn || "");
+
+      setDescriptionEn(product.description?.en || "");
+
+      setDescriptionBn(product.description?.bn || "");
       setPrice(product.price);
       setDiscountPrice(product.discountPrice || "");
       setStock(product.stock);
@@ -139,23 +146,45 @@ export default function EditProductPage() {
     try {
       setLoading(true);
 
-      await updateProduct(id as string, {
-        title,
-        description,
-        price: Number(price),
-        discountPrice: Number(discountPrice) || undefined,
-        stock: Number(stock),
-        brand,
-        unit,
-        productType,
+      await updateProduct(
+        id as string,
+        {
+          title: {
+            en: titleEn,
+            bn: titleBn,
+          },
 
-        expiryDate:  productType === "regular"
+          description: {
+            en: descriptionEn,
+            bn: descriptionBn,
+          },
+
+          price: Number(price),
+
+          discountPrice:
+            Number(discountPrice) ||
+            undefined,
+
+          stock: Number(stock),
+
+          brand,
+
+          unit,
+
+          productType,
+
+          expiryDate:
+            productType === "regular"
               ? expiryDate
               : undefined,
-        location,
-        category,
-        images,
-      });
+
+          location,
+
+          category,
+
+          images,
+        },
+      );
 
       alert("Product Updated Successfully");
       window.location.href = "/products";
@@ -191,19 +220,56 @@ export default function EditProductPage() {
         <div className="space-y-7">
 
           {/* TITLE */}
+        <div className="grid grid-cols-2 gap-4">
+
           <input
             type="text"
+            placeholder="Product Title (English)"
+            value={titleEn}
+            onChange={(e) =>
+              setTitleEn(e.target.value)
+            }
             className="w-full border border-gray-200 rounded-2xl px-5 py-3.5"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
           />
 
-          {/* DESCRIPTION */}
-          <textarea
-            className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+          <input
+            type="text"
+            placeholder="পণ্যের নাম (বাংলা)"
+            value={titleBn}
+            onChange={(e) =>
+              setTitleBn(e.target.value)
+            }
+            className="w-full border border-gray-200 rounded-2xl px-5 py-3.5"
           />
+
+        </div>
+
+          {/* DESCRIPTION */}
+          <div className="grid grid-cols-2 gap-4">
+
+            <textarea
+              placeholder="Description (English)"
+              value={descriptionEn}
+              onChange={(e) =>
+                setDescriptionEn(
+                  e.target.value
+                )
+              }
+              className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32"
+            />
+
+            <textarea
+              placeholder="বিবরণ (বাংলা)"
+              value={descriptionBn}
+              onChange={(e) =>
+                setDescriptionBn(
+                  e.target.value
+                )
+              }
+              className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32"
+            />
+
+          </div>
 
           {/* CATEGORY */}
           <div className="grid grid-cols-2 gap-6">
