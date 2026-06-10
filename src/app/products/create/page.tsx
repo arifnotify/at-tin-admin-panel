@@ -191,18 +191,21 @@ export default function CreateProductPage() {
                 <label className="block text-sm font-medium mb-2">
                   SubCategory <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:border-blue-500 outline-none"
-                >
-                  <option value="">Select SubCategory</option>
-                  {subCategories.map((item) => (
-                    <option key={item._id} value={item.name}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  >
+                    <option value="">Select SubCategory</option>
+
+                    {subCategories.map((item) => (
+                      <option
+                        key={item._id}
+                        value={item._id}
+                      >
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
               </div>
             </div>
           </div>
