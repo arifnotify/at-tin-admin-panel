@@ -70,14 +70,19 @@ export default function ProductsPage() {
     };
 
   // SEARCH FILTER
-  const filteredProducts =
-    products.filter((product) =>
-      product.title
-        .toLowerCase()
-        .includes(
-          search.toLowerCase(),
-        ),
-    );
+const filteredProducts =
+  products.filter((product) =>
+    product.title?.en
+      ?.toLowerCase()
+      .includes(
+        search.toLowerCase(),
+      ) ||
+    product.title?.bn
+      ?.toLowerCase()
+      .includes(
+        search.toLowerCase(),
+      ),
+  );
 
   // LOADING
   if (loading) {
@@ -176,7 +181,7 @@ export default function ProductsPage() {
                       src={
                         product.images?.[0]
                       }
-                      alt={product.title}
+                      alt={product.title?.en}
                       className="w-[60px] h-[60px] object-cover rounded-lg"
                     />
 
@@ -185,7 +190,15 @@ export default function ProductsPage() {
                   {/* NAME */}
                   <td className="p-4 font-medium">
 
-                    {product.title}
+                    <div>
+                    <div className="font-medium">
+                      {product.title?.en}
+                    </div>
+
+                    <div className="text-sm text-gray-500">
+                      {product.title?.bn}
+                    </div>
+                   </div>
 
                   </td>
 

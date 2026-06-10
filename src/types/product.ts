@@ -1,9 +1,15 @@
 export interface Product {
   _id: string;
 
-  title: string;
+    title: {
+      en: string;
+      bn: string;
+    };
 
-  description: string;
+    description: {
+      en: string;
+      bn: string;
+    };
 
   price: number;
 
