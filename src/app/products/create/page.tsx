@@ -10,8 +10,12 @@ import { uploadImages } from "@/src/services/upload.service";
 import { createProduct } from "@/src/services/product.service";
 
 export default function CreateProductPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [titleBn, setTitleBn] = useState("");
+
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionBn, setDescriptionBn] = useState("");
+
   const [price, setPrice] = useState("");
   const [discountPrice, setDiscountPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -79,19 +83,38 @@ export default function CreateProductPage() {
     try {
       setLoading(true);
       await createProduct({
-        title,
-        description,
+        title: {
+          en: titleEn,
+          bn: titleBn,
+        },
+
+        description: {
+          en: descriptionEn,
+          bn: descriptionBn,
+        },
+
         price: Number(price),
-        discountPrice: Number(discountPrice) || undefined,
+
+        discountPrice:
+          Number(discountPrice) || undefined,
+
         stock: Number(stock),
+
         brand,
+
         unit,
+
         productType,
-        expiryDate:  productType === "regular"
+
+        expiryDate:
+          productType === "regular"
             ? expiryDate
             : undefined,
+
         location,
+
         category,
+
         images,
       });
       alert("Product Created Successfully");
@@ -130,13 +153,27 @@ export default function CreateProductPage() {
               <label className="block text-sm font-medium mb-2">
                 Product Title <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                placeholder="Enter product title"
-                className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:border-blue-500 outline-none"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
+              <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Product Title (English)"
+              className="w-full border border-gray-200 rounded-2xl px-5 py-3.5"
+              value={titleEn}
+              onChange={(e) =>
+                setTitleEn(e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="পণ্যের নাম (বাংলা)"
+              className="w-full border border-gray-200 rounded-2xl px-5 py-3.5"
+              value={titleBn}
+              onChange={(e) =>
+                setTitleBn(e.target.value)
+              }
+            />
+          </div>
             </div>
           </div>
 
@@ -149,12 +186,25 @@ export default function CreateProductPage() {
               <label className="block text-sm font-medium mb-2">
                 Description <span className="text-red-500">*</span>
               </label>
+              <div className="grid grid-cols-2 gap-4">
               <textarea
-                placeholder="Enter product description"
-                className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32 resize-y focus:border-blue-500 outline-none"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Description (English)"
+                className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32"
+                value={descriptionEn}
+                onChange={(e) =>
+                  setDescriptionEn(e.target.value)
+                }
               />
+
+              <textarea
+                placeholder="বিবরণ (বাংলা)"
+                className="w-full border border-gray-200 rounded-2xl px-5 py-3 h-32"
+                value={descriptionBn}
+                onChange={(e) =>
+                  setDescriptionBn(e.target.value)
+                }
+              />
+            </div>
             </div>
           </div>
 
