@@ -11,6 +11,7 @@ export interface Product {
       bn: string;
     };
 
+  youtubeVideoUrl:string;
   price: number;
 
   discountPrice: number;

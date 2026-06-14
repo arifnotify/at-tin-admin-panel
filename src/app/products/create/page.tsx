@@ -15,6 +15,7 @@ export default function CreateProductPage() {
 
   const [descriptionEn, setDescriptionEn] = useState("");
   const [descriptionBn, setDescriptionBn] = useState("");
+  const [youtubeVideoUrl, setYoutubeVideoUrl] = useState("");
 
   const [price, setPrice] = useState("");
   const [discountPrice, setDiscountPrice] = useState("");
@@ -116,6 +117,8 @@ export default function CreateProductPage() {
         category,
 
         images,
+        
+        youtubeVideoUrl,
       });
       alert("Product Created Successfully");
       window.location.href = "/products";
@@ -259,6 +262,30 @@ export default function CreateProductPage() {
               </div>
             </div>
           </div>
+          {/* YouTube Video URL */}
+<div className="flex gap-6 items-start">
+  <div className="w-11 h-11 bg-red-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1">
+    ▶️
+  </div>
+
+  <div className="flex-1">
+    <label className="block text-sm font-medium mb-2">
+      YouTube Video URL (Optional)
+    </label>
+
+    <input
+      type="text"
+      placeholder="https://www.youtube.com/watch?v=xxxx"
+      className="w-full border border-gray-200 rounded-2xl px-5 py-3.5 focus:border-blue-500 outline-none"
+      value={youtubeVideoUrl}
+      onChange={(e) => setYoutubeVideoUrl(e.target.value)}
+    />
+
+    <p className="text-xs text-gray-400 mt-2">
+      Paste product demo / review video link
+    </p>
+  </div>
+</div>
 
           {/* Price & Discount */}
           <div className="grid grid-cols-2 gap-6">
