@@ -6,7 +6,12 @@ import { useParams } from "next/navigation";
 import {
   getOrder,
   updateOrderStatus,
+  assignRider,
 } from "@/src/services/order.service";
+
+import {
+  getRiders,
+} from "@/src/services/rider.service";
 
 export default function OrderDetails() {
   const params = useParams();
@@ -21,8 +26,15 @@ export default function OrderDetails() {
   const [error, setError] =
     useState("");
 
+  const [riders, setRiders] =
+    useState<any[]>([]);
+
+  const [selectedRider, setSelectedRider] =
+    useState("");
+
   useEffect(() => {
     loadOrder();
+    loadRiders();
   }, [id]);
 
   const loadOrder = async () => {
@@ -37,10 +49,21 @@ export default function OrderDetails() {
 
       setOrder(data);
     } catch (error) {
-      console.error(error);
-      setError("Order not found");
+      console.log(error);
+      setError("Order Not Found");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRiders = async () => {
+    try {
+      const data =
+        await getRiders();
+
+      setRiders(data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -63,13 +86,43 @@ export default function OrderDetails() {
         });
 
         alert(
-          "Order Status Updated Successfully"
+          "Order Status Updated"
         );
       } catch (error) {
-        console.error(error);
+        console.log(error);
 
         alert(
-          "Failed To Update Status"
+          "Update Failed"
+        );
+      }
+    };
+
+  const handleAssignRider =
+    async () => {
+      try {
+        if (!selectedRider) {
+          alert(
+            "Select Rider First"
+          );
+
+          return;
+        }
+
+        await assignRider(
+          order._id,
+          selectedRider
+        );
+
+        alert(
+          "Rider Assigned Successfully"
+        );
+
+        loadOrder();
+      } catch (error) {
+        console.log(error);
+
+        alert(
+          "Assign Failed"
         );
       }
     };
@@ -92,34 +145,52 @@ export default function OrderDetails() {
 
   return (
     <div className="p-5">
-      <h1 className="text-2xl font-bold mb-5">
+
+      <h1 className="text-3xl font-bold mb-5">
         Order Details
       </h1>
 
-      {/* CUSTOMER INFO */}
-      <div className="border rounded p-4 mb-5">
-        <h2 className="font-bold text-lg mb-3">
-          Customer Information
-        </h2>
+      <div className="border rounded p-5 mb-5">
 
         <p>
-          <strong>Phone:</strong>{" "}
+          <strong>
+            Order Number :
+          </strong>{" "}
+          {order.orderNumber}
+        </p>
+
+        <p>
+          <strong>
+            Customer Phone :
+          </strong>{" "}
           {order.customerPhone}
         </p>
 
         <p>
-          <strong>Address:</strong>{" "}
+          <strong>
+            Shipping Address :
+          </strong>{" "}
           {order.shippingAddress}
         </p>
 
         <p>
-          <strong>Total Amount:</strong>{" "}
+          <strong>
+            Total Amount :
+          </strong>{" "}
           ৳{order.totalAmount}
         </p>
 
+        <p>
+          <strong>
+            Current Status :
+          </strong>{" "}
+          {order.orderStatus}
+        </p>
+
         <div className="mt-4">
+
           <label className="font-semibold block mb-2">
-            Order Status
+            Update Status
           </label>
 
           <select
@@ -137,8 +208,8 @@ export default function OrderDetails() {
               Processing
             </option>
 
-            <option value="Shipped">
-              Shipped
+            <option value="OutForDelivery">
+              Out For Delivery
             </option>
 
             <option value="Delivered">
@@ -149,12 +220,69 @@ export default function OrderDetails() {
               Cancelled
             </option>
           </select>
+
         </div>
+
+        <div className="mt-6">
+
+          <label className="font-semibold block mb-2">
+            Assign Rider
+          </label>
+
+          <select
+            value={selectedRider}
+            onChange={(e) =>
+              setSelectedRider(
+                e.target.value
+              )
+            }
+            className="border rounded px-3 py-2 w-full"
+          >
+            <option value="">
+              Select Rider
+            </option>
+
+            {riders.map(
+              (rider: any) => (
+                <option
+                  key={rider._id}
+                  value={rider._id}
+                >
+                  {rider.name}
+                </option>
+              )
+            )}
+          </select>
+
+          <button
+            onClick={
+              handleAssignRider
+            }
+            className="mt-3 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Assign Rider
+          </button>
+
+        </div>
+
+        {order.assignedRider && (
+          <div className="mt-4">
+
+            <p>
+              <strong>
+                Assigned Rider :
+              </strong>{" "}
+              {order.assignedRider}
+            </p>
+
+          </div>
+        )}
+
       </div>
 
-      {/* PRODUCTS */}
       <div>
-        <h2 className="text-xl font-bold mb-4">
+
+        <h2 className="text-2xl font-bold mb-4">
           Ordered Products
         </h2>
 
@@ -165,7 +293,7 @@ export default function OrderDetails() {
           ) => (
             <div
               key={index}
-              className="border rounded p-4 mb-3 flex gap-4"
+              className="border rounded p-4 mb-4 flex gap-4"
             >
               <img
                 src={
@@ -174,10 +302,11 @@ export default function OrderDetails() {
                 alt={
                   item.productName
                 }
-                className="w-24 h-24 object-cover rounded"
+                className="w-24 h-24 rounded object-cover"
               />
 
               <div>
+
                 <h3 className="font-bold">
                   {
                     item.productName
@@ -185,28 +314,32 @@ export default function OrderDetails() {
                 </h3>
 
                 <p>
-                  Quantity:{" "}
+                  Quantity :
                   {
                     item.quantity
                   }
                 </p>
 
                 <p>
-                  Price: ৳
-                  {item.price}
+                  Price :
+                  ৳{item.price}
                 </p>
 
                 <p>
-                  Total: ৳
+                  Total :
+                  ৳
                   {
                     item.totalPrice
                   }
                 </p>
+
               </div>
             </div>
           )
         )}
+
       </div>
+
     </div>
   );
 }

@@ -26,7 +26,7 @@ export const getOrder = async (id: string) => {
   return res.data;
 };
 
-// UPDATE ORDER STATUS
+// UPDATE STATUS
 export const updateOrderStatus = async (
   id: string,
   orderStatus: string
@@ -46,4 +46,38 @@ export const updateOrderStatus = async (
   );
 
   return res.data;
-}
+};
+
+// ASSIGN RIDER
+export const assignRider = async (
+  orderId: string,
+  riderId: string
+) => {
+  const token = localStorage.getItem("token");
+
+  const res = await api.put(
+    "/orders/assign-rider",
+    {
+      orderId,
+      riderId,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+// TRACKING
+export const getTracking = async (
+  orderId: string
+) => {
+  const res = await api.get(
+    `/orders/${orderId}/tracking`
+  );
+
+  return res.data;
+};
