@@ -16,90 +16,77 @@ export default function OrderDetails() {
   const id = params?.id as string;
 
   const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [riders, setRiders] = useState<any[]>([]);
   const [selectedRider, setSelectedRider] = useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState("");
+  useEffect(() => {
+    if (!id) return;
 
-  // =========================
-  // LOAD ORDER
-  // =========================
+    loadOrder();
+    loadRiders();
+  }, [id]);
+
   const loadOrder = async () => {
     try {
-      if (!id) return;
+      setLoading(true);
+      setError("");
 
       const data = await getOrder(id);
+
+      if (!data) {
+        setError("Order not found");
+        return;
+      }
+
       setOrder(data);
     } catch (err) {
       console.log(err);
-      setError("Order not found");
+      setError("Failed to load order");
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================
-  // LOAD RIDERS
-  // =========================
   const loadRiders = async () => {
     try {
       const data = await getRiders();
-      setRiders(data);
+      setRiders(data || []);
     } catch (err) {
       console.log(err);
     }
   };
 
-  useEffect(() => {
-    loadOrder();
-    loadRiders();
-  }, [id]);
-
-  // =========================
-  // STATUS UPDATE
-  // =========================
-  const handleStatusUpdate = async (status: string) => {
+  const handleStatusUpdate = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     try {
-      setActionLoading(true);
+      const newStatus = e.target.value;
 
-      await updateOrderStatus(order._id, status);
+      await updateOrderStatus(order._id, newStatus);
 
       setOrder((prev: any) => ({
         ...prev,
-        orderStatus: status,
+        orderStatus: newStatus,
       }));
     } catch (err) {
       console.log(err);
       alert("Status update failed");
-    } finally {
-      setActionLoading(false);
     }
   };
 
-  // =========================
-  // ASSIGN RIDER
-  // =========================
   const handleAssignRider = async () => {
     try {
-      if (!selectedRider) {
-        alert("Select a rider first");
-        return;
-      }
-
-      setActionLoading(true);
+      if (!selectedRider) return alert("Select rider first");
 
       await assignRider(order._id, selectedRider);
 
-      await loadOrder(); // refresh order after assign
+      alert("Rider assigned");
 
-      alert("Rider assigned successfully");
+      loadOrder();
     } catch (err) {
       console.log(err);
       alert("Assign failed");
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -117,68 +104,51 @@ export default function OrderDetails() {
     return <p className="p-5 text-red-500">{error}</p>;
   }
 
-  if (!order) return null;
+  // =========================
+  // NULL CHECK (IMPORTANT)
+  // =========================
+  if (!order) {
+    return <p className="p-5">No order found</p>;
+  }
 
   return (
     <div className="p-5">
 
-      {/* =========================
-          HEADER
-      ========================= */}
       <h1 className="text-3xl font-bold mb-5">
         Order Details
       </h1>
 
-      {/* =========================
-          ORDER INFO
-      ========================= */}
-      <div className="border rounded p-5 mb-5">
+      {/* ORDER INFO */}
+      <div className="border p-5 rounded mb-5">
 
-        <p><strong>Order Number:</strong> {order.orderNumber}</p>
-        <p><strong>Customer Phone:</strong> {order.customerPhone}</p>
-        <p><strong>Shipping Address ID:</strong> {order.shippingAddress}</p>
-        <p><strong>Total:</strong> ৳{order.totalAmount}</p>
+        <p><b>Order:</b> {order.orderNumber}</p>
+        <p><b>Phone:</b> {order.customerPhone}</p>
+        <p><b>Address:</b> {order.shippingAddress}</p>
+        <p><b>Total:</b> ৳{order.totalAmount}</p>
+        <p><b>Status:</b> {order.orderStatus}</p>
 
-        <p className="mt-2">
-          <strong>Status:</strong> {order.orderStatus}
-        </p>
-
-        {/* =========================
-            STATUS UPDATE
-        ========================= */}
+        {/* STATUS UPDATE */}
         <div className="mt-4">
-          <label className="font-semibold block mb-2">
-            Update Status
-          </label>
-
           <select
             value={order.orderStatus}
-            onChange={(e) => handleStatusUpdate(e.target.value)}
-            className="border rounded px-3 py-2"
-            disabled={actionLoading}
+            onChange={handleStatusUpdate}
+            className="border p-2"
           >
-            <option value="PENDING">Pending</option>
-            <option value="PROCESSING">Processing</option>
-            <option value="OUT_FOR_DELIVERY">Out For Delivery</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="CANCELLED">Cancelled</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="OutForDelivery">Out For Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
 
-        {/* =========================
-            ASSIGN RIDER
-        ========================= */}
-        <div className="mt-6">
-
-          <label className="font-semibold block mb-2">
-            Assign Rider
-          </label>
+        {/* RIDER ASSIGN */}
+        <div className="mt-5">
 
           <select
             value={selectedRider}
             onChange={(e) => setSelectedRider(e.target.value)}
-            className="border rounded px-3 py-2 w-full"
-            disabled={actionLoading}
+            className="border p-2 w-full"
           >
             <option value="">Select Rider</option>
 
@@ -192,57 +162,36 @@ export default function OrderDetails() {
           <button
             onClick={handleAssignRider}
             className="mt-3 bg-blue-600 text-white px-4 py-2 rounded"
-            disabled={actionLoading}
           >
-            {actionLoading ? "Processing..." : "Assign Rider"}
+            Assign Rider
           </button>
+
         </div>
 
-        {/* =========================
-            CURRENT RIDER
-        ========================= */}
-        {order.assignedRider && (
-          <div className="mt-4 p-3 bg-gray-100 rounded">
-            <p>
-              <strong>Assigned Rider:</strong>{" "}
-              {typeof order.assignedRider === "object"
-                ? order.assignedRider.name
-                : order.assignedRider}
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* =========================
-          ORDER ITEMS
-      ========================= */}
+      {/* ITEMS */}
       <div>
-        <h2 className="text-2xl font-bold mb-4">
-          Ordered Products
+        <h2 className="text-xl font-bold mb-3">
+          Products
         </h2>
 
-        {order.items?.map((item: any, index: number) => (
-          <div
-            key={index}
-            className="border rounded p-4 mb-4 flex gap-4"
-          >
+        {order.items?.map((item: any, i: number) => (
+          <div key={i} className="border p-3 mb-3 flex gap-3">
             <img
               src={item.productImage}
-              className="w-24 h-24 object-cover rounded"
+              className="w-20 h-20 object-cover"
             />
 
             <div>
-              <h3 className="font-bold">
-                {item.productName}
-              </h3>
-
+              <p>{item.productName}</p>
               <p>Qty: {item.quantity}</p>
-              <p>Price: ৳{item.price}</p>
-              <p>Total: ৳{item.totalPrice}</p>
+              <p>৳{item.totalPrice}</p>
             </div>
           </div>
         ))}
       </div>
+
     </div>
   );
 }
