@@ -1,9 +1,13 @@
 "use client";
 
-import { getSupportLinks, updateSupportLinks } from "@/src/services/support-link.service";
-import { SupportLink } from "@/src/types/support-link";
-import { useEffect, useState } from "react";
+import {
+  getSupportLinks,
+  updateSupportLinks,
+} from "@/src/services/support-link.service";
 
+import { SupportLink } from "@/src/types/support-link";
+
+import { useEffect, useState } from "react";
 
 export default function SupportLinksPage() {
   const [form, setForm] =
@@ -27,9 +31,7 @@ export default function SupportLinksPage() {
       const data =
         await getSupportLinks();
 
-      if (data) {
-        setForm(data);
-      }
+      if (data) setForm(data);
     } catch (err) {
       console.log(err);
     }
@@ -45,31 +47,34 @@ export default function SupportLinksPage() {
     });
   };
 
-  const handleSubmit =
-    async () => {
-      try {
-        setLoading(true);
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
 
+      const res =
         await updateSupportLinks(
           form,
         );
 
-        alert(
-          "Support Links Updated Successfully",
-        );
-      } catch (err) {
-        console.log(err);
+      console.log("UPDATED:", res);
 
-        alert(
-          "Update Failed",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      alert(
+        "Support Links Updated Successfully",
+      );
+    } catch (err: any) {
+      console.log(
+        "FAILED:",
+        err?.response?.data,
+      );
+
+      alert("Update Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="max-w-2xl bg-white rounded-xl shadow p-6">
+    <div className="max-w-2xl bg-white p-6 rounded-xl shadow">
 
       <h1 className="text-2xl font-bold mb-6">
         Support Links
@@ -80,65 +85,51 @@ export default function SupportLinksPage() {
         <input
           name="whatsapp"
           value={form.whatsapp}
-          onChange={
-            handleChange
-          }
-          placeholder="WhatsApp Link"
-          className="w-full border p-3 rounded-lg"
+          onChange={handleChange}
+          className="border p-3 w-full"
+          placeholder="WhatsApp"
         />
 
         <input
           name="phone"
           value={form.phone}
-          onChange={
-            handleChange
-          }
-          placeholder="Phone Number"
-          className="w-full border p-3 rounded-lg"
+          onChange={handleChange}
+          className="border p-3 w-full"
+          placeholder="Phone"
         />
 
         <input
           name="facebook"
           value={form.facebook}
-          onChange={
-            handleChange
-          }
-          placeholder="Facebook URL"
-          className="w-full border p-3 rounded-lg"
+          onChange={handleChange}
+          className="border p-3 w-full"
+          placeholder="Facebook"
         />
 
         <input
           name="instagram"
           value={form.instagram}
-          onChange={
-            handleChange
-          }
-          placeholder="Instagram URL"
-          className="w-full border p-3 rounded-lg"
+          onChange={handleChange}
+          className="border p-3 w-full"
+          placeholder="Instagram"
         />
 
         <input
           name="messenger"
           value={form.messenger}
-          onChange={
-            handleChange
-          }
-          placeholder="Messenger URL"
-          className="w-full border p-3 rounded-lg"
+          onChange={handleChange}
+          className="border p-3 w-full"
+          placeholder="Messenger"
         />
 
         <button
-          onClick={
-            handleSubmit
-          }
-          disabled={
-            loading
-          }
-          className="bg-black text-white px-6 py-3 rounded-lg"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="bg-black text-white px-6 py-3 rounded"
         >
           {loading
             ? "Saving..."
-            : "Save Changes"}
+            : "Save"}
         </button>
 
       </div>

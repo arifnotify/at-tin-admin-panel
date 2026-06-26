@@ -1,31 +1,32 @@
-import { SupportLink } from "../types/support-link";
 import api from "./api";
+import { SupportLink } from "../types/support-link";
 
-// ==========================
-// GET SUPPORT LINKS
-// ==========================
-export const getSupportLinks =
-  async () => {
-    const response =
-      await api.get<SupportLink>(
-        "/support-links",
-      );
+// GET
+export const getSupportLinks = async () => {
+  const res = await api.get<SupportLink>(
+    "/support-links",
+  );
 
-    return response.data;
-  };
+  return res.data;
+};
 
-// ==========================
-// UPDATE SUPPORT LINKS
-// ==========================
-export const updateSupportLinks =
-  async (
-    data: SupportLink,
-  ) => {
-    const response =
-      await api.patch(
-        "/support-links",
-        data,
-      );
+// UPDATE
+export const updateSupportLinks = async (
+  data: SupportLink,
+) => {
+  try {
+    const res = await api.patch(
+      "/support-links",
+      data,
+    );
 
-    return response.data;
-  };
+    return res.data;
+  } catch (error: any) {
+    console.log(
+      "UPDATE ERROR:",
+      error?.response?.data,
+    );
+
+    throw error;
+  }
+};
