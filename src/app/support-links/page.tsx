@@ -62,13 +62,9 @@ export default function SupportLinksPage() {
         "Support Links Updated Successfully",
       );
     } catch (err: any) {
-      console.log(
-        "FAILED:",
-        err?.response?.data,
-      );
-
-      alert("Update Failed");
-    } finally {
+  console.log(err?.response?.data);
+  alert(err?.response?.data?.message || "Update Failed");
+}finally {
       setLoading(false);
     }
   };
