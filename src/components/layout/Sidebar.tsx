@@ -12,6 +12,7 @@ import {
   Layers,
   LogOut,
   Zap,
+  Phone,
 } from "lucide-react";
 
 import Cookies from "js-cookie";
@@ -64,6 +65,12 @@ const menuItems = [
     href: "/locations",
     icon: MapPin,
   },
+
+  {
+    title: "Support Links",
+    href: "/support-links",
+    icon: Phone,
+},
 ];
 
 export default function Sidebar() {
