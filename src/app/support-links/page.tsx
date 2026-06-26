@@ -5,7 +5,6 @@ import { SupportLink } from "@/src/types/support-link";
 import { useEffect, useState } from "react";
 
 
-
 export default function SupportLinksPage() {
   const [form, setForm] =
     useState<SupportLink>({
@@ -41,30 +40,36 @@ export default function SupportLinksPage() {
   ) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.value,
     });
   };
 
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
+  const handleSubmit =
+    async () => {
+      try {
+        setLoading(true);
 
-      await updateSupportLinks(form);
+        await updateSupportLinks(
+          form,
+        );
 
-      alert(
-        "Support Links Updated Successfully",
-      );
-    } catch (err) {
-      console.log(err);
+        alert(
+          "Support Links Updated Successfully",
+        );
+      } catch (err) {
+        console.log(err);
 
-      alert("Update Failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+        alert(
+          "Update Failed",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
-    <div className="max-w-2xl bg-white p-6 rounded-xl shadow">
+    <div className="max-w-2xl bg-white rounded-xl shadow p-6">
 
       <h1 className="text-2xl font-bold mb-6">
         Support Links
@@ -75,46 +80,60 @@ export default function SupportLinksPage() {
         <input
           name="whatsapp"
           value={form.whatsapp}
-          onChange={handleChange}
+          onChange={
+            handleChange
+          }
           placeholder="WhatsApp Link"
-          className="w-full border rounded-lg p-3"
+          className="w-full border p-3 rounded-lg"
         />
 
         <input
           name="phone"
           value={form.phone}
-          onChange={handleChange}
+          onChange={
+            handleChange
+          }
           placeholder="Phone Number"
-          className="w-full border rounded-lg p-3"
+          className="w-full border p-3 rounded-lg"
         />
 
         <input
           name="facebook"
           value={form.facebook}
-          onChange={handleChange}
+          onChange={
+            handleChange
+          }
           placeholder="Facebook URL"
-          className="w-full border rounded-lg p-3"
+          className="w-full border p-3 rounded-lg"
         />
 
         <input
           name="instagram"
           value={form.instagram}
-          onChange={handleChange}
+          onChange={
+            handleChange
+          }
           placeholder="Instagram URL"
-          className="w-full border rounded-lg p-3"
+          className="w-full border p-3 rounded-lg"
         />
 
         <input
           name="messenger"
           value={form.messenger}
-          onChange={handleChange}
+          onChange={
+            handleChange
+          }
           placeholder="Messenger URL"
-          className="w-full border rounded-lg p-3"
+          className="w-full border p-3 rounded-lg"
         />
 
         <button
-          onClick={handleSubmit}
-          disabled={loading}
+          onClick={
+            handleSubmit
+          }
+          disabled={
+            loading
+          }
           className="bg-black text-white px-6 py-3 rounded-lg"
         >
           {loading
