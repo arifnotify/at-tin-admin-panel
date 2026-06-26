@@ -1,32 +1,22 @@
 import api from "./api";
-import { SupportLink } from "../types/support-link";
 
 // GET
 export const getSupportLinks = async () => {
-  const res = await api.get<SupportLink>(
-    "/support-links",
-  );
-
+  const res = await api.get("/support-links");
   return res.data;
 };
 
 // UPDATE
 export const updateSupportLinks = async (
-  data: SupportLink,
+  data: any,
 ) => {
-  try {
-    const res = await api.patch(
-      "/support-links",
-      data,
-    );
+  const { _id, createdAt, updatedAt, __v, ...cleanData } =
+    data;
 
-    return res.data;
-  } catch (error: any) {
-    console.log(
-      "UPDATE ERROR:",
-      error?.response?.data,
-    );
+  const res = await api.patch(
+    "/support-links",
+    cleanData,
+  );
 
-    throw error;
-  }
+  return res.data;
 };
