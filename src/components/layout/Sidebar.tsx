@@ -13,6 +13,10 @@ import {
   LogOut,
   Zap,
   Phone,
+  Gift,
+  Wallet,
+  History,
+  TicketPercent,
 } from "lucide-react";
 
 import Cookies from "js-cookie";
@@ -70,6 +74,27 @@ const menuItems = [
     title: "Support Links",
     href: "/support-links",
     icon: Phone,
+},
+
+{
+  title: "Reward Settings",
+  href: "/reward-settings",
+  icon: Gift,
+},
+{
+  title: "Reward Wallets",
+  href: "/reward-wallets",
+  icon: Wallet,
+},
+{
+  title: "Reward Transactions",
+  href: "/reward-transactions",
+  icon: History,
+},
+{
+  title: "Coupons",
+  href: "/coupons",
+  icon: TicketPercent,
 },
 ];
 
