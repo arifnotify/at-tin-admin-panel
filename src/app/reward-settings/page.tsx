@@ -11,55 +11,95 @@ import { RewardSettings } from "@/src/types/reward";
 
 export default function RewardSettingsPage() {
   const [settings, setSettings] =
-    useState<RewardSettings | null>(
-      null,
-    );
+    useState<RewardSettings | null>(null);
 
   const [loading, setLoading] =
     useState(true);
 
+  const [saving, setSaving] =
+    useState(false);
+
   useEffect(() => {
-    loadSettings();
+    fetchSettings();
   }, []);
 
-  const loadSettings =
-    async () => {
-      try {
-        const data =
-          await getRewardSettings();
+  const fetchSettings = async () => {
+    try {
+      const data =
+        await getRewardSettings();
 
-        setSettings(data);
-      } finally {
-        setLoading(false);
-      }
-    };
+      console.log("GET:", data);
 
-  const save =
-    async () => {
+      setSettings(data);
+    } catch (err) {
+      console.log(err);
+
+      alert("Failed to load reward settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const save = async () => {
+    try {
       if (!settings) return;
 
-      await updateRewardSettings(
+      setSaving(true);
+
+      console.log(
+        "PATCH DATA:",
         settings,
       );
 
-      alert(
-        "Reward Settings Updated",
-      );
-    };
+      const res =
+        await updateRewardSettings(
+          settings,
+        );
 
-  if (
-    loading ||
-    !settings
-  ) {
+      console.log(
+        "PATCH RESPONSE:",
+        res,
+      );
+
+      alert(
+        "Reward Settings Updated Successfully",
+      );
+    } catch (err: any) {
+      console.log("PATCH ERROR:", err);
+
+      console.log(
+        "PATCH RESPONSE:",
+        err?.response,
+      );
+
+      alert(
+        err?.response?.data?.message ||
+          err.message ||
+          "Save Failed",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
     return (
-      <div>
+      <div className="p-6">
         Loading...
       </div>
     );
   }
 
+  if (!settings) {
+    return (
+      <div className="p-6">
+        No Reward Settings Found
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
 
       <h1 className="text-3xl font-bold mb-8">
         Reward Settings
@@ -68,13 +108,13 @@ export default function RewardSettingsPage() {
       <div className="grid grid-cols-2 gap-5">
 
         <div>
-          <label>
+          <label className="block mb-2">
             Regular %
           </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.regularPercentage
             }
@@ -91,13 +131,13 @@ export default function RewardSettingsPage() {
         </div>
 
         <div>
-          <label>
+          <label className="block mb-2">
             Premium %
           </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.premiumPercentage
             }
@@ -114,11 +154,13 @@ export default function RewardSettingsPage() {
         </div>
 
         <div>
-          <label>VIP %</label>
+          <label className="block mb-2">
+            VIP %
+          </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.vipPercentage
             }
@@ -135,13 +177,13 @@ export default function RewardSettingsPage() {
         </div>
 
         <div>
-          <label>
-            Every Amount
+          <label className="block mb-2">
+            Per Amount
           </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.perAmount
             }
@@ -157,13 +199,13 @@ export default function RewardSettingsPage() {
         </div>
 
         <div>
-          <label>
+          <label className="block mb-2">
             Minimum Redeem
           </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.minimumRedeem
             }
@@ -180,13 +222,13 @@ export default function RewardSettingsPage() {
         </div>
 
         <div>
-          <label>
+          <label className="block mb-2">
             Maximum Redeem
           </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.maximumRedeem
             }
@@ -203,13 +245,13 @@ export default function RewardSettingsPage() {
         </div>
 
         <div>
-          <label>
+          <label className="block mb-2">
             Expire Days
           </label>
 
           <input
             type="number"
-            className="border w-full p-3 rounded-lg"
+            className="border rounded-lg p-3 w-full"
             value={
               settings.expireDays
             }
@@ -251,9 +293,12 @@ export default function RewardSettingsPage() {
 
       <button
         onClick={save}
-        className="mt-8 bg-black text-white px-8 py-3 rounded-xl"
+        disabled={saving}
+        className="mt-8 bg-black text-white px-8 py-3 rounded-xl hover:bg-gray-800 disabled:opacity-50"
       >
-        Save Settings
+        {saving
+          ? "Saving..."
+          : "Save Settings"}
       </button>
 
     </div>
