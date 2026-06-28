@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { getRewardWallets } from "@/src/services/reward.service";
 
 type Wallet = {
@@ -9,7 +8,6 @@ type Wallet = {
 
   user: {
     phone: string;
-
     customerType: string;
   };
 
@@ -22,7 +20,6 @@ type Wallet = {
 
 export default function RewardWalletPage() {
   const [wallets, setWallets] = useState<Wallet[]>([]);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,13 +28,16 @@ export default function RewardWalletPage() {
 
   const fetchWallets = async () => {
     try {
-      const data = await getRewardWallets();
+      const res = await getRewardWallets();
 
-      console.log("WALLETS:", data);
+      console.log("RAW RESPONSE:", res);
+
+      // ✅ IMPORTANT FIX HERE
+      const data = res?.data || res?.wallets || res || [];
 
       setWallets(data);
     } catch (err) {
-      console.log(err);
+      console.log("ERROR:", err);
     } finally {
       setLoading(false);
     }
@@ -49,78 +49,43 @@ export default function RewardWalletPage() {
 
   return (
     <div>
-
       <h1 className="text-3xl font-bold mb-6">
         Reward Wallets
       </h1>
 
       <div className="overflow-x-auto">
-
         <table className="w-full border">
-
           <thead>
             <tr className="bg-gray-100">
-
-              <th className="p-3 border">
-                Phone
-              </th>
-
-              <th className="p-3 border">
-                Type
-              </th>
-
-              <th className="p-3 border">
-                Balance
-              </th>
-
-              <th className="p-3 border">
-                Total Earned
-              </th>
-
-              <th className="p-3 border">
-                Total Used
-              </th>
-
+              <th className="border p-3">Phone</th>
+              <th className="border p-3">Type</th>
+              <th className="border p-3">Balance</th>
+              <th className="border p-3">Total Earned</th>
+              <th className="border p-3">Total Used</th>
             </tr>
           </thead>
 
           <tbody>
-
-            {wallets.map((w) => (
-              <tr
-                key={w._id}
-                className="text-center"
-              >
-
-                <td className="p-3 border">
-                  {w.user?.phone}
+            {wallets.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center p-5">
+                  No Wallet Found
                 </td>
-
-                <td className="p-3 border">
-                  {w.user?.customerType}
-                </td>
-
-                <td className="p-3 border">
-                  {w.balance}
-                </td>
-
-                <td className="p-3 border">
-                  {w.totalEarned}
-                </td>
-
-                <td className="p-3 border">
-                  {w.totalUsed}
-                </td>
-
               </tr>
-            ))}
-
+            ) : (
+              wallets.map((w) => (
+                <tr key={w._id} className="text-center">
+                  <td className="border p-3">{w.user?.phone}</td>
+                  <td className="border p-3">{w.user?.customerType}</td>
+                  <td className="border p-3">{w.balance}</td>
+                  <td className="border p-3">{w.totalEarned}</td>
+                  <td className="border p-3">{w.totalUsed}</td>
+                </tr>
+              ))
+            )}
           </tbody>
-
         </table>
-
       </div>
-
     </div>
   );
 }
