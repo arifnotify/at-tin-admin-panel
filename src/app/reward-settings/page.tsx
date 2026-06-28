@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import {
   getRewardSettings,
+  createRewardSettings,
   updateRewardSettings,
 } from "@/src/services/reward.service";
 
@@ -11,7 +12,16 @@ import { RewardSettings } from "@/src/types/reward";
 
 export default function RewardSettingsPage() {
   const [settings, setSettings] =
-    useState<RewardSettings | null>(null);
+    useState<RewardSettings>({
+      regularPercentage: 2,
+      premiumPercentage: 5,
+      vipPercentage: 8,
+      perAmount: 100,
+      minimumRedeem: 50,
+      maximumRedeem: 300,
+      expireDays: 365,
+      isActive: true,
+    });
 
   const [loading, setLoading] =
     useState(true);
@@ -28,71 +38,99 @@ export default function RewardSettingsPage() {
       const data =
         await getRewardSettings();
 
-      console.log("GET:", data);
+      console.log(
+        "GET SETTINGS:",
+        data,
+      );
 
-      setSettings(data);
+      if (data) {
+        setSettings(data);
+      }
     } catch (err) {
       console.log(err);
-
-      alert("Failed to load reward settings");
     } finally {
       setLoading(false);
     }
   };
 
-////////////////////////////////////////////////////////
+  const save = async () => {
+    try {
+      setSaving(true);
 
- const save = async () => {
-  if (!settings) return;
+      const payload = {
+        regularPercentage:
+          settings.regularPercentage,
 
-  try {
-    setSaving(true);
+        premiumPercentage:
+          settings.premiumPercentage,
 
-    const payload = {
-      regularPercentage: settings.regularPercentage,
-      premiumPercentage: settings.premiumPercentage,
-      vipPercentage: settings.vipPercentage,
-      perAmount: settings.perAmount,
-      minimumRedeem: settings.minimumRedeem,
-      maximumRedeem: settings.maximumRedeem,
-      expireDays: settings.expireDays,
-      isActive: settings.isActive,
-    };
+        vipPercentage:
+          settings.vipPercentage,
 
-    console.log("PATCH DATA", payload);
+        perAmount:
+          settings.perAmount,
 
-    const res =
-      await updateRewardSettings(payload);
+        minimumRedeem:
+          settings.minimumRedeem,
 
-    console.log("PATCH RESPONSE", res);
+        maximumRedeem:
+          settings.maximumRedeem,
 
-    alert(
-      "Reward Settings Updated Successfully",
-    );
-  } catch (err: any) {
-    console.log(err);
+        expireDays:
+          settings.expireDays,
 
-    alert(
-      err?.response?.data?.message ||
-        "Save Failed",
-    );
-  } finally {
-    setSaving(false);
-  }
-};
+        isActive:
+          settings.isActive,
+      };
+
+      let response;
+
+      // CREATE
+      if (!settings._id) {
+        response =
+          await createRewardSettings(
+            payload,
+          );
+
+        alert(
+          "Reward Settings Created Successfully",
+        );
+      }
+
+      // UPDATE
+      else {
+        response =
+          await updateRewardSettings(
+            payload,
+          );
+
+        alert(
+          "Reward Settings Updated Successfully",
+        );
+      }
+
+      console.log(
+        "SAVE RESPONSE:",
+        response,
+      );
+
+      fetchSettings();
+    } catch (err: any) {
+      console.log(err);
+
+      alert(
+        err?.response?.data
+          ?.message || "Save Failed",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="p-6">
         Loading...
-      </div>
-    );
-  }
-
-  if (!settings) {
-    return (
-      <div className="p-6">
-        No Reward Settings Found
       </div>
     );
   }
@@ -106,6 +144,7 @@ export default function RewardSettingsPage() {
 
       <div className="grid grid-cols-2 gap-5">
 
+        {/* Regular */}
         <div>
           <label className="block mb-2">
             Regular %
@@ -129,6 +168,7 @@ export default function RewardSettingsPage() {
           />
         </div>
 
+        {/* Premium */}
         <div>
           <label className="block mb-2">
             Premium %
@@ -152,6 +192,7 @@ export default function RewardSettingsPage() {
           />
         </div>
 
+        {/* VIP */}
         <div>
           <label className="block mb-2">
             VIP %
@@ -175,6 +216,7 @@ export default function RewardSettingsPage() {
           />
         </div>
 
+        {/* Per Amount */}
         <div>
           <label className="block mb-2">
             Per Amount
@@ -189,14 +231,16 @@ export default function RewardSettingsPage() {
             onChange={(e) =>
               setSettings({
                 ...settings,
-                perAmount: Number(
-                  e.target.value,
-                ),
+                perAmount:
+                  Number(
+                    e.target.value,
+                  ),
               })
             }
           />
         </div>
 
+        {/* Minimum Redeem */}
         <div>
           <label className="block mb-2">
             Minimum Redeem
@@ -220,6 +264,7 @@ export default function RewardSettingsPage() {
           />
         </div>
 
+        {/* Maximum Redeem */}
         <div>
           <label className="block mb-2">
             Maximum Redeem
@@ -243,6 +288,7 @@ export default function RewardSettingsPage() {
           />
         </div>
 
+        {/* Expire Days */}
         <div>
           <label className="block mb-2">
             Expire Days
@@ -266,6 +312,7 @@ export default function RewardSettingsPage() {
           />
         </div>
 
+        {/* Active */}
         <div className="flex items-center gap-3 mt-8">
 
           <input
@@ -297,7 +344,9 @@ export default function RewardSettingsPage() {
       >
         {saving
           ? "Saving..."
-          : "Save Settings"}
+          : settings._id
+          ? "Update Settings"
+          : "Create Settings"}
       </button>
 
     </div>
