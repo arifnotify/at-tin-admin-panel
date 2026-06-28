@@ -40,47 +40,46 @@ export default function RewardSettingsPage() {
     }
   };
 
-  const save = async () => {
-    try {
-      if (!settings) return;
+////////////////////////////////////////////////////////
 
-      setSaving(true);
+ const save = async () => {
+  if (!settings) return;
 
-      console.log(
-        "PATCH DATA:",
-        settings,
-      );
+  try {
+    setSaving(true);
 
-      const res =
-        await updateRewardSettings(
-          settings,
-        );
+    const payload = {
+      regularPercentage: settings.regularPercentage,
+      premiumPercentage: settings.premiumPercentage,
+      vipPercentage: settings.vipPercentage,
+      perAmount: settings.perAmount,
+      minimumRedeem: settings.minimumRedeem,
+      maximumRedeem: settings.maximumRedeem,
+      expireDays: settings.expireDays,
+      isActive: settings.isActive,
+    };
 
-      console.log(
-        "PATCH RESPONSE:",
-        res,
-      );
+    console.log("PATCH DATA", payload);
 
-      alert(
-        "Reward Settings Updated Successfully",
-      );
-    } catch (err: any) {
-      console.log("PATCH ERROR:", err);
+    const res =
+      await updateRewardSettings(payload);
 
-      console.log(
-        "PATCH RESPONSE:",
-        err?.response,
-      );
+    console.log("PATCH RESPONSE", res);
 
-      alert(
-        err?.response?.data?.message ||
-          err.message ||
-          "Save Failed",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
+    alert(
+      "Reward Settings Updated Successfully",
+    );
+  } catch (err: any) {
+    console.log(err);
+
+    alert(
+      err?.response?.data?.message ||
+        "Save Failed",
+    );
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
