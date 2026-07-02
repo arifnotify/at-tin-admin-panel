@@ -7,6 +7,7 @@ import {
   getOrder,
   updateOrderStatus,
   assignRider,
+  adminEditOrder,
 } from "@/src/services/order.service";
 
 import { getRiders } from "@/src/services/rider.service";
@@ -16,11 +17,15 @@ export default function OrderDetails() {
   const id = params?.id as string;
 
   const [order, setOrder] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [riders, setRiders] = useState<any[]>([]);
   const [selectedRider, setSelectedRider] = useState("");
+
+  const [saving, setSaving] = useState(false);
 
   // =========================
   // LOAD DATA
@@ -37,7 +42,9 @@ export default function OrderDetails() {
       setLoading(true);
 
       const data = await getOrder(id);
+
       setOrder(data);
+      setItems(data.items || []);
     } catch (err) {
       console.log(err);
       setError("Order Not Found");
@@ -52,6 +59,45 @@ export default function OrderDetails() {
       setRiders(data);
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  // =========================
+  // ITEM UPDATE (quantity only)
+  // =========================
+  const updateQty = (index: number, value: number) => {
+    const updated = [...items];
+
+    updated[index].quantity = value;
+
+    updated[index].totalPrice =
+      updated[index].price * value;
+
+    setItems(updated);
+  };
+
+  // =========================
+  // SAVE ORDER EDIT
+  // =========================
+  const handleSaveEdit = async () => {
+    try {
+      setSaving(true);
+
+      const payload = items.map((item) => ({
+        product: item.product,
+        quantity: item.quantity,
+      }));
+
+      await adminEditOrder(order._id, payload);
+
+      alert("Order Updated Successfully");
+
+      fetchOrder();
+    } catch (err) {
+      console.log(err);
+      alert("Update Failed");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -97,17 +143,12 @@ export default function OrderDetails() {
   };
 
   // =========================
-  // LOADING
+  // LOADING STATES
   // =========================
   if (loading) return <p className="p-5">Loading...</p>;
-
   if (error) return <p className="p-5 text-red-500">{error}</p>;
-
   if (!order) return <p className="p-5">No Order Found</p>;
 
-  // =========================
-  // SAFE ADDRESS HANDLING
-  // =========================
   const address =
     typeof order.shippingAddress === "object"
       ? order.shippingAddress
@@ -125,15 +166,8 @@ export default function OrderDetails() {
       ========================= */}
       <div className="border rounded p-5 mb-5">
 
-        <p>
-          <strong>Order Number:</strong>{" "}
-          {order.orderNumber}
-        </p>
-
-        <p>
-          <strong>Customer Phone:</strong>{" "}
-          {order.customerPhone}
-        </p>
+        <p><strong>Order Number:</strong> {order.orderNumber}</p>
+        <p><strong>Customer Phone:</strong> {order.customerPhone}</p>
 
         <p>
           <strong>Shipping Address:</strong>{" "}
@@ -142,25 +176,9 @@ export default function OrderDetails() {
             : "No Address"}
         </p>
 
-        {address?.latitude && address?.longitude && (
-          <p className="text-blue-500">
-            Map:{" "}
-            <a
-              href={`https://www.google.com/maps?q=${address.latitude},${address.longitude}`}
-              target="_blank"
-            >
-              Open Location
-            </a>
-          </p>
-        )}
+        <p><strong>Total:</strong> ৳{order.totalAmount}</p>
 
-        <p>
-          <strong>Total:</strong> ৳{order.totalAmount}
-        </p>
-
-        <p>
-          <strong>Status:</strong> {order.orderStatus}
-        </p>
+        <p><strong>Status:</strong> {order.orderStatus}</p>
 
         {/* =========================
             STATUS UPDATE
@@ -216,47 +234,65 @@ export default function OrderDetails() {
           </button>
 
         </div>
-
-        {/* =========================
-            ASSIGNED RIDER
-        ========================= */}
-        {order.assignedRider && (
-          <p className="mt-4">
-            <strong>Assigned Rider:</strong>{" "}
-            {order.assignedRider}
-          </p>
-        )}
-
       </div>
 
       {/* =========================
-          ITEMS
+          🔥 ORDER EDIT SECTION
       ========================= */}
       <h2 className="text-2xl font-bold mb-4">
-        Products
+        Edit Products
       </h2>
 
-      {order.items?.map((item: any, index: number) => (
+      {items.map((item: any, index: number) => (
         <div
           key={index}
           className="border p-4 mb-3 rounded flex gap-4"
         >
+
           <img
             src={item.productImage}
             className="w-20 h-20 object-cover rounded"
           />
 
-          <div>
+          <div className="flex-1">
+
             <h3 className="font-bold">
               {item.productName}
             </h3>
 
-            <p>Qty: {item.quantity}</p>
             <p>Price: ৳{item.price}</p>
-            <p>Total: ৳{item.totalPrice}</p>
+
+            {/* =========================
+                EDIT QUANTITY
+            ========================= */}
+            <input
+              type="number"
+              value={item.quantity}
+              min={1}
+              onChange={(e) =>
+                updateQty(index, Number(e.target.value))
+              }
+              className="border px-2 py-1 w-24 mt-2"
+            />
+
+            <p className="mt-1">
+              Total: ৳{item.totalPrice}
+            </p>
+
           </div>
         </div>
       ))}
+
+      {/* =========================
+          SAVE BUTTON
+      ========================= */}
+      <button
+        onClick={handleSaveEdit}
+        disabled={saving}
+        className="bg-green-600 text-white px-5 py-2 rounded mt-4"
+      >
+        {saving ? "Saving..." : "Save Order Changes"}
+      </button>
 
     </div>
   );

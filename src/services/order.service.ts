@@ -1,46 +1,51 @@
 import api from "./api";
 
-// GET ALL ORDERS
-export const getOrders = async () => {
-  const token = localStorage.getItem("token");
+// =========================
+// TOKEN HELPER
+// =========================
+const getToken = () => {
+  return localStorage.getItem("token");
+};
 
+// =========================
+// GET ALL ORDERS
+// =========================
+export const getOrders = async () => {
   const res = await api.get("/orders", {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
   });
 
   return res.data;
 };
 
+// =========================
 // GET SINGLE ORDER
+// =========================
 export const getOrder = async (id: string) => {
-  const token = localStorage.getItem("token");
-
   const res = await api.get(`/orders/${id}`, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
   });
 
   return res.data;
 };
 
-// UPDATE STATUS
+// =========================
+// UPDATE ORDER STATUS
+// =========================
 export const updateOrderStatus = async (
   id: string,
   orderStatus: string
 ) => {
-  const token = localStorage.getItem("token");
-
   const res = await api.patch(
     `/orders/${id}/status`,
-    {
-      orderStatus,
-    },
+    { orderStatus },
     {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${getToken()}`,
       },
     }
   );
@@ -48,13 +53,13 @@ export const updateOrderStatus = async (
   return res.data;
 };
 
+// =========================
 // ASSIGN RIDER
+// =========================
 export const assignRider = async (
   orderId: string,
   riderId: string
 ) => {
-  const token = localStorage.getItem("token");
-
   const res = await api.put(
     "/orders/assign-rider",
     {
@@ -63,7 +68,7 @@ export const assignRider = async (
     },
     {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${getToken()}`,
       },
     }
   );
@@ -71,12 +76,33 @@ export const assignRider = async (
   return res.data;
 };
 
+// =========================
 // TRACKING
-export const getTracking = async (
-  orderId: string
+// =========================
+export const getTracking = async (orderId: string) => {
+  const res = await api.get(`/orders/${orderId}/tracking`);
+
+  return res.data;
+};
+
+// =========================
+// 🔥 ADMIN EDIT ORDER (NEW)
+// =========================
+export const adminEditOrder = async (
+  orderId: string,
+  items: {
+    product: string;
+    quantity: number;
+  }[]
 ) => {
-  const res = await api.get(
-    `/orders/${orderId}/tracking`
+  const res = await api.patch(
+    `/orders/${orderId}`,
+    { items },
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    }
   );
 
   return res.data;
