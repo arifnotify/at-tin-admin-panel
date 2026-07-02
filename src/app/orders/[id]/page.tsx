@@ -18,7 +18,6 @@ export default function OrderDetails() {
 
   const [order, setOrder] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -33,11 +32,11 @@ export default function OrderDetails() {
   useEffect(() => {
     if (!id) return;
 
-    fetchOrder();
-    fetchRiders();
+    loadOrder();
+    loadRiders();
   }, [id]);
 
-  const fetchOrder = async () => {
+  const loadOrder = async () => {
     try {
       setLoading(true);
 
@@ -53,7 +52,7 @@ export default function OrderDetails() {
     }
   };
 
-  const fetchRiders = async () => {
+  const loadRiders = async () => {
     try {
       const data = await getRiders();
       setRiders(data);
@@ -63,13 +62,12 @@ export default function OrderDetails() {
   };
 
   // =========================
-  // ITEM UPDATE (quantity only)
+  // QUANTITY UPDATE
   // =========================
   const updateQty = (index: number, value: number) => {
     const updated = [...items];
 
     updated[index].quantity = value;
-
     updated[index].totalPrice =
       updated[index].price * value;
 
@@ -77,9 +75,20 @@ export default function OrderDetails() {
   };
 
   // =========================
+  // REMOVE ITEM
+  // =========================
+  const removeItem = (index: number) => {
+    const updated = [...items];
+
+    updated.splice(index, 1);
+
+    setItems(updated);
+  };
+
+  // =========================
   // SAVE ORDER EDIT
   // =========================
-  const handleSaveEdit = async () => {
+  const handleSave = async () => {
     try {
       setSaving(true);
 
@@ -92,7 +101,7 @@ export default function OrderDetails() {
 
       alert("Order Updated Successfully");
 
-      fetchOrder();
+      loadOrder();
     } catch (err) {
       console.log(err);
       alert("Update Failed");
@@ -135,7 +144,7 @@ export default function OrderDetails() {
 
       alert("Rider Assigned");
 
-      fetchOrder();
+      loadOrder();
     } catch (err) {
       console.log(err);
       alert("Assign Failed");
@@ -143,7 +152,7 @@ export default function OrderDetails() {
   };
 
   // =========================
-  // LOADING STATES
+  // LOADING / ERROR
   // =========================
   if (loading) return <p className="p-5">Loading...</p>;
   if (error) return <p className="p-5 text-red-500">{error}</p>;
@@ -166,33 +175,30 @@ export default function OrderDetails() {
       ========================= */}
       <div className="border rounded p-5 mb-5">
 
-        <p><strong>Order Number:</strong> {order.orderNumber}</p>
-        <p><strong>Customer Phone:</strong> {order.customerPhone}</p>
+        <p><b>Order:</b> {order.orderNumber}</p>
+        <p><b>Phone:</b> {order.customerPhone}</p>
 
         <p>
-          <strong>Shipping Address:</strong>{" "}
+          <b>Address:</b>{" "}
           {address
-            ? `${address.areaOrVillage || ""}, ${address.landmark || ""}`
+            ? `${address.areaOrVillage}, ${address.landmark}`
             : "No Address"}
         </p>
 
-        <p><strong>Total:</strong> ৳{order.totalAmount}</p>
+        <p><b>Total:</b> ৳{order.totalAmount}</p>
 
-        <p><strong>Status:</strong> {order.orderStatus}</p>
+        <p><b>Status:</b> {order.orderStatus}</p>
 
-        {/* =========================
-            STATUS UPDATE
-        ========================= */}
+        {/* STATUS */}
         <div className="mt-4">
-
-          <label className="block mb-2 font-semibold">
+          <label className="font-semibold block mb-2">
             Update Status
           </label>
 
           <select
             value={order.orderStatus}
             onChange={handleStatusChange}
-            className="border px-3 py-2 rounded"
+            className="border p-2 rounded"
           >
             <option value="Pending">Pending</option>
             <option value="Processing">Processing</option>
@@ -200,22 +206,19 @@ export default function OrderDetails() {
             <option value="Delivered">Delivered</option>
             <option value="Cancelled">Cancelled</option>
           </select>
-
         </div>
 
-        {/* =========================
-            RIDER ASSIGN
-        ========================= */}
+        {/* RIDER */}
         <div className="mt-6">
 
-          <label className="block mb-2 font-semibold">
+          <label className="font-semibold block mb-2">
             Assign Rider
           </label>
 
           <select
             value={selectedRider}
             onChange={(e) => setSelectedRider(e.target.value)}
-            className="border px-3 py-2 w-full rounded"
+            className="border p-2 w-full rounded"
           >
             <option value="">Select Rider</option>
 
@@ -228,7 +231,7 @@ export default function OrderDetails() {
 
           <button
             onClick={handleAssignRider}
-            className="mt-3 bg-blue-500 text-white px-4 py-2 rounded"
+            className="bg-blue-600 text-white px-4 py-2 mt-3 rounded"
           >
             Assign Rider
           </button>
@@ -237,10 +240,10 @@ export default function OrderDetails() {
       </div>
 
       {/* =========================
-          🔥 ORDER EDIT SECTION
+          ITEMS EDIT
       ========================= */}
       <h2 className="text-2xl font-bold mb-4">
-        Edit Products
+        Edit Items
       </h2>
 
       {items.map((item: any, index: number) => (
@@ -262,22 +265,26 @@ export default function OrderDetails() {
 
             <p>Price: ৳{item.price}</p>
 
-            {/* =========================
-                EDIT QUANTITY
-            ========================= */}
             <input
               type="number"
-              value={item.quantity}
               min={1}
+              value={item.quantity}
               onChange={(e) =>
                 updateQty(index, Number(e.target.value))
               }
-              className="border px-2 py-1 w-24 mt-2"
+              className="border p-1 w-24 mt-2"
             />
 
             <p className="mt-1">
               Total: ৳{item.totalPrice}
             </p>
+
+            <button
+              onClick={() => removeItem(index)}
+              className="text-red-600 mt-2"
+            >
+              Remove Item
+            </button>
 
           </div>
         </div>
@@ -287,11 +294,11 @@ export default function OrderDetails() {
           SAVE BUTTON
       ========================= */}
       <button
-        onClick={handleSaveEdit}
+        onClick={handleSave}
         disabled={saving}
         className="bg-green-600 text-white px-5 py-2 rounded mt-4"
       >
-        {saving ? "Saving..." : "Save Order Changes"}
+        {saving ? "Saving..." : "Save Changes"}
       </button>
 
     </div>
