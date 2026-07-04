@@ -12,7 +12,7 @@ import {
 
 import { getRiders } from "@/src/services/rider.service";
 
-// components (UNCHANGED)
+// Components
 import CustomerInfoCard from "@/src/components/orders/CustomerInfoCard";
 import StatusCard from "@/src/components/orders/StatusCard";
 import RiderCard from "@/src/components/orders/RiderCard";
@@ -20,18 +20,18 @@ import OrderSummary from "@/src/components/orders/OrderSummary";
 import OrderTimeline from "@/src/components/orders/OrderTimeline";
 import EditableOrderItems from "@/src/components/orders/EditableOrderItems";
 
-// NEW (INVOICE)
 import InvoiceActions from "@/src/components/invoice/InvoiceActions";
 
 export default function OrderDetailsPage() {
   const params = useParams();
   const id = params?.id as string;
 
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
   const [riders, setRiders] = useState<any[]>([]);
 
   const [selectedRider, setSelectedRider] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -52,7 +52,7 @@ export default function OrderDetailsPage() {
       const data = await getOrder(id);
 
       setOrder(data);
-      setItems(data.items || []);
+      setItems(data?.items || []);
     } catch (err) {
       console.log(err);
     } finally {
@@ -70,9 +70,11 @@ export default function OrderDetailsPage() {
   };
 
   // =========================
-  // STATUS UPDATE (UNCHANGED LOGIC)
+  // STATUS UPDATE
   // =========================
   const handleStatusChange = async (status: string) => {
+    if (!order) return;
+
     try {
       await updateOrderStatus(order._id, status);
 
@@ -80,8 +82,6 @@ export default function OrderDetailsPage() {
         ...order,
         orderStatus: status,
       });
-
-      alert("Status Updated");
     } catch (err) {
       console.log(err);
       alert("Status Update Failed");
@@ -89,9 +89,11 @@ export default function OrderDetailsPage() {
   };
 
   // =========================
-  // ASSIGN RIDER (UNCHANGED LOGIC)
+  // ASSIGN RIDER
   // =========================
   const handleAssignRider = async () => {
+    if (!order) return;
+
     try {
       if (!selectedRider) {
         alert("Select Rider");
@@ -110,9 +112,11 @@ export default function OrderDetailsPage() {
   };
 
   // =========================
-  // SAVE ITEMS (UNCHANGED LOGIC)
+  // SAVE ITEMS
   // =========================
   const handleSave = async () => {
+    if (!order) return;
+
     try {
       setSaving(true);
 
@@ -146,7 +150,7 @@ export default function OrderDetailsPage() {
   }
 
   // =========================
-  // LOCK SYSTEM (UNCHANGED)
+  // LOCK SYSTEM
   // =========================
   const locked =
     order.orderStatus === "Delivered" ||
@@ -168,7 +172,7 @@ export default function OrderDetailsPage() {
 
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* LEFT SIDE (UNCHANGED STRUCTURE) */}
+        {/* LEFT SIDE */}
         <div className="lg:col-span-2 space-y-6">
 
           <CustomerInfoCard order={order} />
@@ -192,7 +196,6 @@ export default function OrderDetailsPage() {
             locked={locked}
           />
 
-          {/* SAVE BUTTON */}
           {!locked && (
             <button
               onClick={handleSave}
@@ -227,7 +230,7 @@ export default function OrderDetailsPage() {
           {/* TIMELINE */}
           <OrderTimeline order={order} />
 
-          {/* 🧾 INVOICE (NEW ADDITION ONLY) */}
+          {/* 🧾 INVOICE */}
           <InvoiceActions order={order} />
 
           {/* LOCK INFO */}
