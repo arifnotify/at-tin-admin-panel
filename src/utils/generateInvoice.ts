@@ -1,472 +1,296 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
-import { Order } from "@/src/types/order";
-
-import { formatCurrency } from "./currency";
-import { formatDate } from "./date";
+import { InvoiceData } from "@/src/types/invoice";
+import { formatCurrency } from "@/src/utils/currency";
 import { COMPANY } from "../components/company";
 
-// ============================================
-// COMPANY HEADER
-// ============================================
-
-const drawHeader = (doc: jsPDF) => {
-  doc.setFillColor(37, 99, 235);
-
+// ===============================
+// HEADER
+// ===============================
+const drawCompanyHeader = (doc: jsPDF) => {
+  doc.setFillColor(33, 150, 243);
   doc.rect(0, 0, 210, 35, "F");
 
   doc.setTextColor(255, 255, 255);
 
   doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
 
-  doc.setFontSize(22);
-
-  doc.text(COMPANY.name, 14, 17);
-
-  doc.setFont("helvetica", "normal");
+  doc.text(COMPANY.name, 14, 20);
 
   doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
 
-  doc.text(COMPANY.slogan, 14, 25);
+  doc.text(COMPANY.slogan, 14, 28);
 
+  doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
 
-  doc.setFontSize(24);
-
-  doc.text("INVOICE", 145, 20);
+  doc.text("INVOICE", 150, 20);
 
   doc.setTextColor(0, 0, 0);
 };
 
-// ============================================
-// COMPANY INFORMATION
-// ============================================
-
-const drawCompanyInfo = (
-  doc: jsPDF
-) => {
-  let y = 46;
+// ===============================
+// COMPANY INFO
+// ===============================
+const drawCompanyInfo = (doc: jsPDF) => {
+  let y = 45;
 
   doc.setFontSize(11);
-
   doc.setFont("helvetica", "bold");
-
-  doc.text(
-    "Company Information",
-    14,
-    y
-  );
+  doc.text("Company Information", 14, y);
 
   y += 8;
 
-  doc.setFont(
-    "helvetica",
-    "normal"
-  );
+  doc.setFont("helvetica", "normal");
 
-  doc.text(
-    `Address : ${COMPANY.address}`,
-    14,
-    y
-  );
+  doc.text(`Address: ${COMPANY.address}`, 14, y);
+  y += 6;
 
-  y += 7;
+  doc.text(`Phone: ${COMPANY.phone}`, 14, y);
+  y += 6;
 
-  doc.text(
-    `Phone : ${COMPANY.phone}`,
-    14,
-    y
-  );
+  doc.text(`Email: ${COMPANY.email}`, 14, y);
+  y += 6;
 
-  y += 7;
-
-  doc.text(
-    `Email : ${COMPANY.email}`,
-    14,
-    y
-  );
-
-  y += 7;
-
-  doc.text(
-    `Website : ${COMPANY.website}`,
-    14,
-    y
-  );
+  doc.text(`Website: ${COMPANY.website}`, 14, y);
 };
 
-// ============================================
-// ORDER INFORMATION
-// ============================================
-
+// ===============================
+// ORDER INFO
+// ===============================
 const drawOrderInfo = (
   doc: jsPDF,
-  order: Order
+  invoice: InvoiceData
 ) => {
-  let y = 46;
+  let y = 45;
 
-  doc.setFont(
-    "helvetica",
-    "bold"
-  );
-
-  doc.text(
-    "Order Information",
-    125,
-    y
-  );
+  doc.setFont("helvetica", "bold");
+  doc.text("Invoice Info", 130, y);
 
   y += 8;
 
-  doc.setFont(
-    "helvetica",
-    "normal"
-  );
+  doc.setFont("helvetica", "normal");
 
-  doc.text(
-    `Order No : ${order.orderNumber}`,
-    125,
-    y
-  );
+  doc.text(`Invoice: ${invoice.invoiceNumber}`, 130, y);
+  y += 6;
 
-  y += 7;
+  doc.text(`Order: ${invoice.orderNumber}`, 130, y);
+  y += 6;
 
-  doc.text(
-    `Date : ${formatDate(order.createdAt)}`,
-    125,
-    y
-  );
+  doc.text(`Date: ${invoice.invoiceDate}`, 130, y);
+  y += 6;
 
-  y += 7;
-
-  doc.text(
-    `Status : ${order.orderStatus}`,
-    125,
-    y
-  );
-
-  y += 7;
-
-  doc.text(
-    `Payment : ${order.paymentMethod}`,
-    125,
-    y
-  );
+  doc.text(`Status: ${invoice.orderStatus}`, 130, y);
 };
 
-// ============================================
-// CUSTOMER INFORMATION
-// ============================================
-
-const drawCustomerInfo = (
+// ===============================
+// CUSTOMER SECTION
+// ===============================
+const drawCustomerSection = (
   doc: jsPDF,
-  order: Order
+  invoice: InvoiceData
 ) => {
-  let y = 88;
+  let y = 85;
 
-  doc.setDrawColor(
-    220,
-    220,
-    220
-  );
-
-  doc.line(
-    14,
-    y - 6,
-    196,
-    y - 6
-  );
-
-  doc.setFont(
-    "helvetica",
-    "bold"
-  );
-
-  doc.setFontSize(13);
-
-  doc.text(
-    "Customer Information",
-    14,
-    y
-  );
+  doc.setFont("helvetica", "bold");
+  doc.text("Customer Information", 14, y);
 
   y += 10;
 
-  doc.setFont(
-    "helvetica",
-    "normal"
-  );
-
-  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
 
   doc.text(
-    `Name : ${
-      order.shippingAddress?.fullName ||
-      "Customer"
-    }`,
+    `Name: ${invoice.customer.name || "Customer"}`,
     14,
     y
   );
+  y += 6;
 
-  y += 7;
+  doc.text(`Phone: ${invoice.customer.phone}`, 14, y);
+  y += 6;
 
-  doc.text(
-    `Phone : ${order.customerPhone}`,
-    14,
-    y
-  );
+  doc.text(`Address: ${invoice.customer.address}`, 14, y);
 
-  y += 7;
-
-  doc.text(
-    `Address : ${
-      order.shippingAddress?.areaOrVillage || ""
-    }, ${
-      order.shippingAddress?.landmark || ""
-    }`,
-    14,
-    y
-  );
-
-  y += 10;
-
-  doc.line(
-    14,
-    y,
-    196,
-    y
-  );
+  doc.line(14, y + 6, 196, y + 6);
 };
-// ============================================
-// PRODUCT TABLE
-// ============================================
 
-const drawItemsTable = (
+// ===============================
+// PRODUCT TABLE
+// ===============================
+const drawProductTable = (
   doc: jsPDF,
-  order: Order
+  invoice: InvoiceData
 ) => {
   autoTable(doc, {
-    startY: 125,
+    startY: 110,
 
-    head: [
-      [
-        "Product",
-        "Qty",
-        "Price",
-        "Total",
-      ],
-    ],
+    head: [["Product", "Qty", "Price", "Total"]],
 
-    body: order.items.map((item) => [
+    body: invoice.items.map((item) => [
       item.productName,
-      item.quantity.toString(),
+      item.quantity,
       formatCurrency(item.price),
       formatCurrency(item.totalPrice),
     ]),
 
     theme: "striped",
 
-    styles: {
-      fontSize: 10,
-      cellPadding: 3,
-    },
-
     headStyles: {
-      fillColor: [37, 99, 235],
+      fillColor: [33, 150, 243],
       textColor: 255,
       fontStyle: "bold",
     },
 
-    columnStyles: {
-      0: { cellWidth: 80 },
-      1: { halign: "center" },
-      2: { halign: "right" },
-      3: { halign: "right" },
+    styles: {
+      fontSize: 10,
     },
 
-    margin: {
-      left: 14,
-      right: 14,
-    },
+    margin: { left: 14, right: 14 },
   });
 };
 
-// ============================================
+// ===============================
 // TOTAL SECTION
-// ============================================
-
+// ===============================
 const drawTotalSection = (
   doc: jsPDF,
-  order: Order
+  invoice: InvoiceData
 ) => {
   const finalY =
     (doc as any).lastAutoTable.finalY + 10;
 
   let y = finalY;
 
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
 
-  // Subtotal (from items)
-  const subtotal = order.items.reduce(
-    (sum, item) => sum + item.totalPrice,
-    0
+  doc.text("Subtotal:", 130, y);
+  doc.text(
+    formatCurrency(invoice.subtotal),
+    180,
+    y,
+    { align: "right" }
   );
 
-  doc.text("Subtotal", 130, y);
+  y += 6;
 
+  doc.text("Delivery:", 130, y);
   doc.text(
-    formatCurrency(subtotal),
-    190,
+    formatCurrency(invoice.deliveryCharge),
+    180,
+    y,
+    { align: "right" }
+  );
+
+  y += 6;
+
+  doc.text("Discount:", 130, y);
+  doc.text(
+    formatCurrency(invoice.discount),
+    180,
     y,
     { align: "right" }
   );
 
   y += 8;
 
-  // Delivery Charge (default 0 if not exist)
-  const delivery = 0;
-
-  doc.text("Delivery", 130, y);
-
-  doc.text(
-    formatCurrency(delivery),
-    190,
-    y,
-    { align: "right" }
-  );
+  doc.line(130, y, 200, y);
 
   y += 8;
-
-  // Discount (optional)
-  const discount = 0;
-
-  doc.text("Discount", 130, y);
-
-  doc.text(
-    formatCurrency(discount),
-    190,
-    y,
-    { align: "right" }
-  );
-
-  y += 10;
-
-  doc.setLineWidth(0.5);
-  doc.line(130, y, 190, y);
-
-  y += 8;
-
-  // Grand Total
-  const total =
-    subtotal + delivery - discount;
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
 
-  doc.text("Grand Total", 130, y);
-
+  doc.text("Grand Total:", 130, y);
   doc.text(
-    formatCurrency(total),
-    190,
+    formatCurrency(invoice.total),
+    180,
     y,
     { align: "right" }
   );
 };
 
-// ============================================
+// ===============================
 // PAYMENT SECTION
-// ============================================
-
+// ===============================
 const drawPaymentSection = (
   doc: jsPDF,
-  order: Order
+  invoice: InvoiceData
 ) => {
   let y = 235;
 
-  doc.setFont("helvetica", "bold");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
 
-  doc.text("Payment Details", 14, y);
-
-  y += 8;
-
-  doc.setFont("helvetica", "normal");
-
   doc.text(
-    `Method : ${order.paymentMethod}`,
+    `Payment Method: ${invoice.paymentMethod}`,
     14,
     y
   );
 
-  y += 7;
+  y += 6;
 
   doc.text(
-    `Status : ${
-      order.isPaid
-        ? "Paid"
-        : "Unpaid"
+    `Payment Status: ${
+      invoice.paymentStatus ? "PAID" : "UNPAID"
     }`,
     14,
     y
   );
 
-  y += 12;
+  y += 10;
 
-  // Badge
-  if (order.isPaid) {
-    doc.setFillColor(46, 204, 113);
-    doc.rect(14, y, 30, 8, "F");
+  doc.setFillColor(
+    invoice.paymentStatus ? 76 : 244,
+    invoice.paymentStatus ? 175 : 67,
+    invoice.paymentStatus ? 80 : 54
+  );
 
-    doc.setTextColor(255, 255, 255);
+  doc.rect(14, y, 40, 8, "F");
 
-    doc.text("PAID", 20, y + 6);
-  } else {
-    doc.setFillColor(231, 76, 60);
-    doc.rect(14, y, 40, 8, "F");
+  doc.setTextColor(255, 255, 255);
 
-    doc.setTextColor(255, 255, 255);
-
-    doc.text("UNPAID", 18, y + 6);
-  }
+  doc.text(
+    invoice.paymentStatus ? "PAID" : "PENDING",
+    22,
+    y + 6
+  );
 
   doc.setTextColor(0, 0, 0);
 };
 
-// ============================================
+// ===============================
 // FOOTER
-// ============================================
-
+// ===============================
 const drawFooter = (doc: jsPDF) => {
   const pageHeight =
     doc.internal.pageSize.height;
 
-  doc.setDrawColor(220, 220, 220);
-
-  doc.line(
-    14,
-    pageHeight - 25,
-    196,
-    pageHeight - 25
-  );
-
-  doc.setFont("helvetica", "italic");
   doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
 
   doc.text(
-    "Thank you for your order!",
+    "Thank you for choosing Babuni Food!",
     105,
-    pageHeight - 15,
+    pageHeight - 20,
+    { align: "center" }
+  );
+
+  doc.setFontSize(8);
+  doc.text(
+    "This is a system generated invoice.",
+    105,
+    pageHeight - 14,
     { align: "center" }
   );
 };
-// ============================================
-// MAIN GENERATE FUNCTION
-// ============================================
 
+// ===============================
+// MAIN FUNCTION
+// ===============================
 export const generateInvoice = (
-  order: Order
+  invoice: InvoiceData
 ) => {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -474,51 +298,18 @@ export const generateInvoice = (
     format: "a4",
   });
 
-  // Reset text color
   doc.setTextColor(0, 0, 0);
 
-  // =========================
-  // HEADER
-  // =========================
-  drawHeader(doc);
-
-  // =========================
-  // COMPANY INFO
-  // =========================
+  drawCompanyHeader(doc);
   drawCompanyInfo(doc);
-
-  // =========================
-  // ORDER INFO
-  // =========================
-  drawOrderInfo(doc, order);
-
-  // =========================
-  // CUSTOMER INFO
-  // =========================
-  drawCustomerInfo(doc, order);
-
-  // =========================
-  // ITEMS TABLE
-  // =========================
-  drawItemsTable(doc, order);
-
-  // =========================
-  // TOTAL SECTION
-  // =========================
-  drawTotalSection(doc, order);
-
-  // =========================
-  // PAYMENT SECTION
-  // =========================
-  drawPaymentSection(doc, order);
-
-  // =========================
-  // FOOTER
-  // =========================
+  drawOrderInfo(doc, invoice);
+  drawCustomerSection(doc, invoice);
+  drawProductTable(doc, invoice);
+  drawTotalSection(doc, invoice);
+  drawPaymentSection(doc, invoice);
   drawFooter(doc);
 
-  // =========================
-  // DOWNLOAD PDF
-  // =========================
-  doc.save(`${order.orderNumber}.pdf`);
+  doc.save(
+    `${COMPANY.invoicePrefix}-${invoice.invoiceNumber}.pdf`
+  );
 };
