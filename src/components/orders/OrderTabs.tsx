@@ -1,6 +1,10 @@
 "use client";
 
-const tabs = [
+import { OrderStatus } from "@/src/types/order";
+
+type TabType = OrderStatus | "All";
+
+const tabs: TabType[] = [
   "All",
   "Pending",
   "Processing",
@@ -10,10 +14,8 @@ const tabs = [
 ];
 
 interface Props {
-  active: string;
-  onChange: (
-    value: string
-  ) => void;
+  active: TabType;
+  onChange: (value: TabType) => void;
 }
 
 export default function OrderTabs({
@@ -22,27 +24,19 @@ export default function OrderTabs({
 }: Props) {
   return (
     <div className="flex flex-wrap gap-2">
-
       {tabs.map((tab) => (
         <button
           key={tab}
-          onClick={() =>
-            onChange(tab)
-          }
-          className={`
-          px-4 py-2 rounded-lg
-
-          ${
+          onClick={() => onChange(tab)}
+          className={`px-4 py-2 rounded-lg transition ${
             active === tab
               ? "bg-blue-600 text-white"
-              : "bg-gray-100"
-          }
-        `}
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
         >
           {tab}
         </button>
       ))}
-
     </div>
   );
 }
