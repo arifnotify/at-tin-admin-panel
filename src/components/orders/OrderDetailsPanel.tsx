@@ -7,27 +7,6 @@ import OrderSummary from "./OrderSummary";
 import OrderTimeline from "./OrderTimeline";
 import EditableOrderItems from "./EditableOrderItems";
 
-import InvoiceActions from "@/src/components/invoice/InvoiceActions";
-import { Order } from "@/src/types/order";
-
-type Props = {
-  order: Order | null; // ✅ FIX HERE
-
-  riders: any[];
-
-  selectedRider: string;
-  setSelectedRider: (v: string) => void;
-
-  assignRider: () => void;
-  updateStatus: (status: string) => void;
-
-  items: any[];
-  setItems: (items: any[]) => void;
-
-  saveItems: () => void;
-  saving: boolean;
-};
-
 export default function OrderDetailsPanel({
   order,
   riders,
@@ -39,30 +18,27 @@ export default function OrderDetailsPanel({
   setItems,
   saveItems,
   saving,
-}: Props) {
-
-  // =========================
-  // SAFE GUARD (IMPORTANT)
-  // =========================
+}: any) {
   if (!order) {
     return (
-      <div className="bg-white border rounded-2xl p-10 text-center text-gray-500">
-        Select an order to view details
+      <div className="bg-white border rounded-2xl p-10">
+        Select Order
       </div>
     );
   }
 
-  // =========================
-  // LOCK LOGIC
-  // =========================
   const locked =
-    order.orderStatus === "Delivered" ||
-    order.orderStatus === "Cancelled";
+    order.orderStatus ===
+      "Delivered" ||
+    order.orderStatus ===
+      "Cancelled";
 
   return (
     <div className="space-y-5">
 
-      <CustomerInfoCard order={order} />
+      <CustomerInfoCard
+        order={order}
+      />
 
       <StatusCard
         order={order}
@@ -71,8 +47,12 @@ export default function OrderDetailsPanel({
 
       <RiderCard
         riders={riders}
-        selectedRider={selectedRider}
-        setSelectedRider={setSelectedRider}
+        selectedRider={
+          selectedRider
+        }
+        setSelectedRider={
+          setSelectedRider
+        }
         assign={assignRider}
         locked={locked}
       />
@@ -88,16 +68,16 @@ export default function OrderDetailsPanel({
           onClick={saveItems}
           disabled={saving}
           className="
-            bg-green-600
-            hover:bg-green-700
-            text-white
-            px-6
-            py-3
-            rounded-xl
-            transition
-          "
+          bg-green-600
+          text-white
+          px-6
+          py-3
+          rounded-xl
+        "
         >
-          {saving ? "Saving..." : "Save Changes"}
+          {saving
+            ? "Saving..."
+            : "Save Changes"}
         </button>
       )}
 
@@ -108,11 +88,9 @@ export default function OrderDetailsPanel({
         }}
       />
 
-      <OrderTimeline order={order} />
-
-      <div className="pt-4 border-t">
-        <InvoiceActions order={order} />
-      </div>
+      <OrderTimeline
+        order={order}
+      />
 
     </div>
   );
