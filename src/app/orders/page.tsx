@@ -24,8 +24,8 @@ import { Order, OrderItem, OrderStatus } from "@/src/types/order";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
   const [items, setItems] = useState<OrderItem[]>([]);
   const [riders, setRiders] = useState<any[]>([]);
 
@@ -37,9 +37,6 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // =========================
-  // LOAD DATA
-  // =========================
   useEffect(() => {
     loadData();
   }, []);
@@ -64,13 +61,9 @@ export default function OrdersPage() {
     }
   };
 
-  // =========================
-  // LOAD SINGLE ORDER
-  // =========================
   const loadSingleOrder = async (id: string) => {
     try {
       const data = await getOrder(id);
-
       setSelectedOrder(data);
       setItems(data.items || []);
     } catch (err) {
@@ -78,64 +71,38 @@ export default function OrdersPage() {
     }
   };
 
-  // =========================
-  // STATUS UPDATE (FIXED TYPE)
-  // =========================
   const handleStatusChange = async (newStatus: OrderStatus) => {
-    try {
-      if (!selectedOrder) return;
+    if (!selectedOrder) return;
 
-      await updateOrderStatus(selectedOrder._id, newStatus);
+    await updateOrderStatus(selectedOrder._id, newStatus);
 
-      setSelectedOrder({
-        ...selectedOrder,
-        orderStatus: newStatus,
-      });
-
-      loadData();
-    } catch (err) {
-      console.log(err);
-    }
+    setSelectedOrder((prev: any) => ({
+      ...prev,
+      orderStatus: newStatus,
+    }));
   };
-    // =========================
-  // ASSIGN RIDER
-  // =========================
+
   const handleAssignRider = async () => {
-    try {
-      if (!selectedOrder) return;
+    if (!selectedOrder || !selectedRider) return;
 
-      if (!selectedRider) {
-        alert("Select Rider First");
-        return;
-      }
+    await assignRider(selectedOrder._id, selectedRider);
 
-      await assignRider(selectedOrder._id, selectedRider);
-
-      alert("Rider Assigned");
-
-      loadSingleOrder(selectedOrder._id);
-    } catch (err) {
-      console.log(err);
-    }
+    loadSingleOrder(selectedOrder._id);
   };
 
-  // =========================
-  // SAVE ITEMS
-  // =========================
   const handleSaveItems = async () => {
+    if (!selectedOrder) return;
+
+    setSaving(true);
+
     try {
-      if (!selectedOrder) return;
-
-      setSaving(true);
-
-      const payload = items.map((item) => ({
-        product: item.product!,
-        quantity: item.quantity,
-      }));
-
-      await adminEditOrder(selectedOrder._id, payload);
-
-      alert("Order Updated");
+      await adminEditOrder(
+        selectedOrder._id,
+        items.map((i) => ({
+          product: i.product!,
+          quantity: i.quantity,
+        }))
+      );
 
       loadSingleOrder(selectedOrder._id);
     } catch (err) {
@@ -145,29 +112,17 @@ export default function OrdersPage() {
     }
   };
 
-  // =========================
-  // SEARCH
-  // =========================
   const searchedOrders = useMemo(() => {
-    return orders.filter((order) => {
-      return (
-        order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-        order.customerPhone.includes(search)
-      );
-    });
+    return orders.filter((o) =>
+      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+      o.customerPhone.includes(search)
+    );
   }, [orders, search]);
 
-  // =========================
-  // FILTER BY STATUS (FIXED)
-  // =========================
-  const filteredOrders = searchedOrders.filter((order) => {
-    if (status === "All") return true;
-    return order.orderStatus === status;
-  });
+  const filteredOrders = searchedOrders.filter((o) =>
+    status === "All" ? true : o.orderStatus === status
+  );
 
-  // =========================
-  // ACTIVE / COMPLETED
-  // =========================
   const activeOrders = filteredOrders.filter(
     (o) => o.orderStatus !== "Delivered" && o.orderStatus !== "Cancelled"
   );
@@ -176,49 +131,39 @@ export default function OrdersPage() {
     (o) => o.orderStatus === "Delivered" || o.orderStatus === "Cancelled"
   );
 
-  // =========================
-  // STATS
-  // =========================
   const pendingCount = orders.filter((o) => o.orderStatus === "Pending").length;
 
   const deliveredCount = orders.filter((o) => o.orderStatus === "Delivered").length;
 
   const totalRevenue = orders
     .filter((o) => o.orderStatus === "Delivered")
-    .reduce((sum, order) => sum + order.totalAmount, 0);
+    .reduce((sum, o) => sum + o.totalAmount, 0);
 
-  if (loading) {
-    return <div className="p-10">Loading...</div>;
-  }
+  if (loading) return <div className="p-10">Loading...</div>;
 
   return (
     <div className="p-5 bg-gray-50 min-h-screen">
 
-      {/* =========================
-          STATS
-      ========================= */}
+      {/* STATS */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">
-
         <StatCard title="Total Orders" value={orders.length} />
         <StatCard title="Pending" value={pendingCount} />
         <StatCard title="Delivered" value={deliveredCount} />
         <StatCard title="Revenue" value={`৳${totalRevenue}`} />
-
       </div>
 
       {/* SEARCH */}
       <div className="bg-white border rounded-2xl p-5 mb-5">
         <OrderSearch value={search} onChange={setSearch} />
-
         <div className="mt-4">
           <OrderTabs active={status} onChange={setStatus} />
         </div>
       </div>
 
-      {/* MAIN LAYOUT */}
+      {/* MAIN */}
       <div className="grid lg:grid-cols-12 gap-5">
 
-        {/* LEFT */}
+        {/* SIDEBAR */}
         <div className="lg:col-span-4">
           <OrdersSidebar
             activeOrders={activeOrders}
@@ -228,7 +173,7 @@ export default function OrdersPage() {
           />
         </div>
 
-        {/* RIGHT */}
+        {/* DETAILS */}
         <div className="lg:col-span-8">
           <OrderDetailsPanel
             order={selectedOrder}
@@ -245,7 +190,6 @@ export default function OrdersPage() {
         </div>
 
       </div>
-
     </div>
   );
 }
