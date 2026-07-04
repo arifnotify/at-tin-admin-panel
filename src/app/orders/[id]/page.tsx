@@ -20,7 +20,6 @@ import OrderTimeline from "@/src/components/orders/OrderTimeline";
 import EditableOrderItems from "@/src/components/orders/EditableOrderItems";
 
 import { generateInvoice } from "@/src/utils/generateInvoice";
-import { InvoiceData } from "@/src/types/invoice";
 
 export default function OrderDetailsPage() {
   const params = useParams();
@@ -34,42 +33,52 @@ export default function OrderDetailsPage() {
   const [riders, setRiders] = useState<any[]>([]);
   const [selectedRider, setSelectedRider] = useState("");
 
+  // LOAD DATA
   useEffect(() => {
     if (!id) return;
-    loadOrder();
-    loadRiders();
+
+    const load = async () => {
+      try {
+        setLoading(true);
+
+        const o = await getOrder(id);
+        const r = await getRiders();
+
+        setOrder(o);
+        setItems(o?.items || []);
+        setRiders(r || []);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, [id]);
 
-  const loadOrder = async () => {
-    try {
-      setLoading(true);
-      const data = await getOrder(id);
-      setOrder(data);
-      setItems(data.items || []);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // LOCK SYSTEM
+  const locked =
+    order?.orderStatus === "Delivered" ||
+    order?.orderStatus === "Cancelled";
 
-  const loadRiders = async () => {
-    try {
-      const data = await getRiders();
-      setRiders(data || []);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  // LOADING UI
+  if (loading) {
+    return <div className="p-10 text-center">Loading...</div>;
+  }
 
-  const buildInvoice = (order: any): InvoiceData => {
-    const subtotal = order.items.reduce(
-      (sum: number, item: any) => sum + item.totalPrice,
-      0
-    );
+  // ERROR UI
+  if (!order) {
+    return <div className="p-10 text-center text-red-500">Order Not Found</div>;
+  }
 
-    const deliveryCharge = order.deliveryCharge || 0;
-    const discount = order.discount || 0;
+  // INVOICE BUILDER
+  const buildInvoice = () => {
+    const subtotal =
+      items?.reduce((sum, i) => sum + (i.totalPrice || 0), 0) || 0;
+
+    const deliveryCharge = order?.deliveryCharge || 0;
+    const discount = order?.discount || 0;
 
     return {
       invoiceNumber: order.orderNumber,
@@ -77,12 +86,14 @@ export default function OrderDetailsPage() {
       invoiceDate: new Date().toISOString(),
 
       customer: {
-        name: order.shippingAddress?.fullName || "Customer",
-        phone: order.customerPhone,
-        address: `${order.shippingAddress?.areaOrVillage || ""} ${order.shippingAddress?.landmark || ""}`,
+        name: order?.shippingAddress?.fullName || "Customer",
+        phone: order?.customerPhone,
+        address: `${order?.shippingAddress?.areaOrVillage || ""} ${
+          order?.shippingAddress?.landmark || ""
+        }`,
       },
 
-      items: order.items,
+      items,
 
       subtotal,
       deliveryCharge,
@@ -95,35 +106,31 @@ export default function OrderDetailsPage() {
     };
   };
 
-  const locked =
-    order?.orderStatus === "Delivered" ||
-    order?.orderStatus === "Cancelled";
-
-  if (loading) {
-    return <div className="p-10 text-center">Loading Order...</div>;
-  }
-
-  if (!order) {
-    return <div className="p-10 text-center text-red-500">Order Not Found</div>;
-  }
-
   return (
     <div className="bg-gray-50 min-h-screen p-5">
 
-      {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">
-          Order #{order.orderNumber}
-        </h1>
-        <p className="text-gray-500">
-          Manage Order Details
-        </p>
+      {/* DEBUG (remove later if you want) */}
+      <div className="bg-black text-white p-2 mb-3 text-sm">
+        Order Page Loaded ✔
       </div>
 
-      {/* ✅ INVOICE BUTTON (ALWAYS VISIBLE HERE) */}
+      {/* HEADER */}
+      <h1 className="text-3xl font-bold mb-1">
+        Order #{order.orderNumber}
+      </h1>
+
+      <p className="text-gray-500 mb-5">
+        Manage Order Details
+      </p>
+
+      {/* ✅ INVOICE BUTTON (FOR SURE VISIBLE) */}
       <div className="mb-6">
         <button
-          onClick={() => generateInvoice(buildInvoice(order))}
+          type="button"
+          onClick={() => {
+            console.log("Invoice clicked");
+            generateInvoice(buildInvoice());
+          }}
           className="bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700"
         >
           📄 Download Invoice
@@ -171,20 +178,21 @@ export default function OrderDetailsPage() {
                 try {
                   await adminEditOrder(
                     order._id,
-                    items.map((item) => ({
-                      product: item.product,
-                      quantity: item.quantity,
+                    items.map((i) => ({
+                      product: i.product,
+                      quantity: i.quantity,
                     }))
                   );
 
-                  await loadOrder();
+                  const updated = await getOrder(id);
+                  setOrder(updated);
+                  setItems(updated.items || []);
                 } catch (err) {
                   console.log(err);
                 } finally {
                   setSaving(false);
                 }
               }}
-              disabled={saving}
               className="bg-blue-600 text-white px-6 py-3 rounded-xl"
             >
               {saving ? "Saving..." : "Save Changes"}
