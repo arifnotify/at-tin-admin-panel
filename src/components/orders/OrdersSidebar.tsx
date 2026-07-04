@@ -6,11 +6,10 @@ interface Props {
   activeOrders: Order[];
   completedOrders: Order[];
 
-  selectedId: string;
+  // প্রথমে selectedOrder null থাকে, তাই optional
+  selectedId?: string;
 
-  onSelect: (
-    id: string
-  ) => void;
+  onSelect: (id: string) => void;
 }
 
 export default function OrdersSidebar({
@@ -20,107 +19,156 @@ export default function OrdersSidebar({
   onSelect,
 }: Props) {
   return (
-    <div className="bg-white border rounded-2xl">
+    <div className="bg-white rounded-2xl border shadow-sm h-[calc(100vh-180px)] overflow-hidden">
 
-      <div className="p-4 border-b">
-
-        <h2 className="font-bold text-xl">
+      {/* Header */}
+      <div className="p-5 border-b sticky top-0 bg-white z-10">
+        <h2 className="text-xl font-bold">
           Orders
         </h2>
 
+        <p className="text-sm text-gray-500 mt-1">
+          {activeOrders.length} Active • {completedOrders.length} Completed
+        </p>
       </div>
 
-      <div className="p-3">
+      {/* Scroll Area */}
+      <div className="overflow-y-auto h-full p-4">
 
-        {/* ACTIVE */}
+        {/* ================= ACTIVE ================= */}
 
-        <h3 className="font-bold mb-3">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-blue-600 mb-3">
           Active Orders
         </h3>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
 
-          {activeOrders.map(
-            (order) => (
-              <button
-                key={order._id}
-                onClick={() =>
-                  onSelect(order._id)
-                }
-                className={`
+          {activeOrders.length === 0 && (
+            <div className="text-gray-400 text-sm text-center py-6 border rounded-xl">
+              No Active Orders
+            </div>
+          )}
+
+          {activeOrders.map((order) => (
+            <button
+              key={order._id}
+              onClick={() => onSelect(order._id)}
+              className={`
                 w-full
-                text-left
-                p-3
                 rounded-xl
                 border
+                p-4
+                text-left
+                transition
+                hover:border-blue-500
+                hover:bg-blue-50
 
                 ${
-                  selectedId ===
-                  order._id
-                    ? "border-blue-500 bg-blue-50"
-                    : ""
+                  selectedId === order._id
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200"
                 }
               `}
-              >
-                <p className="font-semibold">
-                  #{order.orderNumber}
-                </p>
+            >
+              <div className="flex justify-between items-center">
 
-                <p className="text-xs text-gray-500">
-                  {
-                    order.customerPhone
-                  }
-                </p>
+                <div>
+                  <p className="font-semibold">
+                    #{order.orderNumber}
+                  </p>
 
-              </button>
-            )
-          )}
+                  <p className="text-sm text-gray-500 mt-1">
+                    {order.customerPhone}
+                  </p>
+                </div>
+
+                <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                  {order.orderStatus}
+                </span>
+
+              </div>
+
+              <div className="mt-3 text-sm font-semibold text-green-600">
+                ৳{order.totalAmount}
+              </div>
+
+            </button>
+          ))}
 
         </div>
 
-        {/* COMPLETED */}
+        {/* ================= COMPLETED ================= */}
 
-        <h3 className="font-bold mt-6 mb-3">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-green-600 mt-8 mb-3">
           Completed Orders
         </h3>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
 
-          {completedOrders.map(
-            (order) => (
-              <button
-                key={order._id}
-                onClick={() =>
-                  onSelect(order._id)
-                }
-                className={`
+          {completedOrders.length === 0 && (
+            <div className="text-gray-400 text-sm text-center py-6 border rounded-xl">
+              No Completed Orders
+            </div>
+          )}
+
+          {completedOrders.map((order) => (
+            <button
+              key={order._id}
+              onClick={() => onSelect(order._id)}
+              className={`
                 w-full
-                text-left
-                p-3
                 rounded-xl
                 border
+                p-4
+                text-left
+                transition
+                hover:border-green-500
+                hover:bg-green-50
 
                 ${
-                  selectedId ===
-                  order._id
-                    ? "border-green-500 bg-green-50"
-                    : ""
+                  selectedId === order._id
+                    ? "border-green-600 bg-green-50"
+                    : "border-gray-200"
                 }
               `}
-              >
-                <p className="font-semibold">
-                  #{order.orderNumber}
-                </p>
+            >
+              <div className="flex justify-between items-center">
 
-                <p className="text-xs text-gray-500">
-                  {
-                    order.customerPhone
-                  }
-                </p>
+                <div>
+                  <p className="font-semibold">
+                    #{order.orderNumber}
+                  </p>
 
-              </button>
-            )
-          )}
+                  <p className="text-sm text-gray-500 mt-1">
+                    {order.customerPhone}
+                  </p>
+                </div>
+
+                <span
+                  className={`
+                    text-xs
+                    px-2
+                    py-1
+                    rounded-full
+
+                    ${
+                      order.orderStatus === "Delivered"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }
+                  `}
+                >
+                  {order.orderStatus}
+                </span>
+
+              </div>
+
+              <div className="mt-3 text-sm font-semibold text-green-600">
+                ৳{order.totalAmount}
+              </div>
+
+            </button>
+          ))}
 
         </div>
 
