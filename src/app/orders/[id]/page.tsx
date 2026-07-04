@@ -34,12 +34,8 @@ export default function OrderDetailsPage() {
   const [riders, setRiders] = useState<any[]>([]);
   const [selectedRider, setSelectedRider] = useState("");
 
-  // =========================
-  // LOAD ORDER
-  // =========================
   useEffect(() => {
     if (!id) return;
-
     loadOrder();
     loadRiders();
   }, [id]);
@@ -47,9 +43,7 @@ export default function OrderDetailsPage() {
   const loadOrder = async () => {
     try {
       setLoading(true);
-
       const data = await getOrder(id);
-
       setOrder(data);
       setItems(data.items || []);
     } catch (err) {
@@ -68,21 +62,14 @@ export default function OrderDetailsPage() {
     }
   };
 
-  // =========================
-  // ORDER → INVOICE MAPPER
-  // =========================
   const buildInvoice = (order: any): InvoiceData => {
     const subtotal = order.items.reduce(
-      (sum: number, item: any) =>
-        sum + item.totalPrice,
+      (sum: number, item: any) => sum + item.totalPrice,
       0
     );
 
-    const deliveryCharge =
-      order.deliveryCharge || 0;
-
-    const discount =
-      order.discount || 0;
+    const deliveryCharge = order.deliveryCharge || 0;
+    const discount = order.discount || 0;
 
     return {
       invoiceNumber: order.orderNumber,
@@ -90,9 +77,7 @@ export default function OrderDetailsPage() {
       invoiceDate: new Date().toISOString(),
 
       customer: {
-        name:
-          order.shippingAddress?.fullName ||
-          "Customer",
+        name: order.shippingAddress?.fullName || "Customer",
         phone: order.customerPhone,
         address: `${order.shippingAddress?.areaOrVillage || ""} ${order.shippingAddress?.landmark || ""}`,
       },
@@ -102,147 +87,47 @@ export default function OrderDetailsPage() {
       subtotal,
       deliveryCharge,
       discount,
+      total: subtotal + deliveryCharge - discount,
 
-      total:
-        subtotal +
-        deliveryCharge -
-        discount,
-
-      paymentMethod:
-        order.paymentMethod,
+      paymentMethod: order.paymentMethod,
       paymentStatus: order.isPaid,
       orderStatus: order.orderStatus,
     };
   };
 
-  // =========================
-  // STATUS UPDATE
-  // =========================
-  const handleStatusChange = async (status: string) => {
-    try {
-      await updateOrderStatus(order._id, status);
+  const locked =
+    order?.orderStatus === "Delivered" ||
+    order?.orderStatus === "Cancelled";
 
-      setOrder((prev: any) => ({
-        ...prev,
-        orderStatus: status,
-      }));
-
-      alert("Status Updated");
-    } catch (err) {
-      console.log(err);
-      alert("Status Update Failed");
-    }
-  };
-
-  // =========================
-  // ASSIGN RIDER
-  // =========================
-  const handleAssignRider = async () => {
-    try {
-      if (!selectedRider) {
-        alert("Select Rider First");
-        return;
-      }
-
-      await assignRider(order._id, selectedRider);
-
-      alert("Rider Assigned");
-
-      loadOrder();
-    } catch (err) {
-      console.log(err);
-      alert("Assign Failed");
-    }
-  };
-
-  // =========================
-  // SAVE ITEMS
-  // =========================
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-
-      const payload = items.map((item) => ({
-        product: item.product,
-        quantity: item.quantity,
-      }));
-
-      await adminEditOrder(order._id, payload);
-
-      alert("Order Updated Successfully");
-
-      loadOrder();
-    } catch (err) {
-      console.log(err);
-      alert("Update Failed");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // =========================
-  // LOADING UI
-  // =========================
   if (loading) {
-    return (
-      <div className="p-10 text-center">
-        Loading Order...
-      </div>
-    );
+    return <div className="p-10 text-center">Loading Order...</div>;
   }
 
   if (!order) {
-    return (
-      <div className="p-10 text-center text-red-500">
-        Order Not Found
-      </div>
-    );
+    return <div className="p-10 text-center text-red-500">Order Not Found</div>;
   }
-
-  // =========================
-  // LOCK SYSTEM
-  // =========================
-  const locked =
-    order.orderStatus === "Delivered" ||
-    order.orderStatus === "Cancelled";
 
   return (
     <div className="bg-gray-50 min-h-screen p-5">
 
       {/* HEADER */}
       <div className="mb-6">
-
         <h1 className="text-3xl font-bold">
           Order #{order.orderNumber}
         </h1>
-
         <p className="text-gray-500">
           Manage Order Details
         </p>
-
       </div>
 
-      {/* INVOICE BUTTON */}
+      {/* ✅ INVOICE BUTTON (ALWAYS VISIBLE HERE) */}
       <div className="mb-6">
-
         <button
-          onClick={() =>
-            generateInvoice(
-              buildInvoice(order)
-            )
-          }
-          className="
-            bg-green-600
-            text-white
-            px-5
-            py-2
-            rounded-xl
-            hover:bg-green-700
-          "
+          onClick={() => generateInvoice(buildInvoice(order))}
+          className="bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700"
         >
           📄 Download Invoice
         </button>
-
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -254,14 +139,21 @@ export default function OrderDetailsPage() {
 
           <StatusCard
             order={order}
-            onChange={handleStatusChange}
+            onChange={(status: string) =>
+              updateOrderStatus(order._id, status).then(() =>
+                setOrder((prev: any) => ({
+                  ...prev,
+                  orderStatus: status,
+                }))
+              )
+            }
           />
 
           <RiderCard
             riders={riders}
             selectedRider={selectedRider}
             setSelectedRider={setSelectedRider}
-            assign={handleAssignRider}
+            assign={() => assignRider(order._id, selectedRider)}
             locked={locked}
           />
 
@@ -273,22 +165,31 @@ export default function OrderDetailsPage() {
 
           {!locked && (
             <button
-              onClick={handleSave}
+              onClick={async () => {
+                setSaving(true);
+
+                try {
+                  await adminEditOrder(
+                    order._id,
+                    items.map((item) => ({
+                      product: item.product,
+                      quantity: item.quantity,
+                    }))
+                  );
+
+                  await loadOrder();
+                } catch (err) {
+                  console.log(err);
+                } finally {
+                  setSaving(false);
+                }
+              }}
               disabled={saving}
-              className="
-                bg-blue-600
-                text-white
-                px-6
-                py-3
-                rounded-xl
-              "
+              className="bg-blue-600 text-white px-6 py-3 rounded-xl"
             >
-              {saving
-                ? "Saving..."
-                : "Save Changes"}
+              {saving ? "Saving..." : "Save Changes"}
             </button>
           )}
-
         </div>
 
         {/* RIGHT */}
@@ -310,9 +211,7 @@ export default function OrderDetailsPage() {
           )}
 
         </div>
-
       </div>
-
     </div>
   );
 }
