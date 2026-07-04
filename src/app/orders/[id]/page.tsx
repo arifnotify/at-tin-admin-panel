@@ -12,16 +12,15 @@ import {
 
 import { getRiders } from "@/src/services/rider.service";
 
-// =========================
-// COMPONENTS
-// =========================
 import CustomerInfoCard from "@/src/components/orders/CustomerInfoCard";
 import StatusCard from "@/src/components/orders/StatusCard";
 import RiderCard from "@/src/components/orders/RiderCard";
 import OrderSummary from "@/src/components/orders/OrderSummary";
 import OrderTimeline from "@/src/components/orders/OrderTimeline";
 import EditableOrderItems from "@/src/components/orders/EditableOrderItems";
-import InvoiceActions from "@/src/components/orders/InvoiceActions";
+
+import { generateInvoice } from "@/src/utils/generateInvoice";
+import { InvoiceData } from "@/src/types/invoice";
 
 export default function OrderDetailsPage() {
   const params = useParams();
@@ -36,7 +35,7 @@ export default function OrderDetailsPage() {
   const [selectedRider, setSelectedRider] = useState("");
 
   // =========================
-  // LOAD DATA
+  // LOAD ORDER
   // =========================
   useEffect(() => {
     if (!id) return;
@@ -67,6 +66,53 @@ export default function OrderDetailsPage() {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  // =========================
+  // ORDER → INVOICE MAPPER
+  // =========================
+  const buildInvoice = (order: any): InvoiceData => {
+    const subtotal = order.items.reduce(
+      (sum: number, item: any) =>
+        sum + item.totalPrice,
+      0
+    );
+
+    const deliveryCharge =
+      order.deliveryCharge || 0;
+
+    const discount =
+      order.discount || 0;
+
+    return {
+      invoiceNumber: order.orderNumber,
+      orderNumber: order.orderNumber,
+      invoiceDate: new Date().toISOString(),
+
+      customer: {
+        name:
+          order.shippingAddress?.fullName ||
+          "Customer",
+        phone: order.customerPhone,
+        address: `${order.shippingAddress?.areaOrVillage || ""} ${order.shippingAddress?.landmark || ""}`,
+      },
+
+      items: order.items,
+
+      subtotal,
+      deliveryCharge,
+      discount,
+
+      total:
+        subtotal +
+        deliveryCharge -
+        discount,
+
+      paymentMethod:
+        order.paymentMethod,
+      paymentStatus: order.isPaid,
+      orderStatus: order.orderStatus,
+    };
   };
 
   // =========================
@@ -139,8 +185,8 @@ export default function OrderDetailsPage() {
   // =========================
   if (loading) {
     return (
-      <div className="p-10 text-center text-gray-500">
-        Loading Order Details...
+      <div className="p-10 text-center">
+        Loading Order...
       </div>
     );
   }
@@ -176,14 +222,32 @@ export default function OrderDetailsPage() {
 
       </div>
 
-      {/* INVOICE ACTIONS (NEW FEATURE) */}
+      {/* INVOICE BUTTON */}
       <div className="mb-6">
-        <InvoiceActions order={order} />
+
+        <button
+          onClick={() =>
+            generateInvoice(
+              buildInvoice(order)
+            )
+          }
+          className="
+            bg-green-600
+            text-white
+            px-5
+            py-2
+            rounded-xl
+            hover:bg-green-700
+          "
+        >
+          📄 Download Invoice
+        </button>
+
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* LEFT SIDE */}
+        {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
 
           <CustomerInfoCard order={order} />
@@ -207,29 +271,27 @@ export default function OrderDetailsPage() {
             locked={locked}
           />
 
-          {/* SAVE BUTTON */}
           {!locked && (
             <button
               onClick={handleSave}
               disabled={saving}
               className="
-                bg-green-600
-                hover:bg-green-700
+                bg-blue-600
                 text-white
                 px-6
                 py-3
                 rounded-xl
-                font-semibold
-                transition
               "
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
             </button>
           )}
 
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT */}
         <div className="space-y-6">
 
           <OrderSummary order={{ ...order, items }} />
@@ -237,13 +299,12 @@ export default function OrderDetailsPage() {
           <OrderTimeline order={order} />
 
           {locked && (
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
-              <h3 className="font-bold text-red-600">
+            <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+              <p className="text-red-600 font-bold">
                 Order Locked
-              </h3>
-
-              <p className="text-sm mt-2 text-red-500">
-                Delivered or Cancelled orders cannot be edited.
+              </p>
+              <p className="text-sm text-red-500">
+                Delivered / Cancelled orders cannot be edited.
               </p>
             </div>
           )}
