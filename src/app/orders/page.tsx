@@ -44,7 +44,6 @@ export default function OrdersPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-
       const ordersData = await getOrders();
       const ridersData = await getRiders();
 
@@ -73,37 +72,24 @@ export default function OrdersPage() {
 
   const handleStatusChange = async (newStatus: OrderStatus) => {
     if (!selectedOrder) return;
-
     await updateOrderStatus(selectedOrder._id, newStatus);
-
-    setSelectedOrder((prev: any) => ({
-      ...prev,
-      orderStatus: newStatus,
-    }));
+    setSelectedOrder((prev: any) => ({ ...prev, orderStatus: newStatus }));
   };
 
   const handleAssignRider = async () => {
     if (!selectedOrder || !selectedRider) return;
-
     await assignRider(selectedOrder._id, selectedRider);
-
     loadSingleOrder(selectedOrder._id);
   };
 
   const handleSaveItems = async () => {
     if (!selectedOrder) return;
-
     setSaving(true);
-
     try {
       await adminEditOrder(
         selectedOrder._id,
-        items.map((i) => ({
-          product: i.product!,
-          quantity: i.quantity,
-        }))
+        items.map((i) => ({ product: i.product!, quantity: i.quantity }))
       );
-
       loadSingleOrder(selectedOrder._id);
     } catch (err) {
       console.log(err);
@@ -114,8 +100,8 @@ export default function OrdersPage() {
 
   const searchedOrders = useMemo(() => {
     return orders.filter((o) =>
-      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      o.customerPhone.includes(search)
+      o.orderNumber?.toLowerCase().includes(search.toLowerCase()) ||
+      o.customerPhone?.includes(search)
     );
   }, [orders, search]);
 
@@ -124,71 +110,64 @@ export default function OrdersPage() {
   );
 
   const activeOrders = filteredOrders.filter(
-    (o) => o.orderStatus !== "Delivered" && o.orderStatus !== "Cancelled"
+    (o) => !["Delivered", "Cancelled"].includes(o.orderStatus)
   );
 
   const completedOrders = filteredOrders.filter(
-    (o) => o.orderStatus === "Delivered" || o.orderStatus === "Cancelled"
+    (o) => ["Delivered", "Cancelled"].includes(o.orderStatus)
   );
 
-  const pendingCount = orders.filter((o) => o.orderStatus === "Pending").length;
-
-  const deliveredCount = orders.filter((o) => o.orderStatus === "Delivered").length;
-
-  const totalRevenue = orders
-    .filter((o) => o.orderStatus === "Delivered")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
-
-  if (loading) return <div className="p-10">Loading...</div>;
+  if (loading) return <div className="p-12 text-center text-xl">Loading Orders...</div>;
 
   return (
-    <div className="p-5 bg-gray-50 min-h-screen">
-
-      {/* STATS */}
-      <div className="grid md:grid-cols-4 gap-4 mb-6">
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Stats Cards */}
+      <div className="grid md:grid-cols-4 gap-5 mb-8">
         <StatCard title="Total Orders" value={orders.length} />
-        <StatCard title="Pending" value={pendingCount} />
-        <StatCard title="Delivered" value={deliveredCount} />
-        <StatCard title="Revenue" value={`৳${totalRevenue}`} />
+        <StatCard title="Pending" value={orders.filter(o => o.orderStatus === "Pending").length} />
+        <StatCard title="Delivered" value={orders.filter(o => o.orderStatus === "Delivered").length} />
+        <StatCard title="Total Revenue" value={`৳${orders.filter(o => o.orderStatus === "Delivered").reduce((sum, o) => sum + (o.totalAmount || 0), 0)}`} />
       </div>
 
-      {/* SEARCH */}
-      <div className="bg-white border rounded-2xl p-5 mb-5">
+      {/* Search + Tabs */}
+      <div className="bg-white rounded-3xl shadow p-6 mb-8">
         <OrderSearch value={search} onChange={setSearch} />
-        <div className="mt-4">
+        <div className="mt-5">
           <OrderTabs active={status} onChange={setStatus} />
         </div>
       </div>
 
-      {/* MAIN */}
-      <div className="grid lg:grid-cols-12 gap-5">
-
-        {/* SIDEBAR */}
+      {/* Main Content - Like your Image */}
+      <div className="grid lg:grid-cols-12 gap-6">
+        {/* Left - Orders List (Sidebar) */}
         <div className="lg:col-span-4">
-          <OrdersSidebar
-            activeOrders={activeOrders}
-            completedOrders={completedOrders}
-            selectedId={selectedOrder?._id}
-            onSelect={loadSingleOrder}
-          />
+          <div className="bg-white rounded-3xl shadow p-5 h-full">
+            <OrdersSidebar
+              activeOrders={activeOrders}
+              completedOrders={completedOrders}
+              selectedId={selectedOrder?._id}
+              onSelect={loadSingleOrder}
+            />
+          </div>
         </div>
 
-        {/* DETAILS */}
+        {/* Right - Order Details (Big Card Style) */}
         <div className="lg:col-span-8">
-          <OrderDetailsPanel
-            order={selectedOrder}
-            items={items}
-            setItems={setItems}
-            riders={riders}
-            selectedRider={selectedRider}
-            setSelectedRider={setSelectedRider}
-            updateStatus={handleStatusChange}
-            assignRider={handleAssignRider}
-            saveItems={handleSaveItems}
-            saving={saving}
-          />
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <OrderDetailsPanel
+              order={selectedOrder}
+              items={items}
+              setItems={setItems}
+              riders={riders}
+              selectedRider={selectedRider}
+              setSelectedRider={setSelectedRider}
+              updateStatus={handleStatusChange}
+              assignRider={handleAssignRider}
+              saveItems={handleSaveItems}
+              saving={saving}
+            />
+          </div>
         </div>
-
       </div>
     </div>
   );
