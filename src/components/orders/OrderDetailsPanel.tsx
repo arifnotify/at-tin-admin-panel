@@ -35,29 +35,25 @@ export default function OrderDetailsPanel({
 
   const buildInvoice = () => {
     const subtotal =
-      items?.reduce((sum: number, i: any) => sum + (i.totalPrice || 0), 0) || 0;
-
-    const deliveryCharge = order.deliveryCharge || 0;
-    const discount = order.discount || 0;
+      items?.reduce(
+        (sum: number, i: any) => sum + (i.totalPrice || 0),
+        0
+      ) || 0;
 
     return {
       invoiceNumber: order.orderNumber,
       orderNumber: order.orderNumber,
       invoiceDate: new Date().toISOString(),
-
       customer: {
         name: order.shippingAddress?.fullName || "Customer",
         phone: order.customerPhone,
         address: `${order.shippingAddress?.areaOrVillage || ""} ${order.shippingAddress?.landmark || ""}`,
       },
-
       items,
-
       subtotal,
-      deliveryCharge,
-      discount,
-      total: subtotal + deliveryCharge - discount,
-
+      deliveryCharge: order.deliveryCharge || 0,
+      discount: order.discount || 0,
+      total: subtotal,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.isPaid,
       orderStatus: order.orderStatus,
@@ -65,12 +61,11 @@ export default function OrderDetailsPanel({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
 
-      {/* ✅ INVOICE BUTTON (NOW FIXED) */}
-      <div>
+      {/* INVOICE BUTTON */}
+      <div className="flex justify-end">
         <button
-          type="button"
           onClick={() => generateInvoice(buildInvoice())}
           className="bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700"
         >
@@ -78,24 +73,38 @@ export default function OrderDetailsPanel({
         </button>
       </div>
 
-      <CustomerInfoCard order={order} />
+      {/* =========================
+          STEP 7: 3 CARD GRID
+      ========================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-      <StatusCard order={order} onChange={updateStatus} />
+        {/* CARD 1 */}
+        <CustomerInfoCard order={order} />
 
-      <RiderCard
-        riders={riders}
-        selectedRider={selectedRider}
-        setSelectedRider={setSelectedRider}
-        assign={assignRider}
-        locked={locked}
-      />
+        {/* CARD 2 */}
+        <StatusCard order={order} onChange={updateStatus} />
 
+        {/* CARD 3 */}
+        <RiderCard
+          riders={riders}
+          selectedRider={selectedRider}
+          setSelectedRider={setSelectedRider}
+          assign={assignRider}
+          locked={locked}
+        />
+
+      </div>
+
+      {/* =========================
+          ITEMS SECTION
+      ========================= */}
       <EditableOrderItems
         items={items}
         setItems={setItems}
         locked={locked}
       />
 
+      {/* SAVE BUTTON */}
       {!locked && (
         <button
           onClick={saveItems}
@@ -106,9 +115,15 @@ export default function OrderDetailsPanel({
         </button>
       )}
 
-      <OrderSummary order={{ ...order, items }} />
+      {/* BOTTOM GRID (SUMMARY + TIMELINE) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-      <OrderTimeline order={order} />
+        <OrderSummary order={{ ...order, items }} />
+
+        <OrderTimeline order={order} />
+
+      </div>
+
     </div>
   );
 }

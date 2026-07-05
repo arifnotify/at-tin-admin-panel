@@ -6,11 +6,32 @@ interface Props {
   activeOrders: Order[];
   completedOrders: Order[];
 
-  // প্রথমে selectedOrder null থাকে, তাই optional
   selectedId?: string;
 
   onSelect: (id: string) => void;
 }
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Pending":
+      return "bg-orange-100 text-orange-700";
+
+    case "Processing":
+      return "bg-blue-100 text-blue-700";
+
+    case "OutForDelivery":
+      return "bg-purple-100 text-purple-700";
+
+    case "Delivered":
+      return "bg-green-100 text-green-700";
+
+    case "Cancelled":
+      return "bg-red-100 text-red-700";
+
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
 
 export default function OrdersSidebar({
   activeOrders,
@@ -19,156 +40,229 @@ export default function OrdersSidebar({
   onSelect,
 }: Props) {
   return (
-    <div className="bg-white rounded-2xl border shadow-sm h-[calc(100vh-180px)] overflow-hidden">
+    <div className="h-[calc(100vh-220px)] flex flex-col">
 
-      {/* Header */}
-      <div className="p-5 border-b sticky top-0 bg-white z-10">
-        <h2 className="text-xl font-bold">
+      {/* ======================
+          HEADER
+      ====================== */}
+
+      <div className="sticky top-0 bg-white z-20 border-b p-5">
+
+        <h2 className="text-2xl font-bold text-slate-900">
           Orders
         </h2>
 
-        <p className="text-sm text-gray-500 mt-1">
-          {activeOrders.length} Active • {completedOrders.length} Completed
+        <p className="text-sm text-slate-500 mt-1">
+          {activeOrders.length} Active •{" "}
+          {completedOrders.length} Completed
         </p>
+
       </div>
 
-      {/* Scroll Area */}
-      <div className="overflow-y-auto h-full p-4">
+      {/* ======================
+          SCROLL AREA
+      ====================== */}
 
-        {/* ================= ACTIVE ================= */}
+      <div className="flex-1 overflow-y-auto p-4">
 
-        <h3 className="text-sm font-bold uppercase tracking-wide text-blue-600 mb-3">
-          Active Orders
-        </h3>
+        {/* ACTIVE */}
 
-        <div className="space-y-3">
+        <div className="mb-8">
 
-          {activeOrders.length === 0 && (
-            <div className="text-gray-400 text-sm text-center py-6 border rounded-xl">
-              No Active Orders
-            </div>
-          )}
+          <div className="flex items-center justify-between mb-4">
 
-          {activeOrders.map((order) => (
-            <button
-              key={order._id}
-              onClick={() => onSelect(order._id)}
-              className={`
-                w-full
-                rounded-xl
-                border
-                p-4
-                text-left
-                transition
-                hover:border-blue-500
-                hover:bg-blue-50
+            <h3 className="font-bold text-blue-600 uppercase text-sm tracking-wider">
+              Active Orders
+            </h3>
 
-                ${
-                  selectedId === order._id
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200"
-                }
-              `}
-            >
-              <div className="flex justify-between items-center">
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+              {activeOrders.length}
+            </span>
 
-                <div>
-                  <p className="font-semibold">
-                    #{order.orderNumber}
-                  </p>
+          </div>
 
-                  <p className="text-sm text-gray-500 mt-1">
-                    {order.customerPhone}
-                  </p>
+          <div className="space-y-4">
+
+            {activeOrders.length === 0 && (
+              <div className="border rounded-2xl p-6 text-center text-gray-400">
+                No Active Orders
+              </div>
+            )}
+
+            {activeOrders.map((order) => (
+              <button
+                key={order._id}
+                onClick={() => onSelect(order._id)}
+                className={`
+                  w-full
+                  text-left
+                  rounded-2xl
+                  border
+                  p-4
+                  transition-all
+                  duration-200
+
+                  ${
+                    selectedId === order._id
+                      ? `
+                        border-pink-500
+                        bg-pink-50
+                        shadow-md
+                      `
+                      : `
+                        border-slate-200
+                        bg-white
+                        hover:border-pink-300
+                        hover:shadow-sm
+                      `
+                  }
+                `}
+              >
+                {/* TOP */}
+
+                <div className="flex justify-between items-start">
+
+                  <div>
+
+                    <p className="font-bold text-slate-900">
+                      #{order.orderNumber}
+                    </p>
+
+                    <p className="text-sm text-slate-500 mt-1">
+                      {order.customerPhone}
+                    </p>
+
+                  </div>
+
+                  <span
+                    className={`
+                      text-xs
+                      px-2
+                      py-1
+                      rounded-full
+                      ${getStatusColor(order.orderStatus)}
+                    `}
+                  >
+                    {order.orderStatus}
+                  </span>
+
                 </div>
 
-                <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                  {order.orderStatus}
-                </span>
+                {/* PRICE */}
 
-              </div>
+                <div className="mt-4 flex justify-between items-center">
 
-              <div className="mt-3 text-sm font-semibold text-green-600">
-                ৳{order.totalAmount}
-              </div>
+                  <span className="text-green-600 font-bold">
+                    ৳{order.totalAmount}
+                  </span>
 
-            </button>
-          ))}
+                  <span className="text-xs text-slate-400">
+                    Order
+                  </span>
+
+                </div>
+
+              </button>
+            ))}
+
+          </div>
 
         </div>
 
-        {/* ================= COMPLETED ================= */}
+        {/* COMPLETED */}
 
-        <h3 className="text-sm font-bold uppercase tracking-wide text-green-600 mt-8 mb-3">
-          Completed Orders
-        </h3>
+        <div>
 
-        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-4">
 
-          {completedOrders.length === 0 && (
-            <div className="text-gray-400 text-sm text-center py-6 border rounded-xl">
-              No Completed Orders
-            </div>
-          )}
+            <h3 className="font-bold text-green-600 uppercase text-sm tracking-wider">
+              Completed Orders
+            </h3>
 
-          {completedOrders.map((order) => (
-            <button
-              key={order._id}
-              onClick={() => onSelect(order._id)}
-              className={`
-                w-full
-                rounded-xl
-                border
-                p-4
-                text-left
-                transition
-                hover:border-green-500
-                hover:bg-green-50
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+              {completedOrders.length}
+            </span>
 
-                ${
-                  selectedId === order._id
-                    ? "border-green-600 bg-green-50"
-                    : "border-gray-200"
-                }
-              `}
-            >
-              <div className="flex justify-between items-center">
+          </div>
 
-                <div>
-                  <p className="font-semibold">
-                    #{order.orderNumber}
-                  </p>
+          <div className="space-y-4">
 
-                  <p className="text-sm text-gray-500 mt-1">
-                    {order.customerPhone}
-                  </p>
+            {completedOrders.length === 0 && (
+              <div className="border rounded-2xl p-6 text-center text-gray-400">
+                No Completed Orders
+              </div>
+            )}
+
+            {completedOrders.map((order) => (
+              <button
+                key={order._id}
+                onClick={() => onSelect(order._id)}
+                className={`
+                  w-full
+                  text-left
+                  rounded-2xl
+                  border
+                  p-4
+                  transition-all
+
+                  ${
+                    selectedId === order._id
+                      ? `
+                        border-green-500
+                        bg-green-50
+                      `
+                      : `
+                        border-slate-200
+                        bg-white
+                        hover:border-green-300
+                      `
+                  }
+                `}
+              >
+                <div className="flex justify-between items-start">
+
+                  <div>
+
+                    <p className="font-bold text-slate-900">
+                      #{order.orderNumber}
+                    </p>
+
+                    <p className="text-sm text-slate-500 mt-1">
+                      {order.customerPhone}
+                    </p>
+
+                  </div>
+
+                  <span
+                    className={`
+                      text-xs
+                      px-2
+                      py-1
+                      rounded-full
+                      ${getStatusColor(order.orderStatus)}
+                    `}
+                  >
+                    {order.orderStatus}
+                  </span>
+
                 </div>
 
-                <span
-                  className={`
-                    text-xs
-                    px-2
-                    py-1
-                    rounded-full
+                <div className="mt-4 flex justify-between items-center">
 
-                    ${
-                      order.orderStatus === "Delivered"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }
-                  `}
-                >
-                  {order.orderStatus}
-                </span>
+                  <span className="text-green-600 font-bold">
+                    ৳{order.totalAmount}
+                  </span>
 
-              </div>
+                  <span className="text-xs text-slate-400">
+                    Completed
+                  </span>
 
-              <div className="mt-3 text-sm font-semibold text-green-600">
-                ৳{order.totalAmount}
-              </div>
+                </div>
 
-            </button>
-          ))}
+              </button>
+            ))}
+
+          </div>
 
         </div>
 

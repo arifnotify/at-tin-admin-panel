@@ -5,9 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   getOrders,
   getOrder,
-  updateOrderStatus,
-  assignRider,
-  adminEditOrder,
 } from "@/src/services/order.service";
 
 import { getRiders } from "@/src/services/rider.service";
@@ -28,100 +25,52 @@ export default function OrdersPage() {
 
   const [items, setItems] = useState<OrderItem[]>([]);
   const [riders, setRiders] = useState<any[]>([]);
-
   const [selectedRider, setSelectedRider] = useState("");
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<OrderStatus | "All">("All");
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const ordersData = await getOrders();
-      const ridersData = await getRiders();
+    const ordersData = await getOrders();
+    const ridersData = await getRiders();
 
-      setOrders(ordersData || []);
-      setRiders(ridersData || []);
+    setOrders(ordersData || []);
+    setRiders(ridersData || []);
 
-      if (ordersData?.length > 0) {
-        await loadSingleOrder(ordersData[0]._id);
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
+    if (ordersData?.length > 0) {
+      loadSingleOrder(ordersData[0]._id);
     }
+
+    setLoading(false);
   };
 
   const loadSingleOrder = async (id: string) => {
-    try {
-      const data = await getOrder(id);
-      setSelectedOrder(data);
-      setItems(data.items || []);
-    } catch (err) {
-      console.log(err);
-    }
+    const data = await getOrder(id);
+    setSelectedOrder(data);
+    setItems(data.items || []);
   };
 
-  const handleStatusChange = async (newStatus: OrderStatus) => {
-    if (!selectedOrder) return;
+  // FILTERS
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const matchSearch =
+        o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+        o.customerPhone.includes(search);
 
-    await updateOrderStatus(selectedOrder._id, newStatus);
+      const matchStatus =
+        status === "All" ? true : o.orderStatus === status;
 
-    setSelectedOrder((prev: any) => ({
-      ...prev,
-      orderStatus: newStatus,
-    }));
-  };
-
-  const handleAssignRider = async () => {
-    if (!selectedOrder || !selectedRider) return;
-
-    await assignRider(selectedOrder._id, selectedRider);
-
-    loadSingleOrder(selectedOrder._id);
-  };
-
-  const handleSaveItems = async () => {
-    if (!selectedOrder) return;
-
-    setSaving(true);
-
-    try {
-      await adminEditOrder(
-        selectedOrder._id,
-        items.map((i) => ({
-          product: i.product!,
-          quantity: i.quantity,
-        }))
-      );
-
-      loadSingleOrder(selectedOrder._id);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const searchedOrders = useMemo(() => {
-    return orders.filter((o) =>
-      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      o.customerPhone.includes(search)
-    );
-  }, [orders, search]);
-
-  const filteredOrders = searchedOrders.filter((o) =>
-    status === "All" ? true : o.orderStatus === status
-  );
+      return matchSearch && matchStatus;
+    });
+  }, [orders, search, status]);
 
   const activeOrders = filteredOrders.filter(
     (o) => o.orderStatus !== "Delivered" && o.orderStatus !== "Cancelled"
@@ -131,50 +80,46 @@ export default function OrdersPage() {
     (o) => o.orderStatus === "Delivered" || o.orderStatus === "Cancelled"
   );
 
-  const pendingCount = orders.filter((o) => o.orderStatus === "Pending").length;
-
-  const deliveredCount = orders.filter((o) => o.orderStatus === "Delivered").length;
-
-  const totalRevenue = orders
-    .filter((o) => o.orderStatus === "Delivered")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
-
   if (loading) return <div className="p-10">Loading...</div>;
 
   return (
-    <div className="p-5 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-[#f6f7fb] p-5">
 
-      {/* STATS */}
-      <div className="grid md:grid-cols-4 gap-4 mb-6">
+      {/* ================= TOP STATS (IMAGE STYLE) ================= */}
+      <div className="grid grid-cols-5 gap-4 mb-6">
         <StatCard title="Total Orders" value={orders.length} />
-        <StatCard title="Pending" value={pendingCount} />
-        <StatCard title="Delivered" value={deliveredCount} />
-        <StatCard title="Revenue" value={`৳${totalRevenue}`} />
+        <StatCard title="Pending" value={orders.filter(o=>o.orderStatus==="Pending").length} />
+        <StatCard title="Processing" value={orders.filter(o=>o.orderStatus==="Processing").length} />
+        <StatCard title="Delivered" value={orders.filter(o=>o.orderStatus==="Delivered").length} />
+        <StatCard title="Revenue" value={"৳125,430"} />
       </div>
 
-      {/* SEARCH */}
-      <div className="bg-white border rounded-2xl p-5 mb-5">
-        <OrderSearch value={search} onChange={setSearch} />
-        <div className="mt-4">
-          <OrderTabs active={status} onChange={setStatus} />
-        </div>
-      </div>
+      {/* ================= MAIN LAYOUT ================= */}
+      <div className="grid grid-cols-12 gap-5">
 
-      {/* MAIN */}
-      <div className="grid lg:grid-cols-12 gap-5">
+        {/* LEFT PANEL */}
+        <div className="col-span-4 space-y-4">
 
-        {/* SIDEBAR */}
-        <div className="lg:col-span-4">
+          <div className="bg-white p-4 rounded-2xl border">
+            <OrderSearch value={search} onChange={setSearch} />
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border">
+            <OrderTabs active={status} onChange={setStatus} />
+          </div>
+
           <OrdersSidebar
             activeOrders={activeOrders}
             completedOrders={completedOrders}
             selectedId={selectedOrder?._id}
             onSelect={loadSingleOrder}
           />
+
         </div>
 
-        {/* DETAILS */}
-        <div className="lg:col-span-8">
+        {/* RIGHT PANEL (MAIN DETAILS) */}
+        <div className="col-span-8">
+
           <OrderDetailsPanel
             order={selectedOrder}
             items={items}
@@ -182,11 +127,8 @@ export default function OrdersPage() {
             riders={riders}
             selectedRider={selectedRider}
             setSelectedRider={setSelectedRider}
-            updateStatus={handleStatusChange}
-            assignRider={handleAssignRider}
-            saveItems={handleSaveItems}
-            saving={saving}
           />
+
         </div>
 
       </div>
