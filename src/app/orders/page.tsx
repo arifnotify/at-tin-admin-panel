@@ -14,10 +14,8 @@ import { getRiders } from "@/src/services/rider.service";
 
 import OrdersSidebar from "@/src/components/orders/OrdersSidebar";
 import OrderDetailsPanel from "@/src/components/orders/OrderDetailsPanel";
-
 import OrderSearch from "@/src/components/orders/OrderSearch";
 import OrderTabs from "@/src/components/orders/OrderTabs";
-
 import StatCard from "@/src/components/dashboard/StatCard";
 
 import { Order, OrderItem, OrderStatus } from "@/src/types/order";
@@ -32,16 +30,19 @@ export default function OrdersPage() {
   const [selectedRider, setSelectedRider] = useState("");
 
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<OrderStatus | "All">("All");
+
+  const [status, setStatus] =
+    useState<OrderStatus | "All">("All");
 
   const [loading, setLoading] = useState(true);
+
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  async function loadData() {
     try {
       setLoading(true);
 
@@ -51,46 +52,44 @@ export default function OrdersPage() {
       setOrders(ordersData || []);
       setRiders(ridersData || []);
 
-      if (ordersData?.length > 0) {
+      if (ordersData.length > 0) {
         await loadSingleOrder(ordersData[0]._id);
       }
-    } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const loadSingleOrder = async (id: string) => {
-    try {
-      const data = await getOrder(id);
-      setSelectedOrder(data);
-      setItems(data.items || []);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  async function loadSingleOrder(id: string) {
+    const data = await getOrder(id);
 
-  const handleStatusChange = async (newStatus: OrderStatus) => {
+    setSelectedOrder(data);
+    setItems(data.items || []);
+  }
+
+  async function handleStatus(status: OrderStatus) {
     if (!selectedOrder) return;
 
-    await updateOrderStatus(selectedOrder._id, newStatus);
+    await updateOrderStatus(selectedOrder._id, status);
 
-    setSelectedOrder((prev: any) => ({
-      ...prev,
-      orderStatus: newStatus,
-    }));
-  };
+    setSelectedOrder({
+      ...selectedOrder,
+      orderStatus: status,
+    });
+  }
 
-  const handleAssignRider = async () => {
+  async function handleAssign() {
     if (!selectedOrder || !selectedRider) return;
 
-    await assignRider(selectedOrder._id, selectedRider);
+    await assignRider(
+      selectedOrder._id,
+      selectedRider
+    );
 
     loadSingleOrder(selectedOrder._id);
-  };
+  }
 
-  const handleSaveItems = async () => {
+  async function saveItems() {
     if (!selectedOrder) return;
 
     setSaving(true);
@@ -105,201 +104,232 @@ export default function OrdersPage() {
       );
 
       loadSingleOrder(selectedOrder._id);
-    } catch (err) {
-      console.log(err);
     } finally {
       setSaving(false);
     }
-  };
+  }
 
-  const searchedOrders = useMemo(() => {
-    return orders.filter((o) =>
-      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      o.customerPhone.includes(search)
+  const searched = useMemo(() => {
+    return orders.filter(
+      (o) =>
+        o.orderNumber
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        o.customerPhone.includes(search)
     );
   }, [orders, search]);
 
-  const filteredOrders = searchedOrders.filter((o) =>
-    status === "All" ? true : o.orderStatus === status
+  const filtered = searched.filter((o) =>
+    status === "All"
+      ? true
+      : o.orderStatus === status
   );
 
-  const activeOrders = filteredOrders.filter(
-    (o) => o.orderStatus !== "Delivered" && o.orderStatus !== "Cancelled"
+  const activeOrders = filtered.filter(
+    (o) =>
+      o.orderStatus !== "Delivered" &&
+      o.orderStatus !== "Cancelled"
   );
 
-  const completedOrders = filteredOrders.filter(
-    (o) => o.orderStatus === "Delivered" || o.orderStatus === "Cancelled"
+  const completedOrders = filtered.filter(
+    (o) =>
+      o.orderStatus === "Delivered" ||
+      o.orderStatus === "Cancelled"
   );
 
-  const pendingCount = orders.filter((o) => o.orderStatus === "Pending").length;
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-xl font-semibold">
+        Loading...
+      </div>
+    );
+  }
 
-  const deliveredCount = orders.filter((o) => o.orderStatus === "Delivered").length;
-
-  const totalRevenue = orders
-    .filter((o) => o.orderStatus === "Delivered")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
-
-if (loading) {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-lg font-semibold">
-        Loading Orders...
+    <div className="min-h-screen bg-[#f4f6fb]">
+
+      {/* HEADER */}
+
+      <div className="bg-white border-b">
+
+        <div className="max-w-[1700px] mx-auto px-8 py-5 flex items-center justify-between">
+
+          <div>
+
+            <h1 className="text-3xl font-bold">
+              Orders Dashboard
+            </h1>
+
+            <p className="text-gray-500 mt-1">
+              Manage customer orders
+            </p>
+
+          </div>
+
+          <div className="flex items-center gap-4">
+
+            <button className="w-11 h-11 rounded-full bg-gray-100">
+              🔔
+            </button>
+
+            <div className="flex items-center gap-3">
+
+              <div className="w-11 h-11 rounded-full bg-pink-600 text-white flex items-center justify-center font-bold">
+                A
+              </div>
+
+              <div>
+
+                <p className="font-semibold">
+                  Admin
+                </p>
+
+                <p className="text-xs text-gray-500">
+                  Super Admin
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
+
+      <div className="max-w-[1700px] mx-auto p-8">
+
+        {/* STATS */}
+
+        <div className="grid grid-cols-5 gap-5 mb-7">
+
+          <StatCard
+            title="Total Orders"
+            value={orders.length}
+          />
+
+          <StatCard
+            title="Pending"
+            value={
+              orders.filter(
+                (o) =>
+                  o.orderStatus === "Pending"
+              ).length
+            }
+          />
+
+          <StatCard
+            title="Processing"
+            value={
+              orders.filter(
+                (o) =>
+                  o.orderStatus ===
+                  "Processing"
+              ).length
+            }
+          />
+
+          <StatCard
+            title="Delivered"
+            value={
+              orders.filter(
+                (o) =>
+                  o.orderStatus ===
+                  "Delivered"
+              ).length
+            }
+          />
+
+          <StatCard
+            title="Revenue"
+            value={`৳${orders
+              .filter(
+                (o) =>
+                  o.orderStatus ===
+                  "Delivered"
+              )
+              .reduce(
+                (sum, o) =>
+                  sum + o.totalAmount,
+                0
+              )}`}
+          />
+
+        </div>
+
+        {/* SEARCH */}
+
+        <div className="bg-white rounded-2xl border p-5 mb-6">
+
+          <OrderSearch
+            value={search}
+            onChange={setSearch}
+          />
+
+          <div className="mt-5">
+
+            <OrderTabs
+              active={status}
+              onChange={setStatus}
+            />
+
+          </div>
+
+        </div>
+
+        {/* MAIN */}
+
+        <div className="grid grid-cols-12 gap-6">
+
+          {/* LEFT */}
+
+          <div className="col-span-4">
+
+            <OrdersSidebar
+              activeOrders={activeOrders}
+              completedOrders={completedOrders}
+              selectedId={
+                selectedOrder?._id
+              }
+              onSelect={loadSingleOrder}
+            />
+
+          </div>
+
+          {/* RIGHT */}
+
+          <div className="col-span-8">
+
+            <OrderDetailsPanel
+              order={selectedOrder}
+              items={items}
+              setItems={setItems}
+              riders={riders}
+              selectedRider={
+                selectedRider
+              }
+              setSelectedRider={
+                setSelectedRider
+              }
+              updateStatus={
+                handleStatus
+              }
+              assignRider={
+                handleAssign
+              }
+              saveItems={
+                saveItems
+              }
+              saving={saving}
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   );
-}
-
-return (
-  <div className="min-h-screen bg-slate-50 p-6">
-
-    {/* =========================
-        PAGE HEADER
-    ========================= */}
-
-    <div className="flex items-center justify-between mb-8">
-
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">
-          Orders Dashboard
-        </h1>
-
-        <p className="text-slate-500 mt-1">
-          Manage and track all customer orders
-        </p>
-      </div>
-
-    </div>
-
-    {/* =========================
-        STATS SECTION
-    ========================= */}
-
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-
-      <StatCard
-        title="Total Orders"
-        value={orders.length}
-      />
-
-      <StatCard
-        title="Pending Orders"
-        value={pendingCount}
-      />
-
-      <StatCard
-        title="Delivered Orders"
-        value={deliveredCount}
-      />
-
-      <StatCard
-        title="Revenue"
-        value={`৳${totalRevenue}`}
-      />
-
-    </div>
-
-    {/* =========================
-        SEARCH + FILTER
-    ========================= */}
-
-    <div
-      className="
-      bg-white
-      rounded-3xl
-      border
-      border-slate-200
-      shadow-sm
-      p-5
-      mb-6
-    "
-    >
-
-      <OrderSearch
-        value={search}
-        onChange={setSearch}
-      />
-
-      <div className="mt-5">
-
-        <OrderTabs
-          active={status}
-          onChange={setStatus}
-        />
-
-      </div>
-
-    </div>
-
-    {/* =========================
-        MAIN CONTENT
-    ========================= */}
-
-    <div className="grid grid-cols-12 gap-6">
-
-      {/* ======================
-          LEFT SIDE
-      ====================== */}
-
-      <div className="col-span-12 xl:col-span-4">
-
-        <div
-          className="
-          bg-white
-          rounded-3xl
-          border
-          border-slate-200
-          shadow-sm
-          overflow-hidden
-        "
-        >
-
-          <OrdersSidebar
-            activeOrders={activeOrders}
-            completedOrders={completedOrders}
-            selectedId={selectedOrder?._id}
-            onSelect={loadSingleOrder}
-          />
-
-        </div>
-
-      </div>
-
-      {/* ======================
-          RIGHT SIDE
-      ====================== */}
-
-      <div className="col-span-12 xl:col-span-8">
-
-        <div
-          className="
-          bg-white
-          rounded-3xl
-          border
-          border-slate-200
-          shadow-sm
-          p-5
-        "
-        >
-
-          <OrderDetailsPanel
-            order={selectedOrder}
-            items={items}
-            setItems={setItems}
-            riders={riders}
-            selectedRider={selectedRider}
-            setSelectedRider={setSelectedRider}
-            updateStatus={handleStatusChange}
-            assignRider={handleAssignRider}
-            saveItems={handleSaveItems}
-            saving={saving}
-          />
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-);
 }
